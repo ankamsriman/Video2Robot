@@ -5,7 +5,12 @@ from dataclasses import replace
 from src.schemas.plan import Plan, Relation, Step
 from src.simulation.primitives import StepResult
 from src.simulation.robot_env import load_motion_config
-from src.verification.closed_loop import failure_reason, next_motion, run_closed_loop
+from src.verification.closed_loop import (
+    MAX_FINGER_FORCE,
+    failure_reason,
+    next_motion,
+    run_closed_loop,
+)
 
 APPLE = Step(object="apple", reference="box", relation=Relation.IN)
 LEMON = Step(object="lemon", reference="box", relation=Relation.IN)
@@ -110,6 +115,7 @@ def test_pick_failures_grip_harder_and_placement_failures_slow_down() -> None:
     slow = next_motion(MOTION, "placement", 1)
 
     assert grip.grip_squeeze > MOTION.grip_squeeze
+    assert grip.finger_force_limit > MOTION.finger_force_limit
     assert slow.hand_speed < MOTION.hand_speed
 
 
@@ -127,3 +133,7 @@ def test_adjustments_grow_with_each_attempt() -> None:
 
     assert second.grip_squeeze > first.grip_squeeze
     assert replace(MOTION) == MOTION
+
+
+def test_grip_force_never_exceeds_the_hand_limit() -> None:
+    assert next_motion(MOTION, "pick", 50).finger_force_limit <= MAX_FINGER_FORCE

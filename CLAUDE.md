@@ -36,6 +36,9 @@ The closed-loop check may use only information from the video, never hand-writte
 scripts/setup.sh                    # create environment, download the G1 model
 PYTHONPATH=. .venv/bin/mjpython scripts/watch_live.py   # watch the task live in MuJoCo
 PYTHONPATH=. .venv/bin/python scripts/phase1_gate.py --trials 20 --first-seed 500   # run the gate
+PYTHONPATH=. .venv/bin/python main.py --video data/raw/video_01.mp4 --step full   # video to robot
+PYTHONPATH=. .venv/bin/python scripts/check_video.py --video data/raw/video_01.mp4   # check a test video
+PYTHONPATH=. .venv/bin/python scripts/stress_retry.py   # measure what retries add
 .venv/bin/pytest                    # run tests
 .venv/bin/pytest --cov=src --cov-report=term-missing
 ```

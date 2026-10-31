@@ -49,7 +49,7 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 - [x] Rollout videos, and a live viewer (`scripts/watch_live.py`)
 - [x] **Gate:** target was at least 8 of 10. Result: **20 of 20 on new setups** (seeds 600-619), positions shifted by up to 3 cm.
 - **Scoring history, to report honestly:** an earlier check scored seeds 500-519 as 16 of 20. In all 4 failures the object had landed correctly, but the hand stopped 2-4 cm short, so the check failed the run and stopped the plan. Steps are now judged on where the object ends up, with hand arrival kept as a diagnostic. Seeds 500-519 now score 20 of 20. Seeds 600-619 were first run after the change.
-- **Measured area:** full runs at 78 positions passed 62, under the older, stricter check. Object starts passed across 26-38 cm forward and 35 cm right to 14 cm left. Tray positions failed at the far right and beyond about 54 cm forward. See `data/processed/workspace_map.json`.
+- **Measured area:** one full run at each of 78 positions passed 70, with the corrected check. Object starts passed across 26-38 cm forward and 42 cm right to 14 cm left. Tray positions failed at the far right corner. See `data/processed/workspace_map.json`.
 - **Limitations to state in results:** pelvis pinned (unpinned, it stands idle but falls on far reaches); three-finger hand; simple blocks.
 
 ## Phase 2: Keyframes (code built, untested on real video)
@@ -72,7 +72,9 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 - [ ] Compare AI-only relations with AI plus measured geometry
 - [ ] **Gate:** SSR of at least 70%, with the comparison recorded either way
 
-## Phase 5: Closed loop (retry logic built, not yet run on real video)
+## Phase 5: Closed loop (retry logic built and stress-tested, not yet run on real video)
+Stress test, `data/processed/stress_retry.md`: weak grip went from 0 of 8 to 8 of 8 with retries; knocked objects were recovered; slipperiness barely improved.
+
 - [ ] Compute the final relation state from the simulation and from the demo's last frame
 - [ ] Classify failures as vision, spatial, temporal or execution, and respond to each
 - [ ] Use only information from the video, never the hand-written labels
@@ -92,6 +94,9 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 ## Stretch (only after A, B and C decisions are settled)
 - Whole-body balance with a centre-of-mass constraint, so the pelvis need not be pinned
 - A two-handed task, or a five-finger hand
+
+## Task 2: cup triangle (branch `cup-task`, not merged)
+Physics: 30 of 30 on new setups, 10 of 10 with 15 g cups, hand-written plan. Recognised from a rendered video and rebuilt by the G1. Real video not tried. `scripts/cup_from_video.py` runs it. Merge only if the user asks.
 
 ## Needed from the user
 - Record and label videos in Phase 2

@@ -41,7 +41,7 @@ Stand on the **robot side** of the table, where the robot would stand. Mark this
 Small changes in position between videos are fine and useful.
 
 ## Camera setup
-- Put the phone on a tripod facing the table from **the far side or a corner**, looking down at about 45-60 degrees.
+- Put the phone on a tripod facing the table from **the far side**, looking down at about 50-60 degrees. In tests, the marker wasn't detected at some lower or rotated angles, so check this first (see "Check your first video").
 - Make sure the marker, all objects and both containers stay in frame for the whole video.
 - Check that **no object or container covers the marker**, even partly. From behind the trays, objects can block it, so raise the camera or film from a corner.
 - Use 1080p at 30 frames per second, in landscape.
@@ -57,6 +57,15 @@ Small changes in position between videos are fine and useful.
 5. Move your hand out of frame between steps if you can, then finish with your hands out of frame for 2 seconds.
 
 Each video should be about 20-40 seconds.
+
+## Check your first video
+Record one test video, then run this. It reports what to fix before you film the rest:
+
+```bash
+PYTHONPATH=. .venv/bin/python scripts/check_video.py --video data/raw/video_01.mp4
+```
+
+It needs your objects' colours, which you can read from the video by pointing at each object's pixel position. Or send me the video and I'll set them up.
 
 ## What to record
 Record **about 10 videos**. Vary the order and which object goes where, and put two objects in one container in some of them.
@@ -81,6 +90,16 @@ For each video, create a matching file such as `data/labels/video_01.json`. Time
 ```
 
 `relation` can be `in`, `on_top_of`, `at_the_back_of`, `in_front_of`, `to_the_left` or `to_the_right`. Sorting tasks will mostly use `in`.
+
+## Optional: the cup triangle
+Only if we decide to show this task. Use 3 opaque cups, each a different colour, turned upside down, about 7-8 cm wide at the rim.
+
+- **Start:** cups apart, within the same area as the objects above.
+- **Build:** place two side by side, touching, then the third across their tops. Place them in the same order each time, if you can.
+- **Camera:** from the far side, so the two lower cups appear **side by side** in the picture. From above or at an angle, the top cup hides a lower one and tracking fails.
+- **Marker:** make sure it's fully visible at the start of the video, before cups cover it.
+
+Record 3-4 videos, saved as `data/raw/cups_01.mp4`, and so on.
 
 ## Measurements to send me
 - Each object's width, depth and height, and its name

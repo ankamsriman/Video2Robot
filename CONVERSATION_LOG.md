@@ -56,5 +56,13 @@ SeeDo has three gaps, and we turn each into something measurable:
 | Scoring flaw | The 4 failures out of 20 had actually placed the object correctly; my check had judged the hand | Judge where the object ends up, then retest on new setups |
 | Second task | You proposed a triangle of cups | Try it on a separate branch, so sorting stays safe |
 
+### Overnight work
+| Work | Result |
+|---|---|
+| Video to robot | Works on a rendered video, not yet on real video |
+| Cup triangle, on branch `cup-task` | 30 of 30 with a written plan, and also works from a rendered video |
+| Retry loop | Weak grip went from 0 of 8 to 8 of 8, after fixing a test that measured nothing |
+| Working area | 70 of 78 positions passed, larger than first estimated |
+
 ### Still open
 AI model and API key, GPU access, and which tasks to show in the final submission.

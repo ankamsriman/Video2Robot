@@ -39,6 +39,21 @@ All of these use hand-written plans unless stated, and a **pinned pelvis**.
 | Cup triangle with 15 g cups | 10 of 10 |
 | Real phone video | **Not yet run** |
 
+### Does the retry loop help?
+
+Harder conditions, 8 setups each. Three attempts is perfect for this 3-step plan.
+
+| Condition | One attempt per step | Up to 4 per step | Attempts when it worked |
+|---|---|---|---|
+| Normal, heavy or rotated objects | 8 of 8 | 8 of 8 | 3.0 |
+| Weak grip, 0.3 N m | 0 of 8 | 8 of 8 | 6.0 |
+| Very weak grip, 0.15 N m | 0 of 8 | 8 of 8 | 9.0 |
+| Slippery, friction 0.3 | 6 of 8 | 6 of 8 | 3.0 |
+| Very slippery, friction 0.15 | 5 of 8 | 6 of 8 | 3.2 |
+| Placed object knocked out | Recovered by the final recheck | 8 of 8 | 4.0 |
+
+Retries help when an adjustment fixes the cause, as with grip force, and barely help with slipperiness. These are conditions I chose to cause failures, not real-world measurements.
+
 ## What worked and what didn't
 
 **Worked:**
@@ -48,6 +63,7 @@ All of these use hand-written plans unless stated, and a **pinned pelvis**.
 **Didn't work, or needed fixing:**
 - **First full test: 0 of 10.** The arm snapped to its pose at the start and knocked objects over. `notes.md` section 10 lists every bug found.
 - **Unpinned robot:** it balances while idle but falls over reaching far, so the pelvis stays pinned.
+- **My first retry test showed nothing:** "grip harder" didn't change the force limit, and "slippery" had no effect in the simulator. Both were fixed before the results above.
 - **My first check was wrong:** it reported 16 of 20, but in all 4 failures the object had landed correctly. It was judging the hand. I changed it and retested on new setups.
 
 ## Limitations
@@ -57,7 +73,7 @@ All of these use hand-written plans unless stated, and a **pinned pelvis**.
 - Simplified objects: simple rigid shapes, and cups heavier than real paper cups.
 - The simulated robot knows exact object positions once the scene is built.
 - Colour tracking needs distinct, matte colours.
-- Reach is small: a patch of roughly 20 x 40 cm, as the arm is short and the pelvis is fixed.
+- Reach is limited, as the arm is short and the pelvis is fixed. In single runs, 70 of 78 positions passed: object starts worked from 26-38 cm forward and 42 cm right to 14 cm left, and the far right corner failed.
 
 ## Running it
 

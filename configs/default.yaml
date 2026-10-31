@@ -70,3 +70,8 @@ colors:
   lemon: { hue: [22, 35], min_saturation: 100, min_value: 60 }
   lime: { hue: [45, 80], min_saturation: 100, min_value: 60 }
   box: { hue: [9, 20], min_saturation: 100, min_value: 60 }
+
+# Table area the arm can work in, from the measured reach. Forward (x) and sideways (y).
+work_area:
+  x: [0.26, 0.54]
+  y: [-0.40, 0.15]
