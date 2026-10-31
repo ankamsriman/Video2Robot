@@ -110,6 +110,11 @@ class RobotEnv:
         self._limit_finger_force()
         self._set_ready_pose()
 
+    def set_motion(self, motion: MotionConfig) -> None:
+        """Change how the robot moves, including how hard the fingers can squeeze."""
+        self.motion = motion
+        self._limit_finger_force()
+
     def _limit_finger_force(self) -> None:
         """Cap finger torque, so grasps depend on realistic squeezing force."""
         limit = self.motion.finger_force_limit

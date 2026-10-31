@@ -74,8 +74,8 @@ Doing this on a real humanoid would be expensive and risky, so we use a **simula
 
 | Requirement | Status | Comment |
 |---|---|---|
-| Phone recording | Planned | Fixed tripod. Egocentric "works well" but isn't required |
-| Your data plays a real role | Planned | Your video would decide the task, the order and the object positions |
+| Phone recording | Waiting for your videos | Fixed tripod. Egocentric "works well" but isn't required |
+| Your data plays a real role | **Code ready, not yet met** | Your video decides the task, the order and the object positions; tested only on a rendered video |
 | G1 in MuJoCo | **Built** | The preferred choice |
 | Five-finger hand | **Gap** | Our model has three fingers per hand (Dex3). They suggest "Inspire, Dex5, or similar" |
 | Listed direction | **Different** | Our closed-loop approach isn't on the list, though "everything else is open" |
@@ -191,6 +191,35 @@ The G1 is a real humanoid, about 1.3 m tall. Its simulation model comes from **M
 - Shoulder height is about 1.08 m.
 - Shoulder to elbow is about 20 cm, and elbow to wrist about 18 cm, so the arm is short.
 - The arm alone reaches only a small patch. Adding the waist makes the reachable area much larger, which is why the code uses it.
+
+### Measured working area
+These are full physics runs, one per position, with one object moved and placed in a tray. **70 of 78 passed.** `#` passed, `.` failed. Forward is from the pelvis, and negative sideways is the robot's right.
+
+**Where an object can start** (with the tray in its usual place):
+
+```
+forward\\sideways  -42  -35  -28  -21  -14   -7    0   +7  +14 cm
+42 cm               .    #                        #    #    #    #
+38 cm               #    #    #    #    #    #    #    #    #
+34 cm               #    #    #    #    #    #    #    #    #
+30 cm               #    #    #    #    #    #    #    #    #
+26 cm               #    #    #    #    #    #    #    #    #
+```
+
+**Where a tray can be:**
+
+```
+forward\\sideways  -35  -28  -21  -14   -7    0   +7  +14 cm
+58 cm               .    .    .    .    #    #    #    #
+54 cm               .    .    #    #    #    #    #    #
+50 cm               .    #    #    #    #    #    #    #
+46 cm               #    #    #    #    #    #    #    #
+42 cm               #                        #    #    #
+```
+
+Blank spots were skipped, because another item was already there. With only one run per spot, this is a guide rather than a guarantee.
+
+**The earlier estimate of 20 x 40 cm was too cautious.** It came from a check that I later found was too strict.
 
 ### Why the pelvis is pinned
 The model normally has a **free joint** at the pelvis, meaning the whole robot can move and fall. We delete that joint, which fixes the pelvis in the air at its normal standing height. The robot can't lose its balance, even though its feet are on the floor.
@@ -436,10 +465,15 @@ It renders frames at 960x720 and 30 frames per second, writing directly to a vid
 | `reach_map.py` | Prints a map of where the hand can reach on the table |
 | `phase1_gate.py` | Runs the test: randomises positions and runs the plan many times |
 | `make_marker.py` | Creates `docs/marker.pdf` |
+| `workspace_map.py` | Tests full runs across the table, to find the real working area |
+| `stress_retry.py` | Makes the task harder, to measure what retries add |
+| `run_keyframes.py` | Finds key moments in a video, and saves a speed plot |
+| `check_video.py` | Checks a test video, and says what to fix |
+| `read_colors.py` | Suggests colour settings from points on a video frame |
 | `watch_live.py` | Runs the task live in the MuJoCo window |
 
 ### `tests/`
-There are 34 test functions. Some run several cases, so `pytest` reports 40 tests.
+`pytest` runs about 120 tests. Some test functions run several cases.
 
 | File | What it checks | Example |
 |---|---|---|
@@ -529,7 +563,7 @@ A closed loop checks what really happened and corrects it, as in section 3.
 1. Try the step.
 2. Measure where the object ended up. **It compares with the plan from your video, never your hand-written labels**, so it can't cheat.
 3. If it failed, adjust and retry:
-   - **Failed pick:** grip tighter, by 1 cm per retry.
+   - **Failed pick:** grip harder: fingers aim 1 cm tighter, and the force limit rises 50% per retry, up to 2 N·m.
    - **Failed placement:** move 30% slower per retry.
 4. At the end, recheck everything, and redo any object that got knocked away.
 
@@ -682,6 +716,8 @@ The old check required the hand to arrive within 2 cm. In all 4 failures of the 
 That judged the wrong thing, because the goal is the object's position, not the hand's. So I changed it, and retested on new setups in case the fix merely flattered the score. A score rising because a check changed should always make you suspicious, so asking why it changed is the right habit.
 
 ### Current limitations
+**The biggest one comes first: nothing has been tried on real video yet.**
+
 1. **Pelvis pinned**, so there's no real balance.
 2. **Three-finger hand**, where the challenge suggests five.
 3. **Simple blocks**, not real shapes.
@@ -690,6 +726,38 @@ That judged the wrong thing, because the goal is the object's position, not the 
 6. **Small test size:** 20 runs give a rough estimate, not a precise rate.
 7. **The trays don't move**, so they can't be knocked around.
 8. **The physics isn't validated against reality**, because no real robot is involved.
+
+---
+
+### Does the retry loop actually help?
+To find out, I made the task harder on purpose. Each condition ran 8 setups (seeds 800-807).
+
+| Condition | One attempt per step | With up to 4 attempts | Average attempts when it worked (3 is perfect) |
+|---|---|---|---|
+| Normal | 8 of 8 | 8 of 8 | 3.0 |
+| Heavy, 300 g | 8 of 8 | 8 of 8 | 3.0 |
+| Rotated 30 degrees | 8 of 8 | 8 of 8 | 3.0 |
+| Slippery, friction 0.3 | 6 of 8 | 6 of 8 | 3.0 |
+| Very slippery, friction 0.15 | 5 of 8 | 6 of 8 | 3.2 |
+| Weak grip, 0.5 N·m | 8 of 8 | 8 of 8 | 3.0 |
+| **Weak grip, 0.3 N·m** | **0 of 8** | **8 of 8** | 6.0 |
+| **Very weak grip, 0.15 N·m** | **0 of 8** | **8 of 8** | 9.0 |
+| Object knocked out after placing | 8 of 8* | 8 of 8 | 4.0 |
+
+*Even with one attempt, the final recheck still runs. With no recheck at all, that object would just stay out of place.
+
+**How to read it:**
+- **Where retries matter:** a weak grip, because each retry truly squeezes harder. It starts too weak, measures the failed lift, and grips harder until it holds.
+- **Where they don't:** when the first attempt already works, it costs nothing extra.
+- **Slipperiness mostly isn't fixed.** Trying again with the same approach only gained one run out of 16.
+
+**The first version of this test was wrong twice, and that's instructive:**
+1. **Retries had no effect**, as "grip harder" only changed the target finger position. With a force limit, the fingers couldn't push any harder. Now it raises the force limit too, up to a maximum of 2 N·m.
+2. **"Slippery" wasn't slippery.** MuJoCo uses the higher friction of two touching surfaces, so the grippy fingers cancelled the setting. It only counted once I gave the object priority.
+
+A test that passes can be measuring nothing. So when a result looks good, it's worth asking what would have made it fail.
+
+**These conditions are chosen by me to expose failures. They aren't real-world measurements,** and the sample is small.
 
 ---
 

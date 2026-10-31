@@ -16,6 +16,8 @@ from src.simulation.scene import SceneConfig
 
 SQUEEZE_STEP = 0.01
 SPEED_FACTOR = 0.7
+FORCE_STEP = 1.5
+MAX_FINGER_FORCE = 2.0
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +45,12 @@ def failure_reason(result: StepResult) -> str:
 def next_motion(base: MotionConfig, reason: str, retry: int) -> MotionConfig:
     """Choose the adjustment: grip harder after a dropped pick, go slower after a bad place."""
     if reason == "pick":
-        return replace(base, grip_squeeze=base.grip_squeeze + SQUEEZE_STEP * retry)
+        force = min(base.finger_force_limit * FORCE_STEP**retry, MAX_FINGER_FORCE)
+        return replace(
+            base,
+            grip_squeeze=base.grip_squeeze + SQUEEZE_STEP * retry,
+            finger_force_limit=force,
+        )
     return replace(base, hand_speed=base.hand_speed * SPEED_FACTOR**retry)
 
 
@@ -97,7 +104,7 @@ class SimulatedRobot:
         self._config = config
 
     def run_step(self, step: Step, motion: MotionConfig) -> StepResult:
-        self._env.motion = motion
+        self._env.set_motion(motion)
         return primitives.run_step(self._env, self._config, step)
 
     def measure(self, step: Step) -> Relation:

@@ -1,5 +1,7 @@
 """Motion helpers and an end-to-end physics check of a single pick and place."""
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -141,3 +143,14 @@ def test_free_standing_robot_balances_on_its_feet_while_idle() -> None:
     env.advance(3.0)
 
     assert env.data.qpos[2] > 0.75
+
+
+def test_set_motion_changes_the_finger_force_limit() -> None:
+    config = load_scene_config()
+    motion = load_motion_config()
+    env = RobotEnv(build_model(config), motion)
+
+    env.set_motion(replace(motion, finger_force_limit=1.7))
+
+    index = env.model.actuator("right_hand_thumb_1_joint").id
+    assert env.model.actuator_forcerange[index][1] == pytest.approx(1.7)
