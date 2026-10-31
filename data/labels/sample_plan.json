@@ -1,0 +1,7 @@
+{
+  "steps": [
+    { "object": "apple", "reference": "box", "relation": "in" },
+    { "object": "lemon", "reference": "bowl", "relation": "in" },
+    { "object": "lime", "reference": "bowl", "relation": "in" }
+  ]
+}

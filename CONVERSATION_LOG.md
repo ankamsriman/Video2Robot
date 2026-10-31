@@ -42,3 +42,17 @@ SeeDo has three gaps, and we turn each into something measurable:
 ### What got built
 
 **Phase 0 complete.** The project skeleton, Python environment and G1 model are in place. The G1 renders on your Mac and the first 2 tests pass.
+
+**Phase 1 complete.** The G1 sorts three blocks in real physics, using friction only. It passed 16 of 20 unseen setups, after starting at 0 of 10. The pelvis is pinned, because the robot falls on far reaches when unpinned.
+
+### What changed along the way
+
+| Moment | What happened | Decision |
+|---|---|---|
+| Official text | `task.md` turned out to hold a tracker; the official challenge text was pasted back | Plan from the official text. Deadline confirmed as Wed Nov 4 |
+| Training | Post-training is the official example, but not mandatory | Do A, then B, then C, as time permits |
+| Slow Mac | iCloud had removed local copies of project files | You downloaded them and cleared space |
+| Project location | I suggested moving it out of Desktop | You kept it there, so the code survives losing the laptop |
+
+### Still open
+AI model and API key, GPU access, and whether to push to a private GitHub repo before the final submission.

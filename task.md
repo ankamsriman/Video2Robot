@@ -1,67 +1,83 @@
-# Video2Robot Task Specification & Implementation Tracker
+​Awign and Armature AI Labs in partnership with RIC (Robotics India Community) and Tanna TechBiz (NVIDIA Preferred Partner) are hiring interns to work on humanoid robot learning. We’re skipping the resume screen and asking you to build something instead.
 
-Based on the **SeeDo** framework (*"VLM See, Robot Do: Human Demo Video to Robot Action Plan via Vision Language Model"*, NYU, arXiv:2410.08792) and expanding upon preliminary tracking explorations in `Demo2Robot`.
+​Edit: Upon approval, please check your email with whatsapp link and join the group. All updates will be shared there first.
 
----
+​Description
 
-## Project Goal
-Transform unstructured human demonstration videos into robot-executable symbolic plans and continuous control trajectories in MuJoCo simulation via:
-1. Kinematic Keyframe Selection (MediaPipe hand velocity valleys)
-2. Visual Prompting & Open-Vocabulary Tracking (Grounding DINO + SAM 2)
-3. Chained Chain-of-Thought (CoT) VLM Reasoning (Gemini / GPT-4o)
-4. Parameterized Action Primitives & Execution in MuJoCo (6-DOF robot arm)
-5. Automated Benchmark Suite (TSR, FSR, SSR, error diagnosis)
+​Record yourself doing a simple task on your phone. Use that footage to make a humanoid robot do it in simulation. The strongest submissions get a 2-month, full-time robot learning internship and full-time roles with Awign hardware team in Bangalore.
 
----
+​The challenge
 
-## Phase-Wise Checklist
+​Collect a small manipulation dataset yourself. A phone camera is enough, and egocentric footage works well. Then use it to drive a humanoid or dexterous robot hand in simulation. Unitree G1 and MuJoCo are preferred, and alternatives are welcome.
 
-### [ ] Phase 1: Environment Setup & Project Scaffolding
-- [ ] Create Python virtual environment and configure dependencies (`opencv-python`, `mediapipe`, `torch`, `torchvision`, `mujoco`, `scipy`, `pydantic`).
-- [ ] Establish directory hierarchy (`configs/`, `data/`, `src/`, `tests/`).
-- [ ] Link / copy demonstration videos from `../Demo2Robot/data/raw/` to `data/raw/`.
-- [ ] Create baseline configuration file `configs/default.yaml`.
+​There’s one hard rule: the data you personally recorded has to play a real role in your approach. Everything else is open.
 
-### [ ] Phase 2: Keyframe Selection via Hand Kinematics
-- [ ] Implement `src/keyframe_selector/hand_detector.py` using MediaPipe Hands.
-- [ ] Implement `src/keyframe_selector/speed_analyzer.py` to calculate hand center speed profile $v(t) = \|\mathbf{x}_t - \mathbf{x}_{t-1}\| / \Delta t$.
-- [ ] Implement Gaussian / Savitzky-Golay smoothing and local minima (valley) detector.
-- [ ] Prune boundary frames and cluster adjacent candidate detections.
-- [ ] Implement visualization tool saving velocity curves with marked pick/place keyframe timestamps.
+​Here’s an example: Film your hand picking up a cup and placing it on a coaster. Retarget your hand poses to the G1’s five-finger hand. Post-train a small VLA like SmolVLA on that data. Then show the G1 doing the task in MuJoCo, using fingertip contact to confirm the grasp.
 
-### [ ] Phase 3: Visual Prompting & SAM 2 Video Tracking
-- [ ] Implement `src/perception/object_detector.py` for initial frame object discovery (Prompt 1) and open-vocabulary bounding box detection (Grounding DINO / Florence-2).
-- [ ] Implement `src/perception/sam2_tracker.py` using SAM 2 to track instances across keyframes with persistent IDs.
-- [ ] Implement visual prompt overlay renderer (colored mask contours, tracking ID labels, and centroid coordinates $(u, v)$).
-- [ ] Export visual-prompted keyframe sequences to `data/processed/visual_prompts/`.
+​Directions you could take
 
-### [ ] Phase 4: Chained CoT VLM Reasoning & Task Plan Generation
-- [ ] Implement `src/reasoning/prompts.py` containing standard SeeDo prompts (Filtering, Pick detection, Reference detection, Spatial relation classification).
-- [ ] Implement `src/reasoning/vlm_planner.py` interacting with VLM (Gemini 1.5 Pro / GPT-4o / open-source VLM).
-- [ ] Pair keyframes into sequential $(\text{Pick}, \text{Place})$ intervals.
-- [ ] Classify 6 canonical spatial relations: `in`, `on top of`, `at the back of`, `in front of`, `to the left`, `to the right`.
-- [ ] Output validated, structured JSON / Pydantic plans.
+​Post-train a policy on a simple task using your own recordings
 
-### [ ] Phase 5: MuJoCo Robot Simulation & Code-as-Policies Execution
-- [ ] Create 6-DOF robot simulation scene in MuJoCo (UR5e / Franka Panda with gripper on workspace table).
-- [ ] Implement differential IK solver and smooth Cartesian trajectory interpolator in `src/simulation/robot_env.py`.
-- [ ] Implement parameterized action primitives in `src/simulation/primitives.py`:
-  - `pick(object_id)`
-  - `place_relative(object_id, ref_id, relation)`
-- [ ] Map 2D visual coordinate offsets to 3D Cartesian workspace offsets.
-- [ ] Build automated simulation video recorder saving execution rollouts.
+​Retarget human hand motion to a five-finger hand, and use tactile signals for grasp detection or force control
 
-### [ ] Phase 6: Automated Evaluation Suite & Error Diagnosis
-- [ ] Implement `src/evaluation/metrics.py`:
-  - **TSR (Task Success Rate)**: Strict sequence equality check.
-  - **FSR (Final State Success Rate)**: Final relational state graph alignment.
-  - **SSR (Step Success Rate)**: Two-pointer sequence alignment score.
-- [ ] Implement automated error categorization:
-  - Vision Error (object recognition mismatch).
-  - Spatial Error (incorrect spatial relation).
-  - Temporal Error (wrong order, omitted or redundant steps).
-- [ ] Implement benchmarking CLI script outputting Markdown and CSV evaluation reports.
+​Bootstrap a policy and push its success rate up with RL
 
-### [ ] Phase 7: CLI Pipeline & Interactive Dashboard
-- [ ] Implement `main.py` CLI supporting modular execution (`--step keyframes`, `--step perception`, `--step plan`, `--step sim`, `--step full`).
-- [ ] Build interactive visualizer (Streamlit / Gradio) displaying demo video, hand velocity graph, prompt-annotated keyframes, VLM reasoning traces, and MuJoCo execution playback.
+​Take the world-model route: show video or state prediction, with less focus on policy success
+
+​Take a standard policy and make it run much faster than the baseline
+
+​Pick your robot
+
+​The Unitree G1 is our default, but we’d love to see other embodiments. Retargeting your data well to a less common body counts in your favour. All of these have free MuJoCo models in MuJoCo Menagerie:
+
+​Unitree G1 (default): a 1.3 m humanoid. Pair it with a five-finger hand (Inspire, Dex5, or similar).
+
+​Booster T1: a smaller, lighter humanoid, good for fast RL iterations.
+
+​Apptronik Apollo: a full-size, human-scale humanoid. Human data maps more directly here.
+
+​Pick your simulator
+
+​MuJoCo is preferred. Use whatever runs on the hardware you have:
+
+​MuJoCo (preferred): a pip install that runs on a laptop CPU or free Colab. Use MJX or MuJoCo Playground for GPU-parallel RL.
+
+​PyBullet: the lightest option, and it runs anywhere.
+
+​Isaac Sim / Isaac Lab: the best for large-scale RL and photoreal cameras. Needs an NVIDIA RTX GPU.
+
+​LIBERO / robosuite: tabletop benchmarks built on MuJoCo, good for starting with an arm.
+
+​What to submit
+
+​A public GitHub repository by Wed 4 Nov 2026, 23:59 IST, containing:
+
+​A README or short deck: how to run it, example outputs (videos or GIFs), your design choices, and what worked and what didn’t
+
+​Your recorded data (or a representative sample), plus a note on how you collected it
+
+​We’ll email the submission form to approved registrants.
+
+​How we judge
+
+​Creativity: as long as your own data genuinely matters to the result
+
+​Results: how well the robot performs in simulation, and/or the quality of your world-model predictions
+
+​Clarity: a simple implementation and an honest, clear presentation. No AI slop please.
+
+​Challenge Winners:
+
+​Paid Internships with Awign : Full-time, 6 days a week, in Bangalore, for 2 months. You’ll work daily with the founding team and engineers working on humanoid robots.
+
+​Strong performers will be considered for full-time roles with the Awign hardware team.
+
+About
+
+​Awign (a Mynavi company): Robotics data collection at scale
+
+​Armature AI Labs: a shared physical AI and robotics lab in HSR Layout, Bangalore.
+
+​RIC: Robotics India Community, democratising robotics in India
+
+​TTB (Tanna TechBiz): Physical AI Solutions, NVIDIA preferred partner

@@ -4,3 +4,38 @@ paths:
   raw_videos: data/raw
   labels: data/labels
   processed: data/processed
+
+# The tabletop copied into simulation. Replace object sizes with real measurements in Phase 2.
+# The layout fits the reach measured by scripts/reach_map.py. Objects should be at least
+# 6 cm wide side to side, because the G1 fingers sit about 5.8 cm apart.
+scene:
+  table:
+    near_edge_x: 0.16
+    depth: 0.55
+    width: 0.90
+    top_height: 0.72
+  objects:
+    apple: { size: [0.06, 0.07, 0.07], position: [0.35, -0.28], mass: 0.08, rgba: [0.80, 0.15, 0.15, 1] }
+    lemon: { size: [0.06, 0.07, 0.07], position: [0.35, -0.16], mass: 0.08, rgba: [0.90, 0.80, 0.15, 1] }
+    lime: { size: [0.06, 0.07, 0.07], position: [0.35, -0.04], mass: 0.08, rgba: [0.25, 0.70, 0.25, 1] }
+  containers:
+    bowl: { size: [0.15, 0.18, 0.04], position: [0.50, 0.03], rgba: [0.85, 0.85, 0.90, 1] }
+    box: { size: [0.15, 0.18, 0.04], position: [0.50, -0.21], rgba: [0.65, 0.45, 0.25, 1] }
+
+# How the robot moves. Heights are measured above the table or the placement surface.
+motion:
+  arm: right
+  grip_height: 0.04
+  hover_height: 0.17
+  release_clearance: 0.015
+  side_gap: 0.03
+  hand_speed: 0.20
+  finger_time: 0.5
+  settle_time: 0.6
+  control_rate_hz: 25
+  finger_force_limit: 1.0
+  hand_pitch: 0.20
+  open_width: 0.10
+  grip_squeeze: 0.015
+  release_margin: 0.035
+  home_position: [0.30, -0.10, 0.95]

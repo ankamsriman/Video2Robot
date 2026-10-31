@@ -23,6 +23,8 @@ Intro sesson.txt
 # Videos and generated output; hand-written labels in data/labels stay tracked
 data/raw/*
 !data/raw/.gitkeep
+# The challenge requires a sample of the recorded data in the repo
+!data/raw/sample/
 data/processed/*
 !data/processed/.gitkeep
 

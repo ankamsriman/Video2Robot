@@ -5,7 +5,8 @@ A simulated Unitree G1 humanoid watches a video of a person sorting objects at a
 ## Read these first
 - `PLAN.md`: phases, test gates and live status. Check it to see what is next.
 - `CONVERSATION_LOG.md`: why decisions were made.
-- `task.md`: original spec. Never edit it.
+- `task.md`: the official challenge text. Never edit it.
+- `notes.md`: full from-scratch explanation of the project for the user. Keep it accurate as things change.
 
 ## How to work with this user
 - The user is new to Python and robotics. Explain results and robotics ideas in plain language.
@@ -14,11 +15,13 @@ A simulated Unitree G1 humanoid watches a video of a person sorting objects at a
 - Commit locally after each phase. Do not push unless asked.
 
 ## Decisions
-- Robot: Unitree G1 from MuJoCo Menagerie, standing at a table. This replaces the 6-DOF arm in `task.md` because the organisers prefer a humanoid.
+- Robot: Unitree G1 from MuJoCo Menagerie, standing at a table, with a pinned pelvis. Results must say so.
+- Project location: stays on the iCloud-synced Desktop by user choice, so the code survives losing the laptop. If imports become slow, check for dataless files.
 - Task: sort 3-4 objects into 2 containers.
 - Camera: phone on a tripod, fixed in place, with a printed ArUco marker in the shot.
 - Compute: Mac for simulation and logic; hackathon or cloud GPU for SAM 2, with results cached to disk.
-- Deadline: unconfirmed. Plan for Nov 4, 2026.
+- Deadline: Wed 4 Nov 2026, 23:59 IST (official).
+- Order: A (video to plan to scripted robot), then B (retarget hand path), then C (train a policy), each only if time permits. See `PLAN.md`.
 - Vision AI model: **deferred by the user.** Raise it at the start of Phase 4, not before.
 
 ## Novelty to protect
@@ -31,6 +34,8 @@ The closed-loop check may use only information from the video, never hand-writte
 ## Commands
 ```bash
 scripts/setup.sh                    # create environment, download the G1 model
+PYTHONPATH=. .venv/bin/mjpython scripts/watch_live.py   # watch the task live in MuJoCo
+PYTHONPATH=. .venv/bin/python scripts/phase1_gate.py --trials 20 --first-seed 500   # run the gate
 .venv/bin/pytest                    # run tests
 .venv/bin/pytest --cov=src --cov-report=term-missing
 ```
@@ -43,4 +48,4 @@ scripts/setup.sh                    # create environment, download the G1 model
 - Target 80% test coverage on logic modules, writing tests first. Check simulator visuals and model wrappers through phase gates.
 
 ## Current status
-Phase 0 complete. Next: Phase 1.
+Phases 0 and 1 complete (16 of 20 on unseen setups). Next: Phase 2, which needs the user's videos.

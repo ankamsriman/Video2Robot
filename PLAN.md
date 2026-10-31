@@ -1,5 +1,17 @@
 # Video2Robot plan
 
+**Deadline: Wed 4 Nov 2026, 23:59 IST.** `task.md` holds the official challenge text.
+**Hard rule:** the data recorded by the user must play a real role. This is not met until Phase 4.
+**Submit:** public GitHub repo, README or deck (how to run, example videos, design choices, what worked and what didn't), a sample of recorded data, and a note on how it was collected.
+**Judged on:** creativity, results, and clarity ("No AI slop").
+
+**Order of work (each builds on the last; each must be complete before starting the next):**
+- **A:** video -> plan -> scripted robot (Phases 2-6).
+- **B:** also retarget the recorded hand path to the G1. Start only if A is solid by about Tue Nov 3 midday.
+- **C:** train ACT or a VLA on the retargeted motion, using a GPU. Start only if B finishes early.
+
+Save the full hand path in Phase 2, not just its speed, so B needs no rework.
+
 The simulator comes first, so there is always a working robot to show. A phase is done when its gate passes. Gate numbers are initial targets; misses are reported, not hidden.
 
 ```
@@ -13,8 +25,8 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | Phase | Name | Target (if deadline is Nov 4) | Status |
 |---|---|---|---|
 | 0 | Foundations | Sat Oct 31 | Done |
-| 1 | Digital twin, G1 runs a hand-written plan | Sat Oct 31 - Sun Nov 1 | Next |
-| 2 | Keyframes | Sun Nov 1 | Not started |
+| 1 | Digital twin, G1 runs a hand-written plan | Sat Oct 31 - Sun Nov 1 | Done, 16 of 20 unseen, pinned pelvis |
+| 2 | Keyframes | Sun Nov 1 | Next, needs videos |
 | 3 | Perception and real positions | Sun Nov 1 | Not started |
 | 4 | Planner | Mon Nov 2 | Not started |
 | 5 | Closed loop | Mon Nov 2 - Tue Nov 3 | Not started |
@@ -29,19 +41,19 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 - [x] Secret and video ignore rules checked before the first commit
 - [x] **Gate:** G1 renders and `pytest` runs (2 tests pass)
 
-## Phase 1: Digital twin and G1 executes a hand-written plan
-- [ ] Table, objects and containers in MuJoCo
-- [ ] Pin the pelvis first, then try a free base with legs held by joint control
-- [ ] `plan.json` schema and arm IK with `mink`
-- [ ] `pick(object)` and `place(object, reference, relation)`
-- [ ] Measure arm reach and use it to set the real demo area
-- [ ] Try friction grasping, time-boxed; otherwise use a clearly labelled assisted grasp
-- [ ] Record rollout videos
-- [ ] **Gate:** a 3-step plan succeeds in at least 8 of 10 runs with positions randomised by about 3 cm
+## Phase 1: Digital twin and G1 executes a hand-written plan (done)
+- [x] Table, objects and containers in MuJoCo (sizes are placeholders until real measurements arrive)
+- [x] `plan.json` schema and arm IK with `mink`, plus torso turning and hand correction
+- [x] `pick(object)` and `place(object, reference, relation)`, using friction only, with no assisted grasp
+- [x] Reach measured; layout fitted to it
+- [x] Rollout videos, and a live viewer (`scripts/watch_live.py`)
+- [x] **Gate:** target was at least 8 of 10. Result: **16 of 20 on unseen setups** (seeds 500-519). All 4 failures stopped 2-4 cm short at the far tray.
+- **Limitations to state in results:** pelvis pinned (unpinned, it stands idle but falls on far reaches); three-finger hand; simple blocks.
 
 ## Phase 2: Keyframes
 - [ ] User records about 10 videos and labels pick and place times and the correct plan
 - [ ] Hand-speed curve from MediaPipe, smoothing, valley detection, merging, saved plot
+- [ ] Save the full hand path for option B
 - [ ] **Gate:** at least 90% of labelled moments found within 0.5 s
 
 ## Phase 3: Perception and real positions
@@ -75,13 +87,11 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 - [ ] Confirm the submission format and rules with the organisers
 - [ ] **Gate:** full run works from a clean checkout following the README
 
-## Stretch (pick one, only after Phase 7's core is safe)
-- Torso lean or squat reach with a centre-of-mass constraint
-- A two-handed task
-- An ACT policy trained on simulated episodes using the GPU
+## Stretch (only after A, B and C decisions are settled)
+- Whole-body balance with a centre-of-mass constraint, so the pelvis need not be pinned
+- A two-handed task, or a five-finger hand
 
 ## Needed from the user
-- Confirm the deadline and the submission rules
 - Record and label videos in Phase 2
 - GPU access details by Phase 3
 - Decide the AI model at the start of Phase 4
