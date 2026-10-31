@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import mujoco
+import numpy as np
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,6 +14,10 @@ CONFIG_PATH = ROOT / "configs/default.yaml"
 # Midpoint between the thumb and fingertips, in the wrist frame (calibrated in Phase 1).
 GRASP_POINT_IN_WRIST = (0.125, 0.08, 0.0)
 WALL_THICKNESS = 0.006
+CUP_FACES = 32
+CUP_RIM_RADIUS = 0.04
+CUP_TOP_RADIUS = 0.028
+CUP_IMPRATIO = 10.0
 
 
 @dataclass(frozen=True)
@@ -24,6 +29,7 @@ class ItemConfig:
     position: tuple[float, float]
     rgba: tuple[float, float, float, float]
     mass: float = 0.0
+    shape: str = "box"
 
 
 @dataclass(frozen=True)
@@ -50,6 +56,7 @@ def _read_items(section: Mapping[str, Mapping]) -> tuple[ItemConfig, ...]:
             position=tuple(item["position"]),
             rgba=tuple(item["rgba"]),
             mass=item.get("mass", 0.0),
+            shape=item.get("shape", "box"),
         )
         for name, item in section.items()
     )
@@ -81,7 +88,42 @@ def _add_table(spec: mujoco.MjSpec, table: TableConfig) -> None:
     )
 
 
+def _add_cup(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
+    """An upside-down tapered cup: a solid, rigid shape, wide at the bottom."""
+    half_height = item.size[2] / 2
+    width_at_grip = item.size[0] / 2
+    slope = (CUP_RIM_RADIUS - CUP_TOP_RADIUS) / item.size[2]
+    rim = width_at_grip + slope * half_height
+    top = width_at_grip - slope * half_height
+    angles = np.linspace(0, 2 * np.pi, CUP_FACES, endpoint=False)
+    rings = [
+        np.column_stack(
+            (radius * np.cos(angles), radius * np.sin(angles), np.full(CUP_FACES, z))
+        )
+        for radius, z in ((rim, -half_height), (top, half_height))
+    ]
+    spec.add_mesh(
+        name=f"{item.name}_mesh", uservert=np.concatenate(rings).ravel().tolist()
+    )
+    body = spec.worldbody.add_body(
+        name=item.name, pos=[*item.position, table_top + half_height + 0.001]
+    )
+    body.add_freejoint(name=f"{item.name}_free")
+    body.add_geom(
+        name=f"{item.name}_geom",
+        type=mujoco.mjtGeom.mjGEOM_MESH,
+        meshname=f"{item.name}_mesh",
+        mass=item.mass,
+        rgba=item.rgba,
+        friction=[1.5, 0.02, 0.002],
+        condim=4,
+    )
+
+
 def _add_object(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
+    if item.shape == "cup":
+        _add_cup(spec, item, table_top)
+        return
     half = [length / 2 for length in item.size]
     body = spec.worldbody.add_body(
         name=item.name, pos=[*item.position, table_top + half[2] + 0.001]
@@ -167,7 +209,12 @@ def build_model(
                 moved.get(item.name, item.position),
                 item.rgba,
                 item.mass,
+                item.shape,
             ),
             config.table.top_height,
         )
+    if any(item.shape == "cup" for item in config.objects):
+        # More accurate friction, so a cup held on its sloped side doesn't creep downward.
+        spec.option.cone = mujoco.mjtCone.mjCONE_ELLIPTIC
+        spec.option.impratio = CUP_IMPRATIO
     return spec.compile()
