@@ -43,6 +43,7 @@ Small changes in position between videos are fine and useful.
 ## Camera setup
 - Put the phone on a tripod facing the table from **the far side or a corner**, looking down at about 45-60 degrees.
 - Make sure the marker, all objects and both containers stay in frame for the whole video.
+- Check that **no object or container covers the marker**, even partly. From behind the trays, objects can block it, so raise the camera or film from a corner.
 - Use 1080p at 30 frames per second, in landscape.
 - Lock focus and exposure. On iPhone, press and hold on the table until "AE/AF Lock" appears.
 - Use bright, even light and avoid strong shadows.

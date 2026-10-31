@@ -25,7 +25,7 @@ A simulated Unitree G1 humanoid watches a video of a person sorting objects at a
 - Vision AI model: **deferred by the user.** Raise it at the start of Phase 4, not before.
 
 ## Novelty to protect
-1. The AI decides what moved; measured positions decide where.
+1. Measured positions decide what moved and where. A geometric planner works with no AI model, so the hard rule can be met without an API key.
 2. A marker turns pixels into real centimetres.
 3. The robot's result is checked against the demo and retried. Headline metrics: attempts to success and execution success rate.
 
@@ -48,4 +48,4 @@ PYTHONPATH=. .venv/bin/python scripts/phase1_gate.py --trials 20 --first-seed 50
 - Target 80% test coverage on logic modules, writing tests first. Check simulator visuals and model wrappers through phase gates.
 
 ## Current status
-Phases 0 and 1 complete (16 of 20 on unseen setups). Next: Phase 2, which needs the user's videos.
+Phases 0 and 1 complete (20 of 20 on new setups, judged on where objects end up, with a pinned pelvis). Code for Phases 2, 3 and 5 exists but is untested on real video. Waiting for the user's videos. Cup triangle experiment lives on branch `cup-task`.

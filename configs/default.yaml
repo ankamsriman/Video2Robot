@@ -39,3 +39,24 @@ motion:
   grip_squeeze: 0.015
   release_margin: 0.035
   home_position: [0.30, -0.10, 0.95]
+
+# Finding pick and place moments from hand speed. Speeds are image widths per second.
+keyframes:
+  smoothing_seconds: 0.3
+  min_gap_seconds: 0.8
+  boundary_seconds: 0.5
+  min_prominence: 0.05
+
+# The printed marker's centre on the table, in the same coordinates as the scene.
+marker:
+  center: [0.24, -0.12]
+  side: 0.10
+  marker_id: 0
+
+# Following objects by colour, and turning their movement into a plan.
+tracking:
+  min_area: 150
+  area_fraction: 0.5
+observer:
+  move_threshold: 0.05
+  stable_seconds: 1.0

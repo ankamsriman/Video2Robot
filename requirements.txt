@@ -6,6 +6,8 @@ pydantic==2.14.2
 PyYAML==6.0.3
 imageio==2.38.1
 imageio-ffmpeg
+mediapipe==1.2.0
+opencv-python-headless
 pytest==9.2.0
 pytest-cov==7.1.0
 ruff

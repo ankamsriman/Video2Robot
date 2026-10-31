@@ -84,7 +84,7 @@ def main() -> None:
     logger.info("Result: %d of %d passed", passes, args.trials)
     OUTPUT.mkdir(parents=True, exist_ok=True)
     base = "free_base" if args.free_base else "pinned"
-    name = f"report_{base}_seeds_{args.first_seed}.json"
+    name = f"report_{base}_seeds_{args.first_seed}_x{args.trials}.json"
     (OUTPUT / name).write_text(json.dumps(report, indent=2))
 
 

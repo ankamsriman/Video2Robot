@@ -396,7 +396,7 @@ Without it, gravity would make the arm sag. Motors have to be slightly "wrong" t
 2. For each waypoint along the minimum-jerk curve, solve IK and send the joint targets.
 3. Run physics between waypoints. At 25 waypoints per second and 500 physics steps per second, that's 20 physics steps per waypoint.
 4. Run `_correct_hand`: measure the real hand position, and nudge the aim to remove any error.
-5. **Measure the final error. Return `True` only if the hand is within 2 cm.**
+5. **Measure the final error. Return `True` only if the hand is within 2 cm.** This is logged as a warning, and steps are judged on where the object ends up.
 
 **`set_fingers(pose)`** moves fingers smoothly to a pose.
 
@@ -512,11 +512,13 @@ The first full test scored **0 out of 10**. Here's how that became 80%.
 
 | Test | Setups | Passed | Notes |
 |---|---|---|---|
-| Used for tuning | 10 | 9 | Flattering, because I adjusted the layout using these |
-| Unseen, before hand correction | 20 | 16 | Honest check |
-| Unseen, final code, quick check | 5 | 5 | Too few to mean much alone |
-| **Unseen, final code** | **20** | **16 (80%)** | **The number to quote** |
-| Unpinned, before hand correction | 10 | 0 | Hand missed due to sway, and later testing showed it also falls on far reaches |
+| Used for tuning, old check | 10 | 9 | Flattering, because I adjusted the layout using these |
+| Unseen, old check | 20 | 16 | My check was flawed; see below |
+| Same setups, corrected check | 20 | 20 | Shows the effect of the fix |
+| **New setups, corrected check** | **20** | **20** | **The number to quote** |
+| Unpinned, old check | 10 | 0 | Hand missed due to sway, and later testing showed it also falls on far reaches |
+
+**20 of 20 doesn't mean 100%.** With 20 runs, the true rate could still be somewhat lower, roughly above 85%. It also only covers shifts of up to 3 cm, simple blocks and a pinned pelvis.
 
 ### Why "unseen" matters
 If you tune using the same setups you test on, the score flatters you, like a student who sees the exam in advance. Every setup here is generated from a random seed, so running new seeds gives setups the system hasn't been tuned on.
@@ -524,12 +526,13 @@ If you tune using the same setups you test on, the score flatters you, like a st
 ### What a pass means
 All of these must be true for a pass:
 - Every pick was really held.
-- The hand physically arrived at every target, within 2 cm.
 - Each object measured as `in` its container.
 - All objects were still in place at the end.
 
-### What the failures are
-All 4 failures in the final test had the hand stopping 2–4 cm short at the far tray, around 0.53 m forward and 0.25–0.29 m to the right. That's the edge of the reach. Moving the tray in slightly would probably help, but I haven't tested that.
+### The scoring mistake
+The old check required the hand to arrive within 2 cm. In all 4 failures of the 16-of-20 test, the hand stopped 2-4 cm short at the far tray, yet **the apple landed correctly in the box**. The check still called that failure and stopped the plan, so the other objects were never tried.
+
+That judged the wrong thing, because the goal is the object's position, not the hand's. So I changed it, and retested on new setups in case the fix merely flattered the score. A score rising because a check changed should always make you suspicious, so asking why it changed is the right habit.
 
 ### Current limitations
 1. **Pelvis pinned**, so there's no real balance.
@@ -603,7 +606,7 @@ We then adapt SeeDo's prompts and compare two approaches: the AI choosing the re
 - **FSR = 1**, because the final arrangement is right.
 - **SSR = 2/3**: A matches, C matches later in the true list, and B can't match after C without going backwards.
 
-We're also checking a detail: the paper's written SSR method moves its pointer forward by exactly one, which looks wrong when a match is found further along.
+A detail: the paper prints a pointer method, but SeeDo's released code uses the longest common subsequence, meaning the longest run of correct steps kept in order. We use that.
 
 Our dataset is small and self-recorded, so our numbers can't be fairly compared with the paper's.
 

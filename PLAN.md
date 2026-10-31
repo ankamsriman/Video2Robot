@@ -25,7 +25,7 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | Phase | Name | Target (if deadline is Nov 4) | Status |
 |---|---|---|---|
 | 0 | Foundations | Sat Oct 31 | Done |
-| 1 | Digital twin, G1 runs a hand-written plan | Sat Oct 31 - Sun Nov 1 | Done, 16 of 20 unseen, pinned pelvis |
+| 1 | Digital twin, G1 runs a hand-written plan | Sat Oct 31 - Sun Nov 1 | Done, 20 of 20 on new setups, pinned pelvis |
 | 2 | Keyframes | Sun Nov 1 | Next, needs videos |
 | 3 | Perception and real positions | Sun Nov 1 | Not started |
 | 4 | Planner | Mon Nov 2 | Not started |
@@ -47,16 +47,18 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 - [x] `pick(object)` and `place(object, reference, relation)`, using friction only, with no assisted grasp
 - [x] Reach measured; layout fitted to it
 - [x] Rollout videos, and a live viewer (`scripts/watch_live.py`)
-- [x] **Gate:** target was at least 8 of 10. Result: **16 of 20 on unseen setups** (seeds 500-519). All 4 failures stopped 2-4 cm short at the far tray.
+- [x] **Gate:** target was at least 8 of 10. Result: **20 of 20 on new setups** (seeds 600-619), positions shifted by up to 3 cm.
+- **Scoring history, to report honestly:** an earlier check scored seeds 500-519 as 16 of 20. In all 4 failures the object had landed correctly, but the hand stopped 2-4 cm short, so the check failed the run and stopped the plan. Steps are now judged on where the object ends up, with hand arrival kept as a diagnostic. Seeds 500-519 now score 20 of 20. Seeds 600-619 were first run after the change.
+- **Measured area:** full runs at 78 positions passed 62, under the older, stricter check. Object starts passed across 26-38 cm forward and 35 cm right to 14 cm left. Tray positions failed at the far right and beyond about 54 cm forward. See `data/processed/workspace_map.json`.
 - **Limitations to state in results:** pelvis pinned (unpinned, it stands idle but falls on far reaches); three-finger hand; simple blocks.
 
-## Phase 2: Keyframes
+## Phase 2: Keyframes (code built, untested on real video)
 - [ ] User records about 10 videos and labels pick and place times and the correct plan
 - [ ] Hand-speed curve from MediaPipe, smoothing, valley detection, merging, saved plot
 - [ ] Save the full hand path for option B
 - [ ] **Gate:** at least 90% of labelled moments found within 0.5 s
 
-## Phase 3: Perception and real positions
+## Phase 3: Perception and real positions (colour tracking and marker built, tested on a synthetic video only)
 - [ ] Object detection in the first frame, falling back to clicking objects by hand
 - [ ] SAM 2 tracking on the GPU, with outlines and IDs drawn on saved keyframes
 - [ ] Pixels to table centimetres from the marker, using each object's base contact point
@@ -70,7 +72,7 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 - [ ] Compare AI-only relations with AI plus measured geometry
 - [ ] **Gate:** SSR of at least 70%, with the comparison recorded either way
 
-## Phase 5: Closed loop
+## Phase 5: Closed loop (retry logic built, not yet run on real video)
 - [ ] Compute the final relation state from the simulation and from the demo's last frame
 - [ ] Classify failures as vision, spatial, temporal or execution, and respond to each
 - [ ] Use only information from the video, never the hand-written labels
@@ -78,7 +80,7 @@ If time runs short, cut in this order: stretch, viewer polish, free-base standin
 
 ## Phase 6: Benchmark
 - [ ] TSR, FSR, SSR, execution success, attempts to success, error types; Markdown and CSV reports
-- [ ] Check SSR against SeeDo's `evaluation_script.py`, because the paper's pointer update looks wrong for matches found further along
+- [x] SSR uses the longest common subsequence, as SeeDo's released script does, rather than the pointer method in its paper
 - [ ] Do not present results as directly comparable to the paper's
 - [ ] **Gate:** one command regenerates every reported number
 

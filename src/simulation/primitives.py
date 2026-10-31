@@ -30,11 +30,8 @@ class StepResult:
 
     @property
     def success(self) -> bool:
-        return (
-            self.picked
-            and self.reached
-            and self.measured_relation is self.step.relation
-        )
+        """Judged on where the object ended up. `reached` is kept as a diagnostic only."""
+        return self.picked and self.measured_relation is self.step.relation
 
 
 @dataclass(frozen=True)
@@ -96,7 +93,9 @@ def pick(env: RobotEnv, config: SceneConfig, name: str) -> bool:
     position = env.object_position(name)
     lifted = position[2] - start_z >= MIN_LIFT
     close = np.linalg.norm(position - env.hand_position) <= MAX_HOLD_DISTANCE
-    return bool(reached and lifted and close)
+    if not reached:
+        logger.info("Hand fell short while picking '%s'", name)
+    return bool(lifted and close)
 
 
 def _target_xyz(
@@ -115,7 +114,7 @@ def _target_xyz(
 
 
 def place(
-    env: RobotEnv, config: SceneConfig, step: Step, placed: tuple[str, ...]
+    env: RobotEnv, config: SceneConfig, step: Step, placed: tuple[str, ...] = ()
 ) -> bool:
     """Carry the held object to its target, lower it, and let go."""
     table = config.table.top_height
@@ -136,7 +135,7 @@ def place(
     return bool(reached)
 
 
-def _measure(env: RobotEnv, config: SceneConfig, step: Step) -> Relation:
+def measure(env: RobotEnv, config: SceneConfig, step: Step) -> Relation:
     return classify_relation(
         _live_box(env, config, step.object),
         _live_box(env, config, step.reference),
@@ -148,12 +147,28 @@ def final_relations(
     env: RobotEnv, config: SceneConfig, plan: Plan
 ) -> tuple[Relation, ...]:
     """Measure, after the fact, where every planned object actually ended up."""
-    return tuple(_measure(env, config, step) for step in plan.steps)
+    return tuple(measure(env, config, step) for step in plan.steps)
 
 
-def _run_step(
-    env: RobotEnv, config: SceneConfig, step: Step, placed: tuple[str, ...]
-) -> StepResult:
+def occupants(
+    env: RobotEnv, config: SceneConfig, reference: str, exclude: str
+) -> tuple[str, ...]:
+    """Find which objects are really inside a container right now, by measuring."""
+    container = _live_box(env, config, reference)
+    return tuple(
+        item.name
+        for item in config.objects
+        if item.name != exclude
+        and classify_relation(_live_box(env, config, item.name), container)
+        is Relation.IN
+    )
+
+
+def run_step(env: RobotEnv, config: SceneConfig, step: Step) -> StepResult:
+    """Pick and place one object, then measure where it really ended up."""
+    placed = ()
+    if _is_container(config, step.reference):
+        placed = occupants(env, config, step.reference, step.object)
     if not pick(env, config, step.object):
         logger.warning("Could not pick '%s'", step.object)
         return StepResult(step, picked=False, reached=False, measured_relation=None)
@@ -162,21 +177,15 @@ def _run_step(
     except ValueError as error:
         logger.warning("Could not place '%s': %s", step.object, error)
         return StepResult(step, picked=True, reached=False, measured_relation=None)
-    measured = _measure(env, config, step)
+    measured = measure(env, config, step)
     return StepResult(step, picked=True, reached=reached, measured_relation=measured)
 
 
 def execute_plan(env: RobotEnv, config: SceneConfig, plan: Plan) -> ExecutionResult:
-    """Run all steps in order, stopping at the first failure."""
+    """Run all steps once, with no retries, stopping at the first failure."""
     results: tuple[StepResult, ...] = ()
     for step in plan.steps:
-        placed = tuple(
-            done.step.object
-            for done in results
-            if done.step.reference == step.reference
-            and done.step.relation is Relation.IN
-        )
-        outcome = _run_step(env, config, step, placed)
+        outcome = run_step(env, config, step)
         results = (*results, outcome)
         logger.info("%s -> %s", step, "ok" if outcome.success else "FAILED")
         if not outcome.success:

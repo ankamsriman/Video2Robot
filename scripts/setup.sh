@@ -14,4 +14,10 @@ if [ ! -d third_party/mujoco_menagerie ]; then
   git -C third_party/mujoco_menagerie sparse-checkout set unitree_g1
 fi
 
+if [ ! -f checkpoints/hand_landmarker.task ]; then
+  mkdir -p checkpoints
+  curl -fsSL -o checkpoints/hand_landmarker.task \
+    https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+fi
+
 echo "Setup complete. Run the tests with: .venv/bin/pytest"
