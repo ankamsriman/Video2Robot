@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Large or downloaded files, restored by scripts/setup.sh
+third_party/
+checkpoints/
+papers/
+
+# Session transcripts name other participants; keep them local
+*transcript*.txt
+Intro sesson.txt
+
+# Videos and generated output; hand-written labels in data/labels stay tracked
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# macOS
+.DS_Store

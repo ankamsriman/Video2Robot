@@ -1,0 +1,6 @@
+# Single source for paths and tunable numbers. Lengths are metres unless the name says otherwise.
+paths:
+  g1_scene: third_party/mujoco_menagerie/unitree_g1/scene_with_hands.xml
+  raw_videos: data/raw
+  labels: data/labels
+  processed: data/processed
