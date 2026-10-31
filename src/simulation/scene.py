@@ -88,8 +88,8 @@ def _add_table(spec: mujoco.MjSpec, table: TableConfig) -> None:
     )
 
 
-def _add_cup(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
-    """An upside-down tapered cup: a solid, rigid shape, wide at the bottom."""
+def cup_vertices(item: ItemConfig) -> list[float]:
+    """Points of an upside-down tapered cup, wide at the bottom, centred on its height."""
     half_height = item.size[2] / 2
     width_at_grip = item.size[0] / 2
     slope = (CUP_RIM_RADIUS - CUP_TOP_RADIUS) / item.size[2]
@@ -102,9 +102,13 @@ def _add_cup(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
         )
         for radius, z in ((rim, -half_height), (top, half_height))
     ]
-    spec.add_mesh(
-        name=f"{item.name}_mesh", uservert=np.concatenate(rings).ravel().tolist()
-    )
+    return np.concatenate(rings).ravel().tolist()
+
+
+def _add_cup(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
+    """A solid, rigid cup standing upside-down on the table."""
+    half_height = item.size[2] / 2
+    spec.add_mesh(name=f"{item.name}_mesh", uservert=cup_vertices(item))
     body = spec.worldbody.add_body(
         name=item.name, pos=[*item.position, table_top + half_height + 0.001]
     )

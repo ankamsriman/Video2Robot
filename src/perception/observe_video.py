@@ -27,6 +27,7 @@ class TrackingConfig:
 @dataclass(frozen=True)
 class VideoObservation:
     tracks: Mapping[str, np.ndarray]
+    pixels: Mapping[str, np.ndarray]
     fps: float
     mapping: TableMapping
 
@@ -114,4 +115,6 @@ def observe_video(
     tracks = {
         name: _to_table(track, mapping, depths[name]) for name, track in pixels.items()
     }
-    return VideoObservation(tracks, _video_fps(video) / tracking.frame_stride, mapping)
+    return VideoObservation(
+        tracks, pixels, _video_fps(video) / tracking.frame_stride, mapping
+    )

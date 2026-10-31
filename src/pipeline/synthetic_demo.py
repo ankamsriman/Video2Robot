@@ -15,7 +15,7 @@ import numpy as np
 
 from src.perception.homography import MarkerConfig
 from src.schemas.plan import Plan
-from src.simulation.scene import SceneConfig
+from src.simulation.scene import SceneConfig, cup_vertices
 
 WIDTH, HEIGHT = 1280, 720
 FPS = 30
@@ -103,6 +103,16 @@ def _build_scene(
     for item in config.objects:
         half = [length / 2 for length in item.size]
         body = world.add_body(name=item.name, mocap=True, pos=[0, 0, 0])
+        if item.shape == "cup":
+            spec.add_mesh(name=f"{item.name}_mesh", uservert=cup_vertices(item))
+            body.add_geom(
+                type=mujoco.mjtGeom.mjGEOM_MESH,
+                meshname=f"{item.name}_mesh",
+                rgba=item.rgba,
+                contype=0,
+                conaffinity=0,
+            )
+            continue
         body.add_geom(
             type=mujoco.mjtGeom.mjGEOM_BOX,
             size=half,
@@ -116,13 +126,11 @@ def _build_scene(
     return model
 
 
-def _carry_path(
-    start: np.ndarray, end: np.ndarray, frames: int, rest_height: float
-) -> np.ndarray:
+def _carry_path(start: np.ndarray, end: np.ndarray, frames: int) -> np.ndarray:
     progress = np.linspace(0, 1, frames)[:, None]
     path = start + progress * (end - start)
-    lift = CARRY_HEIGHT * np.sin(np.pi * progress)
-    return np.column_stack((path[:, 0], path[:, 1], rest_height + lift[:, 0]))
+    path[:, 2] += CARRY_HEIGHT * np.sin(np.pi * progress[:, 0])
+    return path
 
 
 def render_synthetic_demo(
@@ -133,6 +141,7 @@ def render_synthetic_demo(
     targets: Mapping[str, Position],
     output: Path,
     view: CameraView | None = None,
+    target_heights: Mapping[str, float] | None = None,
 ) -> None:
     """Write a video in which each planned object travels from its start to its target."""
     view = view or CameraView()
@@ -170,10 +179,12 @@ def render_synthetic_demo(
         for _ in range(int(PAUSE_SECONDS * FPS)):
             write_frame()
         for step in plan.steps:
-            start = positions[step.object][:2]
-            end = np.array(targets[step.object])
+            raised = (target_heights or {}).get(step.object, 0.0)
+            end = np.array(
+                [*targets[step.object], rest[step.object] + raised],
+            )
             frames = int(MOVE_SECONDS * FPS)
-            for point in _carry_path(start, end, frames, rest[step.object]):
+            for point in _carry_path(positions[step.object], end, frames):
                 positions[step.object] = point
                 write_frame()
             for _ in range(int(PAUSE_SECONDS * FPS)):

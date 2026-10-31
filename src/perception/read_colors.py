@@ -24,7 +24,7 @@ def _median_hue(hues: np.ndarray) -> int:
     """Average on a circle, because hue wraps round: red sits at both ends."""
     angles = hues.astype(float) * 2 * np.pi / HUE_RANGE
     mean = np.arctan2(np.sin(angles).mean(), np.cos(angles).mean())
-    return int(round(mean * HUE_RANGE / (2 * np.pi))) % HUE_RANGE
+    return round(mean * HUE_RANGE / (2 * np.pi)) % HUE_RANGE
 
 
 def suggest_spec(name: str, sample: np.ndarray) -> SuggestedColor:

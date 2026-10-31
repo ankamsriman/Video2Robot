@@ -40,3 +40,20 @@ triangle:
   top_radius: 0.028
   position_tolerance: 0.02
   max_tilt_degrees: 10.0
+
+# Reading the triangle from a video. Replace the colours using scripts/read_colors.py.
+marker:
+  center: [0.24, -0.12]
+  side: 0.10
+  marker_id: 0
+tracking:
+  min_area: 150
+  area_fraction: 0.3
+  frame_stride: 3
+observer:
+  move_threshold: 0.05
+  stable_seconds: 1.0
+colors:
+  cup_a: { hue: [22, 35], min_saturation: 100, min_value: 60 }
+  cup_b: { hue: [45, 80], min_saturation: 100, min_value: 60 }
+  cup_c: { hue: [170, 8], min_saturation: 100, min_value: 60 }
