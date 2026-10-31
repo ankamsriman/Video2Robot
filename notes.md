@@ -312,7 +312,7 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | Build the simulator first | It was the biggest risk, and it guarantees something to show even if vision fails later |
 | One shared plan format | The hand-written plan can later be swapped for an AI-written plan without touching the robot code |
 | Fixed camera and printed marker | Lets us convert pixels to centimetres |
-| AI decides *what*; measurement decides *where* | Targets SeeDo's biggest failure source |
+| Measured positions decide the plan | Targets SeeDo's biggest failure source, and needs no AI model or API key |
 | Retry loop | Gives the mentors' metric, attempts to success |
 | Honest labelling | Clarity is a judging criterion, and it's simply correct |
 
@@ -623,8 +623,15 @@ It runs these stages, and each saves its output so it can be rerun alone:
 
 This went better than I expected. You thought it was probably possible, and you were right.
 
+### From a rendered video
+A raised cup breaks the marker conversion, which only works on the table. So `triangle_observer.py` recognises it in the image instead: the cup's base appears above the line joining the two lower cups, and between them. The build position comes from the two lower cups, which are on the table.
+
+It worked on a rendered video: it found the order and built the triangle.
+
+**The camera matters.** From high above, the top cup hid a lower one and tracking failed. From the side, with the lower cups side by side in the picture, all three stayed visible. To run it on your video: `git checkout cup-task`, then `PYTHONPATH=. .venv/bin/python scripts/cup_from_video.py --video data/raw/cups_01.mp4`.
+
 ### What this doesn't show
-- **The plan is hand-written.** The robot hasn't learned this from a video, so the hard rule isn't met for this task. A raised cup also breaks the marker conversion, which needs extra code.
+- **Most results use a hand-written plan,** and none use real video, so the hard rule isn't met yet for this task. It's now been shown working from a rendered video, as below, but not a real one.
 - **The simulated hand has an advantage:** it knows each cup's exact position. A real robot wouldn't.
 - **Real cups differ:** they're hollow, flexible and much lighter, and the simulator's top cup rests on a solid surface.
 - **Pelvis is pinned,** as in Task 1.

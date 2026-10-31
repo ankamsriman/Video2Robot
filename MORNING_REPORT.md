@@ -12,7 +12,7 @@
 | **Video to robot, cups** | Recognised the triangle and rebuilt it | Rendered video only, branch `cup-task` |
 | **Retry loop** | Weak grip: 0 of 8 to 8 of 8 | Conditions I chose; slipperiness barely improved |
 | **Working area** | 70 of 78 positions passed | One run per position |
-| **Tests** | All pass, about 95% coverage | Hand tracking has only been tried on a still photo |
+| **Tests** | All pass, about 97% coverage | Hand tracking has only been tried on a still photo |
 
 **Your instinct about the cups was right.** I worried the third cup wouldn't balance, but after fixing slip, it did every time.
 
