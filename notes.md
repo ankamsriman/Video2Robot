@@ -13,6 +13,8 @@ Throughout, **[Built]** means the code exists and has been tested. **[Planned]**
 6. [What the mentors and papers said](#6-what-the-mentors-and-papers-said)
 7. [Our design and why](#7-our-design-and-why)
 8. [The code, file by file](#8-the-code-file-by-file)
+   - [The vision and planning code](#8b-the-vision-and-planning-code)
+   - [Task 2: the cup triangle](#8c-task-2-the-cup-triangle)
 9. [Worked example: putting the apple in the box](#9-worked-example-putting-the-apple-in-the-box)
 10. [What went wrong and what it taught us](#10-what-went-wrong-and-what-it-taught-us)
 11. [Results and how to read them](#11-results-and-how-to-read-them)
@@ -34,7 +36,7 @@ Imagine you sit at a table and film yourself putting an apple in a box. You hand
 
 Doing this on a real humanoid would be expensive and risky, so we use a **simulator**: a program that acts like a video game with accurate physics. If the robot's fingers don't squeeze hard enough in the simulator, the object really does slip.
 
-**Where we are:** steps 4 and part of 5 are built, using a plan I wrote by hand. Steps 1 to 3 are not built yet, and they need your videos.
+**Where we are:** code for all five steps now exists and works together on a rendered test video. **It hasn't yet seen a real video.** So the challenge's hard rule still isn't met, and your recordings are the next step.
 
 ---
 
@@ -305,7 +307,7 @@ scripts/                    tools you can run
 tests/                      automatic checks
 ```
 
-The `keyframe_selector`, `perception`, `reasoning` and `evaluation` folders under `src/` are empty placeholders, because those phases aren't built yet.
+The files above move the robot. Section 8B covers the files that watch the video, and `main.py`, which joins everything.
 
 ### A little Python first
 - **Function:** a named piece of work with inputs and an output. `min_jerk(0.5)` returns `0.5`.
@@ -450,6 +452,151 @@ We usually write the test **first**, watch it fail, then write the code. That pr
 
 ---
 
+## 8B. The vision and planning code
+
+This code turns a video into a plan. It's only been tested on a rendered video, where every true position is known.
+
+```
+main.py                         one command that runs everything
+src/keyframe_selector/          finds your hand and the key moments
+src/perception/homography.py    pixels to table centimetres, using the marker
+src/perception/color_tracker.py follows coloured objects
+src/perception/observe_video.py joins the two above into per-frame positions
+src/perception/read_colors.py   suggests colour settings from a video frame
+src/reasoning/demo_observer.py  works out the plan with no AI
+src/reasoning/vlm_planner.py    works out the plan with an AI, once one is chosen
+src/verification/closed_loop.py the retry loop
+src/evaluation/metrics.py       TSR, FSR and SSR scores
+src/pipeline/run_video.py       runs the stages and saves their output
+src/pipeline/synthetic_demo.py  renders the test video
+```
+
+### `speed_analyzer.py`: finding key moments
+Your hand slows down when it picks or places something. So we measure its speed in each frame and look for the dips.
+
+**Example:** if your hand moves from image position 0.40 to 0.41 in one frame at 30 frames per second, its speed is 0.01 x 30 = 0.3 image widths per second.
+
+Raw speed is jittery, so a filter called **Savitzky-Golay** smooths it. It fits short curves through nearby points, which keeps real dips in place better than plain averaging. Then a dip only counts if it:
+- is deep enough compared with its surroundings (its **prominence**)
+- is at least 0.8 seconds from the previous dip, so one pause doesn't count twice
+- isn't in the first or last half-second, when your hand is just arriving or leaving
+- happens in a frame where your hand was really visible, so a gap where it left the frame can't fake a dip
+
+### `hand_detector.py`: following your hand
+**MediaPipe** finds 21 points on your hand in each frame, such as fingertips and knuckles. We save all 21 in `hand_path.npz`, not just the speed. Option B would need that full path, and saving it now avoids redoing the work.
+
+### `homography.py`: pixels to centimetres
+A flat table photographed at an angle looks like a trapezoid. A **homography** is the maths that undoes that distortion. It can be worked out from four points whose real positions we know, and the printed marker gives us exactly that: four corners of a 10 cm square.
+
+**Limit:** it only works for points on the table's surface. The top of a tall object appears further away than it is. So we use the **bottom edge** of each object, where it touches the table. The camera sees the object's near side, so `base_position` then moves half the object's depth further away to find its centre.
+
+**Example:** an apple 6 cm deep whose near edge maps to x = 0.38 has its centre 3 cm further along.
+
+### `color_tracker.py`: following objects
+It converts each frame to **HSV**, which separates a colour's hue from its brightness. That means a shadow changes the brightness but mostly leaves the hue alone, which RGB doesn't do.
+
+For each object it keeps pixels in that object's hue range, cleans up specks, and takes the largest blob. If much of the object is hidden, such as behind your hand, it reports nothing for that frame rather than a misleading position.
+
+**Red is a special case:** hue is a circle, and red sits at both ends, so its range wraps around, such as 170 to 8.
+
+This is the simple method. SAM 2 would handle tricky objects better, but needs a GPU.
+
+### `demo_observer.py`: the plan with no AI
+This was a design change made while building, and it's useful: once we know where everything is, the plan follows from simple logic.
+
+1. Find each object's position at the start and end of the video.
+2. If it moved more than 5 cm, you moved it.
+3. If it ended inside a container's outline, the relation is `in`. Otherwise, it's the direction from the nearest item.
+4. Order the steps by when each object first left its starting position.
+
+**Example:** the lemon leaves first at 3 s, and ends inside the box. The apple leaves at 6 s, and also ends in the box. So the plan is: lemon in box, then apple in box.
+
+**Why it matters:** your video can drive the robot with **no API key and no GPU**, which protects the hard rule. **Limit:** it only sees each object's final position, so moving an object twice counts once.
+
+### `vlm_planner.py`: the plan with an AI
+This follows SeeDo's question sequence:
+1. Is the hand working on an object in this frame? Others are discarded.
+2. Pair the remaining frames: pick, place, pick, place.
+3. For each pair, ask what's picked, what the reference is, and what the relation is.
+
+The answers are checked: an item that isn't in the scene raises an error instead of reaching the robot. It can also use measured relations instead of the AI's, so we can compare them, as SeeDo's biggest weakness is spatial errors.
+
+**Status:** tested only with a fake AI that plays back scripted answers. It needs the model choice you've postponed, and connecting one is a small job. Its accuracy is unknown until then.
+
+### `closed_loop.py`: the retry loop
+A closed loop checks what really happened and corrects it, as in section 3.
+
+1. Try the step.
+2. Measure where the object ended up. **It compares with the plan from your video, never your hand-written labels**, so it can't cheat.
+3. If it failed, adjust and retry:
+   - **Failed pick:** grip tighter, by 1 cm per retry.
+   - **Failed placement:** move 30% slower per retry.
+4. At the end, recheck everything, and redo any object that got knocked away.
+
+It also counts attempts, which gives the mentors' metric: attempts to success.
+
+### `metrics.py`: scoring plans
+Section 12 explains TSR, FSR and SSR with an example. For SSR, it uses the **longest common subsequence**: the longest run of correct steps kept in order. SeeDo's released code does the same, though its paper prints a different method.
+
+### `synthetic_demo.py`: the test video
+Testing with real video alone would make it hard to measure accuracy, since we wouldn't know the true positions. So this renders a table with the marker and coloured blocks that glide to their targets, with every position known.
+
+**Results:** the plan was correct, and blocks were located to within 0.1-0.7 cm, and the tray to 2.2 cm. **Real video will be worse:** it has shadows, blur and a real hand, none of which this test includes.
+
+### `main.py`: one command
+It runs these stages, and each saves its output so it can be rerun alone:
+
+| Stage | Output in `data/processed/<video>/` |
+|---|---|
+| `keyframes` | `hand_path.npz`, `keyframes.json` |
+| `perception` | `tracks.npz` |
+| `plan` | `observation.json` |
+| `sim` | `rollout.mp4`, `result.json` |
+
+**Note:** the no-AI planner doesn't use key moments yet, since object tracking is enough for it. They matter for the AI planner.
+
+---
+
+## 8C. Task 2: the cup triangle
+
+**This lives on a separate git branch, `cup-task`,** so it can't affect sorting. A branch is a separate line of history, and to look at it you'd run `git checkout cup-task`.
+
+**The task:** three cups start apart at random positions. Two end up side by side on the table, and the third rests across their tops.
+
+```
+         [red]
+    [yellow][green]
+```
+
+### How the cups are modelled
+- **Solid, rigid and upside-down:** wide at the bottom, narrow at the top. A flat top gives the third cup something to rest on.
+- **60 g,** heavier than a real paper cup. It's a simplification to state in your README, though 15 g cups also passed.
+
+### What it took
+1. **The first problem was slip.** The cup slowly slid through the fingers, about 2 cm in 3 seconds, because its sides slope. Gripping harder didn't help much.
+2. **The fix was a more accurate friction setting.** MuJoCo's default friction model is fast but approximate. The **elliptic cone** with a higher **impratio** setting is more accurate for grasping, and reduced slip to about 1 mm.
+3. **The spacing:** cup centres are 8.5 cm apart, so the fingers fit, yet the top cup's 8 cm base still overlaps both.
+
+### What counts as a success
+`triangle.py` measures the result 2 seconds after the hand has left. All must be true:
+- Both lower cups stand upright on the table, within 1.5 cm of the right height.
+- They're side by side, within 2 cm of the intended gap.
+- The top cup is at the height of resting on them, centred over both within 2 cm, and tilted under 10 degrees.
+
+### Results
+- **30 of 30** on new random setups.
+- **10 of 10** with very light 15 g cups.
+
+This went better than I expected. You thought it was probably possible, and you were right.
+
+### What this doesn't show
+- **The plan is hand-written.** The robot hasn't learned this from a video, so the hard rule isn't met for this task. A raised cup also breaks the marker conversion, which needs extra code.
+- **The simulated hand has an advantage:** it knows each cup's exact position. A real robot wouldn't.
+- **Real cups differ:** they're hollow, flexible and much lighter, and the simulator's top cup rests on a solid surface.
+- **Pelvis is pinned,** as in Task 1.
+
+---
+
 ## 9. Worked example: putting the apple in the box
 
 Here's what happens for `{ "object": "apple", "reference": "box", "relation": "in" }`, using the default positions. Runs also randomise them by up to 3 cm.
@@ -548,7 +695,7 @@ That judged the wrong thing, because the goal is the object's position, not the 
 
 ## 12. What comes next
 
-### Phase 2: finding key moments [Planned]
+### Phase 2: finding key moments [Code built, not yet tried on real video]
 **You:** record about 10 videos using `docs/RECORDING_GUIDE.md`, with rough labels.
 
 **Code:** MediaPipe finds your hand in each frame. We compute its speed: distance moved between frames, divided by time. Then we smooth that curve and find the valleys.
@@ -563,7 +710,7 @@ speed
 
 **Pass if** at least 90% of labelled moments are found within 0.5 seconds.
 
-### Phase 3: finding objects and real positions [Planned]
+### Phase 3: finding objects and real positions [Code built, not yet tried on real video]
 - **Grounding DINO or Florence-2** find objects in the first frame from text descriptions.
 - **SAM 2** follows each object through the video, keeping the same ID. It needs a GPU.
 - **Homography** converts pixels to table centimetres.
@@ -574,14 +721,14 @@ It only works for points **on the table's surface**. A point at the top of an ob
 
 **Pass if** the median error is 3 cm or less against a ruler.
 
-### Phase 4: writing the plan [Planned]
+### Phase 4: writing the plan [Built without AI; AI version needs a model choice]
 **First, decide which AI model to use.** You chose to leave this until now. It needs an API key: a private password that lets programs use an online service.
 
 We then adapt SeeDo's prompts and compare two approaches: the AI choosing the relation alone, and the AI choosing the objects while measured positions choose the relation.
 
 **Pass if** SSR is at least 70%.
 
-### Phase 5: closed loop, the main idea [Planned]
+### Phase 5: closed loop, the main idea [Code built, not yet tried on real video]
 1. The robot runs the plan.
 2. We compute the final arrangement in simulation.
 3. We compute the final arrangement from the last video frame.
@@ -591,7 +738,7 @@ We then adapt SeeDo's prompts and compare two approaches: the AI choosing the re
 
 **Important honesty rule:** this check can use only information from the video, never your hand-written labels. Otherwise it would be cheating.
 
-### Phase 6: scoring [Planned]
+### Phase 6: scoring [Code built, not yet tried on real video]
 
 | Metric | Question it answers |
 |---|---|
@@ -668,6 +815,12 @@ Run these from the project folder. Lines starting with `#` are comments.
 # Print the map of where the hand can reach
 PYTHONPATH=. .venv/bin/python scripts/reach_map.py
 
+# Turn a video into a plan and robot run (needs your video and colour settings)
+PYTHONPATH=. .venv/bin/python main.py --video data/raw/video_01.mp4 --step full
+
+# Watch the task live in the MuJoCo window
+PYTHONPATH=. .venv/bin/mjpython scripts/watch_live.py
+
 # Run the plan once on a new random setup (saves a video)
 PYTHONPATH=. .venv/bin/python scripts/phase1_gate.py --trials 1 --first-seed 900
 
@@ -688,6 +841,7 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 |---|---|
 | **ACT** | A popular imitation-learning model that predicts short bursts of motion |
 | **Actuator** | A motor |
+| **Branch** | A separate line of a project's history in git |
 | **API key** | Private password that lets a program use an online service |
 | **ArUco marker** | A printed black-and-white square that software can detect precisely |
 | **Closed loop** | Measuring results and correcting; the opposite of open loop |
@@ -697,6 +851,7 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 | **Digital twin** | A simulated copy of a real setup |
 | **DOF** | Degree of freedom: one independent way of moving |
 | **Egocentric** | Filmed from your own point of view |
+| **Elliptic cone** | A more accurate friction model in MuJoCo |
 | **Episode** | One complete recorded attempt at a task |
 | **FK** | Forward kinematics: joint angles to hand position |
 | **Free joint** | Lets a body move freely in space |
@@ -708,6 +863,8 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 | **Gravity compensation** | Extra motor effort that cancels the arm's weight |
 | **Grounding DINO** | AI that finds objects from text descriptions |
 | **Homography** | Mapping between a flat surface and its image |
+| **HSV** | A colour format separating hue from brightness |
+| **Longest common subsequence** | The longest run of matching items kept in order |
 | **IK** | Inverse kinematics: hand position to joint angles |
 | **Keyframe** | An important frame chosen from a video |
 | **MediaPipe** | Library that finds hand positions in images |
@@ -724,12 +881,14 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 | **PPO** | A common reinforcement-learning method |
 | **Primitive** | A basic reusable action, such as `pick` |
 | **Pydantic** | Library that checks data matches a format |
+| **Prominence** | How much a dip stands out from its surroundings |
 | **Radian** | Unit of angle; 1 rad is about 57 degrees |
 | **Real-to-sim** | Copying real-world data and scenes into simulation |
 | **Retargeting** | Mapping human motion onto a robot's different body |
 | **RL** | Reinforcement learning: learning through trial and reward |
 | **SAM 2** | AI that outlines and follows objects through video |
 | **Seed** | Number that makes "random" results repeatable |
+| **Savitzky-Golay filter** | Smooths a curve while keeping its dips in place |
 | **Sim-to-real gap** | Difference between simulated and real behaviour |
 | **SSR** | Step success rate |
 | **Stiffness** | How hard a motor pushes per unit of error |
