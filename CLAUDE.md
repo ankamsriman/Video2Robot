@@ -51,4 +51,4 @@ PYTHONPATH=. .venv/bin/python scripts/stress_retry.py   # measure what retries a
 - Target 80% test coverage on logic modules, writing tests first. Check simulator visuals and model wrappers through phase gates.
 
 ## Current status
-Phases 0 and 1 complete (20 of 20 on new setups, judged on where objects end up, with a pinned pelvis). Code for Phases 2, 3 and 5 exists but is untested on real video. Waiting for the user's videos. Cup triangle is on branch `cup-task`; the flipped fourth cup is on `cup-flip`. Neither is merged.
+Phases 0 and 1 complete (20 of 20 on new setups, judged on where objects end up, with a pinned pelvis). Code for Phases 2, 3 and 5 exists but is untested on real video. The user's real steel-glass videos are in `data/raw`, with no marker. On branch `real-glasses`, `scripts/glass_from_video.py` takes `task2.mov` through to a built triangle in simulation, once, with hand-picked rough table corners. Task 3 from video isn't built, and the flip hasn't been tested at the real glass size. Cup triangle is on branch `cup-task`; the flipped fourth cup is on `cup-flip`. None are merged.
