@@ -57,9 +57,9 @@ observer:
   move_threshold: 0.05
   stable_seconds: 1.0
 colors:
-  cup_a: { hue: [22, 35], min_saturation: 100, min_value: 60 }
-  cup_b: { hue: [45, 80], min_saturation: 100, min_value: 60 }
-  cup_c: { hue: [170, 8], min_saturation: 100, min_value: 60 }
+  cup_a: { hue: [22, 35], min_saturation: 100, min_value: 30 }
+  cup_b: { hue: [45, 80], min_saturation: 100, min_value: 30 }
+  cup_c: { hue: [170, 8], min_saturation: 100, min_value: 30 }
 
 flip:
   grip_height: 0.045
