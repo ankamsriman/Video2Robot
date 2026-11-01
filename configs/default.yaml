@@ -76,3 +76,15 @@ colors:
 work_area:
   x: [0.26, 0.54]
   y: [-0.40, 0.15]
+
+# The real table in the user's videos, measured to about 1 cm. Width runs across the
+# picture; depth runs from the person's edge towards the phone.
+real_table:
+  width: 0.80
+  depth: 0.50
+
+# The real steel glasses in the user's videos, as typed by the user.
+real_glass:
+  height: 0.115
+  rim_diameter: 0.073
+  closed_end_diameter: 0.055

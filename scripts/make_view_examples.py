@@ -8,6 +8,7 @@ PYTHONPATH=. .venv/bin/python scripts/make_view_examples.py
 
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import cv2
@@ -198,7 +199,10 @@ def _text(
     cv2.putText(image, text, (x, y), font, scale, (255, 255, 255), 1, cv2.LINE_AA)
 
 
-def _render(view: View) -> np.ndarray:
+def render_view(
+    view: View, extras: Callable[[mujoco.MjsBody], None] | None = None
+) -> np.ndarray:
+    """Draw a view from the phone's position, with anything `extras` adds to the scene."""
     spec = mujoco.MjSpec()
     world = spec.worldbody
     world.add_light(pos=[0.5, -0.1, 2.0], dir=[0, 0, -1], castshadow=False)
@@ -211,6 +215,8 @@ def _render(view: View) -> np.ndarray:
     _add_marker(world, MARKER, TABLE_TOP + 0.0005)
     for item in view.items:
         _add_item(world, item)
+    if extras is not None:
+        extras(world)
     model = spec.compile()
     model.vis.global_.offwidth = WIDTH
     model.vis.global_.offheight = HEIGHT
@@ -342,7 +348,7 @@ def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     results = {}
     for view in views():
-        picture = _render(view)
+        picture = render_view(view)
         results[view.name] = {
             "marker_detected": _marker_seen(picture),
             "everything_in_frame": _in_frame(view),
