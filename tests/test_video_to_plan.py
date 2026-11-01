@@ -17,7 +17,7 @@ from src.reasoning.demo_observer import ObserverConfig, observe_demo
 from src.schemas.plan import Plan, Relation, Step
 from src.simulation.scene import load_scene_config
 
-MARKER = MarkerConfig(center=(0.24, -0.12), side=0.10, marker_id=0)
+MARKER = MarkerConfig(center=(0.64, -0.10), side=0.10, marker_id=0)
 SPECS = [
     ColorSpec("apple", (170, 8), 100, 60),
     ColorSpec("lemon", (22, 35), 100, 60),

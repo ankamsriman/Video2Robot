@@ -19,31 +19,35 @@ This is how to film the demo videos for Phase 2. The layout matches what the sim
 
 Choose objects that look clearly different, ideally in different colours, with the table a contrasting colour. This makes tracking much easier.
 
+## What the phone should see
+Pictures of the exact view for each task are in `docs/recording_views/`. They're drawn in the simulator to real measurements, and they aren't photos. `task1_start.png` and `task1_end.png` show Task 1, and Tasks 2 and 3 have the same pair.
+
 ## Table layout
-Stand on the **robot side** of the table, where the robot would stand. Mark this area with tape:
+Stand on the **robot side** of the table, where the robot would stand. Measure from that near edge, and mark the spots with tape:
 
 ```
-                        far side of the table
+                 far side of the table, where the phone is
       +--------------------------------------------------+
-      |    [ container A ]            [ container B ]    |   tray centres: about 26 cm past the marker
+      |                     [MARKER]                     |   marker centre: 48 cm from your edge
       |                                                  |
-      |      (object)      (object)      (object)        |   objects: about 11 cm past the marker
+      |    [ container A ]            [ container B ]    |   tray centres: 34 cm from your edge
       |                                                  |
-      |                     [MARKER]                     |   marker centre
+      |      (object)      (object)      (object)        |   objects: 19 cm from your edge
+      |                                                  |
       +--------------------------------------------------+
                   robot side (near edge of the table)
 ```
 
-- **Marker:** flat on the table, about 8 cm from the near edge, with its arrow pointing away from you. Tape it down so it can't move.
-- **Objects:** in a row about 11 cm beyond the marker, spaced about 12 cm apart.
-- **Containers:** about 26 cm beyond the marker, side by side, with centres about 24 cm apart.
+- **Marker:** flat on the table, with its arrow pointing away from you, towards the phone. It sits at the phone's end so objects can't block its view. Cut the page down, leaving about 3 cm of white around the black square, and draw the arrow on before cutting if it would be cut off. Tape it down so it can't move.
+- **Objects:** measured from a line running straight towards you from the marker's centre: 18 cm and 6 cm to your right, and 6 cm to your left.
+- **Containers:** 11 cm to your right of that line, and 13 cm to your left.
 
 Small changes in position between videos are fine and useful.
 
 ## Camera setup
-- Put the phone on a tripod facing the table from **the far side**, looking down at about 50-60 degrees. In tests, the marker wasn't detected at some lower or rotated angles, so check this first (see "Check your first video").
+- Put the phone on a tripod facing the table from **the far side**, about 75 cm above the tabletop and about 30 cm beyond the table's far edge, looking down at about 50 degrees. A short tripod works if it stands on a second table of about the same height.
 - Make sure the marker, all objects and both containers stay in frame for the whole video.
-- Check that **no object or container covers the marker**, even partly. From behind the trays, objects can block it, so raise the camera or film from a corner.
+- Check that **nothing covers the marker**, even partly, including your hand during the first few seconds.
 - Use 1080p at 30 frames per second, in landscape.
 - Lock focus and exposure. On iPhone, press and hold on the table until "AE/AF Lock" appears.
 - Use bright, even light and avoid strong shadows.

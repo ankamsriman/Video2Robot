@@ -45,9 +45,12 @@ def _largest_blob(mask: np.ndarray) -> tuple[np.ndarray, int] | None:
 
 
 def _bottom_middle(blob: np.ndarray) -> tuple[float, float]:
-    rows, columns = np.nonzero(blob)
-    bottom = rows.max()
-    return (float(columns[rows == bottom].mean()), float(bottom))
+    # Using each column's lowest pixel, not only the lowest row, because a slightly tilted
+    # edge has one corner as its lowest row, which is half the object's width off-centre.
+    columns = np.nonzero(blob.any(axis=0))[0]
+    from_bottom = np.argmax(blob[::-1, columns], axis=0)
+    bottoms = blob.shape[0] - 1 - from_bottom
+    return (float(columns.mean()), float(np.median(bottoms)))
 
 
 def track_colors(
