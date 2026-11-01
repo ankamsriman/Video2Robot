@@ -35,6 +35,8 @@ IK_DT = 0.02
 IK_MAX_ITERATIONS = 200
 POSITION_TOLERANCE = 0.005
 ORIENTATION_TOLERANCE = 0.05
+GENTLE_JOINT_SPEED = 0.5
+GENTLE_DAMPING = 0.05
 
 
 def palm_down_rotation(side: str = "right", pitch: float = 0.0) -> np.ndarray:
@@ -101,18 +103,35 @@ class ArmIK:
         frozen = [dof for dof in range(model.nv) if dof not in arm_dofs]
         self._freeze = mink.DofFreezingTask(model, dof_indices=frozen)
         self._limits = [mink.ConfigurationLimit(model)]
+        # Near a straight arm, tiny hand motions can demand huge joint motions. Gentle
+        # motions cap joint speed and add damping, so that can't throw a held object.
+        names = [f"{side}_{name}_joint" for name in ARM_JOINTS] + [WAIST_LEAN_JOINT]
+        self._gentle_limits = [
+            *self._limits,
+            mink.VelocityLimit(model, dict.fromkeys(names, GENTLE_JOINT_SPEED)),
+        ]
 
     def solve(
-        self, qpos: np.ndarray, position: np.ndarray, rotation: np.ndarray
+        self,
+        qpos: np.ndarray,
+        position: np.ndarray,
+        rotation: np.ndarray,
+        keep_waist: bool = False,
     ) -> IKResult:
-        """Solve for a target hand pose, starting from the joint angles in `qpos`."""
+        """Solve for a target hand pose, starting from the joint angles in `qpos`.
+
+        Normally the torso turns to face the target, with a slight lean. `keep_waist` stays
+        near the current pose instead, for motions that must stay gentle.
+        """
         start = qpos.copy()
-        start[self._twist_qpos] = waist_yaw_for_target(
-            float(position[0]), float(position[1]), self._side
-        )
+        if not keep_waist:
+            start[self._twist_qpos] = waist_yaw_for_target(
+                float(position[0]), float(position[1]), self._side
+            )
         self._configuration.update(start)
         preferred = start.copy()
-        preferred[self._lean_qpos] = PREFERRED_LEAN
+        if not keep_waist:
+            preferred[self._lean_qpos] = PREFERRED_LEAN
         self._posture.set_target(preferred)
         self._frame.set_target(
             mink.SE3.from_rotation_and_translation(
@@ -128,15 +147,19 @@ class ArmIK:
                 and np.linalg.norm(error[3:]) < ORIENTATION_TOLERANCE / 5
             ):
                 break
-            velocity = mink.solve_ik(
-                self._configuration,
-                tasks,
-                IK_DT,
-                SOLVER,
-                damping=1e-3,
-                limits=self._limits,
-                constraints=[self._freeze],
-            )
+            try:
+                velocity = mink.solve_ik(
+                    self._configuration,
+                    tasks,
+                    IK_DT,
+                    SOLVER,
+                    damping=GENTLE_DAMPING if keep_waist else 1e-3,
+                    limits=self._gentle_limits if keep_waist else self._limits,
+                    constraints=[self._freeze],
+                )
+            except mink.NoSolutionFound:
+                # Keep the closest pose so far. The error returned below reports the miss.
+                break
             self._configuration.integrate_inplace(velocity, IK_DT)
         return IKResult(
             qpos=self._configuration.q.copy(),

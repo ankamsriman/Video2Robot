@@ -1,0 +1,96 @@
+# Settings for the flipped-cup task: a triangle, plus a fourth cup placed opening-up.
+# Cups are rigid and heavier than real paper cups, which is a simplification.
+paths:
+  g1_scene: third_party/mujoco_menagerie/unitree_g1/scene_with_hands.xml
+
+scene:
+  table:
+    near_edge_x: 0.16
+    depth: 0.55
+    width: 0.90
+    top_height: 0.72
+  objects:
+    cup_a: { shape: cup, size: [0.069, 0.069, 0.09], position: [0.30, 0.10], mass: 0.06, rgba: [0.92, 0.78, 0.15, 1] }
+    cup_b: { shape: cup, size: [0.069, 0.069, 0.09], position: [0.36, 0.0], mass: 0.06, rgba: [0.20, 0.65, 0.25, 1] }
+    cup_c: { shape: cup, size: [0.069, 0.069, 0.09], position: [0.30, -0.08], mass: 0.06, rgba: [0.80, 0.15, 0.15, 1] }
+    cup_d: { shape: cup, opening: true, size: [0.069, 0.069, 0.09], position: [0.42, -0.04], mass: 0.06, rgba: [0.20, 0.35, 0.80, 1] }
+  containers: {}
+
+motion:
+  arm: right
+  grip_height: 0.04
+  hover_height: 0.22
+  release_clearance: 0.006
+  side_gap: 0.0
+  hand_speed: 0.20
+  finger_time: 0.5
+  settle_time: 0.6
+  control_rate_hz: 25
+  finger_force_limit: 1.0
+  hand_pitch: 0.20
+  open_width: 0.10
+  grip_squeeze: 0.015
+  release_margin: 0.035
+  home_position: [0.30, -0.10, 0.98]
+
+triangle:
+  # The tower stands where the wrist twist naturally ends, so the flipped cup only
+  # needs lowering straight down.
+  center: [0.365, -0.30]
+  cup_spacing: 0.085
+  cup_height: 0.09
+  rim_radius: 0.04
+  top_radius: 0.028
+  position_tolerance: 0.02
+  max_tilt_degrees: 10.0
+
+# Reading the triangle from a video. Replace the colours using scripts/read_colors.py.
+marker:
+  center: [0.24, -0.12]
+  side: 0.10
+  marker_id: 0
+tracking:
+  min_area: 150
+  area_fraction: 0.3
+  frame_stride: 3
+observer:
+  move_threshold: 0.05
+  stable_seconds: 1.0
+colors:
+  cup_a: { hue: [22, 35], min_saturation: 100, min_value: 60 }
+  cup_b: { hue: [45, 80], min_saturation: 100, min_value: 60 }
+  cup_c: { hue: [170, 8], min_saturation: 100, min_value: 60 }
+
+flip:
+  grip_height: 0.045
+  # The cup sits deeper in the hand than usual, with fingertips past its centre, so that
+  # squeezing pulls it in instead of pushing it out. Finger angles are for this depth.
+  grip_depth: 0.02
+  approach_clearance: 0.03
+  open_pose: [0.0, 0.7, -1.6, 0.95, 0.0, 0.95, 0.0]
+  close_pose: [0.0, 0.1, -1.3, 0.85, 0.85, 0.85, 0.85]
+  release_pose: [0.0, 0.6, -1.65, 1.05, 0.0, 1.05, 0.0]
+  start_roll: 1.57
+  hand_yaw: -0.6
+  twist_angle: 3.14
+  # An arm pose with a level forearm, found by search, so the wrist alone flips the cup.
+  twist_pose:
+    waist_yaw_joint: 0.41
+    waist_pitch_joint: -0.10
+    right_shoulder_pitch_joint: -1.19
+    right_shoulder_roll_joint: 0.23
+    right_shoulder_yaw_joint: -1.64
+    right_elbow_joint: 0.12
+    right_wrist_roll_joint: -1.20
+    right_wrist_pitch_joint: 0.0
+    right_wrist_yaw_joint: 0.0
+  pose_seconds: 6.0
+  twist_seconds: 5.0
+  hover_height: 0.26
+  twist_speed: 1.0
+  place_clearance: 0.004
+  lower_speed: 0.03
+  back_out_distance: 0.12
+  lift_after_release: 0.14
+  # Where the hand ends, up and away from the finished tower.
+  finish_position: [0.46, -0.02, 1.02]

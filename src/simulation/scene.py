@@ -17,7 +17,9 @@ WALL_THICKNESS = 0.006
 CUP_FACES = 32
 CUP_RIM_RADIUS = 0.04
 CUP_TOP_RADIUS = 0.028
-CUP_IMPRATIO = 10.0
+CUP_IMPRATIO = 50.0
+OPENING_FRACTION = 0.85
+OPENING_THICKNESS = 0.0005
 
 
 @dataclass(frozen=True)
@@ -30,6 +32,7 @@ class ItemConfig:
     rgba: tuple[float, float, float, float]
     mass: float = 0.0
     shape: str = "box"
+    opening: bool = False
 
 
 @dataclass(frozen=True)
@@ -57,6 +60,7 @@ def _read_items(section: Mapping[str, Mapping]) -> tuple[ItemConfig, ...]:
             rgba=tuple(item["rgba"]),
             mass=item.get("mass", 0.0),
             shape=item.get("shape", "box"),
+            opening=item.get("opening", False),
         )
         for name, item in section.items()
     )
@@ -122,6 +126,21 @@ def _add_cup(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
         friction=[1.5, 0.02, 0.002],
         condim=4,
     )
+    if item.opening:
+        # The cup is solid, so a dark disc on its wide end shows where the opening is.
+        rim = (
+            item.size[0] / 2
+            + half_height * (CUP_RIM_RADIUS - CUP_TOP_RADIUS) / item.size[2]
+        )
+        body.add_geom(
+            type=mujoco.mjtGeom.mjGEOM_CYLINDER,
+            size=[rim * OPENING_FRACTION, OPENING_THICKNESS, 0],
+            pos=[0, 0, -half_height - OPENING_THICKNESS],
+            rgba=[0.05, 0.05, 0.05, 1],
+            contype=0,
+            conaffinity=0,
+            mass=0,
+        )
 
 
 def _add_object(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
@@ -214,6 +233,7 @@ def build_model(
                 item.rgba,
                 item.mass,
                 item.shape,
+                item.opening,
             ),
             config.table.top_height,
         )

@@ -8,6 +8,7 @@ from pathlib import Path
 import mujoco
 import numpy as np
 import yaml
+from scipy.spatial.transform import Rotation, Slerp
 
 from src.simulation.ik import (
     ARM_JOINTS,
@@ -149,6 +150,10 @@ class RobotEnv:
         self.data.qpos[self.model.joint(joint).qposadr[0]] = value
 
     @property
+    def hand_site(self) -> int:
+        return self._site
+
+    @property
     def hand_position(self) -> np.ndarray:
         return self.data.site_xpos[self._site].copy()
 
@@ -186,31 +191,75 @@ class RobotEnv:
         names += [WAIST_LEAN_JOINT, WAIST_TWIST_JOINT]
         return {name: float(qpos[self.model.joint(name).qposadr[0]]) for name in names}
 
-    def move_hand(self, target: np.ndarray, speed: float | None = None) -> bool:
-        """Move the grasp point in a straight line.
+    def move_hand(
+        self,
+        target: np.ndarray,
+        speed: float | None = None,
+        rotation: np.ndarray | None = None,
+        twist_speed: float = 1.0,
+        keep_waist: bool = False,
+        min_seconds: float = 0.3,
+    ) -> bool:
+        """Move the grasp point in a straight line, optionally turning the hand as it goes.
 
         Returns True only if the hand physically arrived, so a blocked or unreachable
         move can never be mistaken for a successful one.
         """
         start = self.hand_position
         distance = float(np.linalg.norm(target - start))
-        duration = max(distance / (speed or self.motion.hand_speed), 0.3)
+        start_rotation = Rotation.from_matrix(self._rotation)
+        end_rotation = Rotation.from_matrix(
+            self._rotation if rotation is None else rotation
+        )
+        turn = (end_rotation * start_rotation.inv()).magnitude()
+        duration = max(
+            distance / (speed or self.motion.hand_speed),
+            turn / twist_speed,
+            min_seconds,
+        )
+        turning = Slerp(
+            [0.0, 1.0], Rotation.concatenate([start_rotation, end_rotation])
+        )
         control_dt = 1.0 / self.motion.control_rate_hz
         waypoints = max(int(duration / control_dt), 1)
         for index in range(1, waypoints + 1):
             progress = min_jerk(index / waypoints)
             waypoint = start + progress * (target - start)
-            result = self._ik.solve(self._commanded_qpos(), waypoint, self._rotation)
+            self._rotation = turning(progress).as_matrix()
+            result = self._ik.solve(
+                self._commanded_qpos(), waypoint, self._rotation, keep_waist
+            )
             self._command = {**self._command, **self._arm_targets(result.qpos)}
             self.advance(control_dt)
-        self._correct_hand(target)
+        self._correct_hand(target, keep_waist)
         error = float(np.linalg.norm(self.hand_position - target))
         if error >= ARRIVAL_TOLERANCE:
             logger.warning("Hand stopped %.1f cm short of %s", error * 100, target)
             return False
         return True
 
-    def _correct_hand(self, target: np.ndarray) -> None:
+    def move_joints(self, targets: Mapping[str, float], seconds: float) -> None:
+        """Smoothly move named joints to set angles, with all the others held still.
+
+        Afterwards, hand motions keep the hand's new orientation.
+        """
+        begin = {joint: self._command[joint] for joint in targets}
+        control_dt = 1.0 / self.motion.control_rate_hz
+        waypoints = max(int(seconds / control_dt), 1)
+        for index in range(1, waypoints + 1):
+            progress = min_jerk(index / waypoints)
+            updates = {
+                joint: begin[joint] + progress * (angle - begin[joint])
+                for joint, angle in targets.items()
+            }
+            self._command = {**self._command, **updates}
+            self.advance(control_dt)
+        self._rotation = self.data.site_xmat[self._site].reshape(3, 3).copy()
+
+    def joint_angle(self, joint: str) -> float:
+        return float(self.data.qpos[self.model.joint(joint).qposadr[0]])
+
+    def _correct_hand(self, target: np.ndarray, keep_waist: bool = False) -> None:
         """Measure where the hand really is and nudge it onto the target.
 
         Body sway and joint sag leave a small error. This feedback removes it, in the
@@ -224,8 +273,25 @@ class RobotEnv:
             if np.linalg.norm(error) < CORRECTION_TOLERANCE:
                 continue
             aim = aim + CORRECTION_GAIN * error
-            result = self._ik.solve(self._commanded_qpos(), aim, self._rotation)
+            result = self._ik.solve(
+                self._commanded_qpos(), aim, self._rotation, keep_waist
+            )
             self._command = {**self._command, **self._arm_targets(result.qpos)}
+
+    def relax_fingers(self) -> None:
+        """Set each finger's target to where it really is, releasing stored squeeze.
+
+        Gripping commands fingers past where the object stops them, like a compressed
+        spring. Opening without this first lets one side keep pushing as the other backs
+        off, which shoves the object.
+        """
+        prefix = f"{self.motion.arm}_hand_"
+        actual = {
+            f"{prefix}{finger}_joint": self.joint_angle(f"{prefix}{finger}_joint")
+            for finger in FINGER_JOINTS
+        }
+        self._command = {**self._command, **actual}
+        self.advance(self.motion.settle_time)
 
     def set_fingers(self, pose: tuple[float, ...]) -> None:
         """Move the active hand's fingers smoothly to a pose."""
