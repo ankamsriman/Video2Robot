@@ -89,7 +89,7 @@ def test_observer_rejects_a_video_where_a_cup_never_moved() -> None:
 def test_rendered_triangle_video_drives_the_robot_to_build_it(tmp_path: Path) -> None:
     config = load_scene_config(CONFIG)
     triangle = load_triangle_config(CONFIG)
-    marker = MarkerConfig(center=(0.24, -0.12), side=0.10, marker_id=0)
+    marker = MarkerConfig(center=(0.64, -0.10), side=0.10, marker_id=0)
     specs = [
         ColorSpec("cup_a", (22, 35), 100, 60),
         ColorSpec("cup_b", (45, 80), 100, 60),
