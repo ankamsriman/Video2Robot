@@ -58,3 +58,21 @@ colors:
   cup_a: { hue: [22, 35], min_saturation: 100, min_value: 30 }
   cup_b: { hue: [45, 80], min_saturation: 100, min_value: 30 }
   cup_c: { hue: [170, 8], min_saturation: 100, min_value: 30 }
+
+# Reading the real steel glasses from a video. The table is measured in place of a marker.
+real_video:
+  table_width: 0.80
+  table_depth: 0.50
+  glass_height: 0.115
+  brighter_than_table: 28
+  min_brightness: 150
+  max_saturation: 45
+  min_area: 500
+  max_area: 9000
+  min_fill: 0.82
+  min_roundness: 0.45
+  room_above_table: 150
+  same_spot_pixels: 16
+  min_seen_seconds: 0.5
+  min_presence: 0.4
+  max_top_offset: 0.03
