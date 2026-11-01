@@ -27,7 +27,7 @@ Pictures are in `docs/recording_views/`, named `person_1_start.png` to `person_4
 
 - **In the shot:** your hand and forearm while you work, and possibly your waist at the top edge. Your head and face aren't needed, so keep them out, since this data will be public.
 - **Your hand:** one bare hand with all five fingers showing, no gloves. Hand detection needs to see the fingers.
-- **Your grip:** from above or the sides, so the phone can still see the object's front.
+- **Your grip:** for blocks, from above or the sides, so the phone can still see the object's front. For steel glasses, always from the side around the middle, because glasses are followed by their bright closed tops, so those must stay uncovered.
 - **Your reach:** come from your side of the table, and never reach past the trays to the marker.
 - **Your clothes:** a plain shirt, not the same colour as any object or tray, because objects are followed by colour. Don't use a tray close to your skin colour.
 - **Nobody else in the shot.**
