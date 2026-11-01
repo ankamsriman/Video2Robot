@@ -8,7 +8,7 @@
 |---|---|---|
 | **Sorting** | 20 of 20 on new setups | Hand-written plan, shifts up to 3 cm, pinned pelvis |
 | **Cup triangle** | 30 of 30 on new setups, 10 of 10 with 15 g cups | Hand-written plan, rigid simulated cups |
-| **Flipped fourth cup** | 21 of 24 on new setups | Programmed flip, restricted layout, no video link, branch `cup-flip` |
+| **Flipped fourth cup** | 50 of 50 on new setups, after an aiming fix | Programmed flip, restricted layout, no video link, branch `cup-flip` |
 | **Video to robot, sorting** | Correct plan, task completed | Rendered video only |
 | **Video to robot, cups** | Recognised the triangle and rebuilt it | Rendered video only, branch `cup-task` |
 | **Retry loop** | Weak grip: 0 of 8 to 8 of 8 | Conditions I chose; slipperiness barely improved |

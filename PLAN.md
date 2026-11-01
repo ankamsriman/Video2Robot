@@ -99,7 +99,7 @@ Stress test, `data/processed/stress_retry.md`: weak grip went from 0 of 8 to 8 o
 Physics: 30 of 30 on new setups, 10 of 10 with 15 g cups, hand-written plan. Recognised from a rendered video and rebuilt by the G1. Real video not tried. `scripts/cup_from_video.py` runs it. Merge only if the user asks.
 
 ## Task 3: flipped fourth cup (branch `cup-flip`, not merged)
-Physics: 21 of 24 on new setups, hand-written plan, programmed flip, pinned pelvis, restricted layout. No video link yet, so the hard rule isn't met for this task. `scripts/flip_trial.py` runs it.
+Physics: 50 of 50 on new setups (seeds 300-349; 21 of 24 before the aiming fix), hand-written plan, programmed flip, pinned pelvis, restricted layout. No video link yet, so the hard rule isn't met for this task. `scripts/flip_trial.py` runs it.
 
 ## Needed from the user
 - Record and label videos in Phase 2

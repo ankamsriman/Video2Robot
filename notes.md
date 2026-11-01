@@ -682,15 +682,23 @@ Scores improved as bugs were fixed, on new setups each time:
 | After the higher `impratio` | 1 of 12, a new problem appeared |
 | After backing out and removing the swing | 5 of 12 |
 | After sliding in and centring | 9 of 15 |
-| **Final version, new setups** | **21 of 24 (87.5%)** |
+| Before the aiming fix | 21 of 24 (87.5%) |
+| **Final version, new setups** | **50 of 50 (100%)** |
 
-The 3 failures had the cup on top and flipped, but more than 2 cm off-centre. I kept that check as it was. I also moved the hand's finishing position afterwards, for a clearer video, and 3 more new setups passed.
+The 3 failures at 21 of 24 had the cup on top and flipped, but more than 2 cm off-centre. I kept that check as it was. Tracing the cup through each failed run showed two small errors adding up:
+
+1. **Aiming at the plan.** The hand aimed at where the top cup should be, but that cup had settled up to 1.5 cm away.
+2. **A shift on release.** Opening the fingers moved the cup about 0.4 cm forward and 0.3 cm sideways, in a similar direction every time.
+
+**The fix:** aim at the top cup's measured position, aim slightly the opposite way to cancel the shift, and correct once more just above the tower. The cup in the 3 failed setups went from just over 2 cm off-centre to under 0.3 cm. Then 50 setups the robot had never seen all passed, and the original 24 passed 24 of 24.
+
+**100% here doesn't mean it can never fail.** With 50 of 50, a true failure rate of a few percent could still go unseen. The new test also has the same limits listed below.
 
 ### What this doesn't show
 - **The robot doesn't learn the flip from a video.** It's programmed. Nothing connects this task to video yet, not even a rendered one, so **the hard rule isn't met for it**. Your README must say so.
 - **The layout is restricted.** The tower has a fixed spot, and the fourth cup must start 40-44 cm forward. It isn't as flexible as Tasks 1 and 2.
 - **Simulation only:** rigid solid cups, a dark disc that represents the opening, a pinned pelvis, and a friction setting chosen because it worked.
-- **A real robot may behave differently.** Exact knowledge of the cup's position and tilt wouldn't be available.
+- **A real robot may behave differently.** Exact knowledge of the cup's position and tilt wouldn't be available, and the final fix relies on it: the robot reads both cups' exact positions from the simulator.
 
 ---
 
