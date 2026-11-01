@@ -856,6 +856,10 @@ speed
 
 **Homography, explained:** when you photograph a flat table from an angle, the table looks like a trapezoid. There's a mathematical mapping that undoes this, and it's fully determined by four known points. Our printed marker provides exactly that: four corners of a square known to be 10 cm wide. So if the apple's base is at pixel (640, 400), the mapping might tell us it's at table position (35 cm, −28 cm).
 
+**Where the marker goes:** at the phone's end of the table, 48 cm from the robot's edge. I first put it near the robot, but drawing the view from a 75 cm tripod showed the blocks standing in front of it. Nothing can stand between the phone and something right beside it. Blocks still measured within about 1.1 cm in a rendered test, and trays within about 2.7 cm.
+
+**A tracker bug that this view exposed:** to find an object's base, the tracker used only the lowest row of its coloured pixels. If the bottom edge looks slightly tilted, that row is a single corner, so the position jumped sideways by up to half a block. A test block read 3 cm off. It now uses the lowest pixel in every column.
+
 It only works for points **on the table's surface**. A point at the top of an object would be misplaced, so we use the point where the object touches the table.
 
 **Pass if** the median error is 3 cm or less against a ruler.
