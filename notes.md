@@ -15,6 +15,7 @@ Throughout, **[Built]** means the code exists and has been tested. **[Planned]**
 8. [The code, file by file](#8-the-code-file-by-file)
    - [The vision and planning code](#8b-the-vision-and-planning-code)
    - [Task 2: the cup triangle](#8c-task-2-the-cup-triangle)
+   - [Task 3: flipping a fourth cup](#8d-task-3-flipping-a-fourth-cup)
 9. [Worked example: putting the apple in the box](#9-worked-example-putting-the-apple-in-the-box)
 10. [What went wrong and what it taught us](#10-what-went-wrong-and-what-it-taught-us)
 11. [Results and how to read them](#11-results-and-how-to-read-them)
@@ -638,6 +639,61 @@ It worked on a rendered video: it found the order and built the triangle.
 
 ---
 
+## 8D. Task 3: flipping a fourth cup
+
+**This lives on its own git branch, `cup-flip`.** `main` and `cup-task` aren't affected.
+
+**The task:** build the triangle, then stand a fourth cup on top with its **opening up**. The cup starts opening-down, so the robot has to turn it over with one hand.
+
+```
+        \___/     cup 4: opening up
+        /   \     cup 3
+     /   \ /   \  cups 1, 2
+```
+
+### The main idea
+Flipping with the palm above the cup puts the palm **underneath** at the end, where it would hit the tower. So the robot grips with its palm **beside** the cup, and rotates around the line between thumb and fingers, like food on a spit. The palm ends on the cup's other side, so nothing is in the way.
+
+### What it took
+Each failure taught something. It took about 12 attempts at the design:
+
+| Problem | Cause | Fix | Lesson |
+|---|---|---|---|
+| Cup thrown to the floor | Inverse kinematics made a big shoulder swing | Turn **only the wrist joint** | Sometimes direct control beats a solver |
+| Flip ended 45 degrees short | The forearm wasn't level | Search for an arm pose with a level forearm | Wrist turning flips cleanly only about a level axis |
+| Cup dropped however hard it gripped | It sat past the fingertips, so squeezing pushed it out, like a slippery seed | Hold it deeper, with fingertips past its centre | More force doesn't fix bad geometry |
+| Arm flailed wildly | The solver reset the waist, and later a fallen cup caused a huge "correction" | Keep the pose steady, and never correct if the cup isn't held | Check assumptions before acting on a measurement |
+| Tilted about 12 degrees | Grip and arm alignment | Measure the tilt, and correct it slowly | Closed-loop correction again |
+| Carrying it to the tower failed | Reaching far with the hand turned over | **Build the tower where the twist ends** | Change the task layout, not just the motion |
+| Cup crept out over seconds | Soft friction model | Higher `impratio` | Simulation settings can matter as much as code |
+| Palm knocked the cup over | Coming straight down hit its wide base | Come down beside it, then slide in | |
+| Fingers carried the cup away | It's widest at the top, so lifting caught the rim | Centre the hand, back out sideways, then lift | |
+| Cup shoved 1.2 cm on release | The thumb stays loaded like a spring after squeezing | Set finger targets to their real positions first | The same cause as a Task 1 bug |
+| Tower knocked over at the end | My own final arm swing | Remove the swing | |
+
+One of my diagnoses was wrong along the way: I blamed the fingertip paths, calculated them, and found they moved outward as they should. So it's worth checking a theory before building on it.
+
+### Results
+Scores improved as bugs were fixed, on new setups each time:
+
+| Stage | Result |
+|---|---|
+| First random test | 1 of 9 |
+| After the higher `impratio` | 1 of 12, a new problem appeared |
+| After backing out and removing the swing | 5 of 12 |
+| After sliding in and centring | 9 of 15 |
+| **Final version, new setups** | **21 of 24 (87.5%)** |
+
+The 3 failures had the cup on top and flipped, but more than 2 cm off-centre. I kept that check as it was. I also moved the hand's finishing position afterwards, for a clearer video, and 3 more new setups passed.
+
+### What this doesn't show
+- **The robot doesn't learn the flip from a video.** It's programmed. Nothing connects this task to video yet, not even a rendered one, so **the hard rule isn't met for it**. Your README must say so.
+- **The layout is restricted.** The tower has a fixed spot, and the fourth cup must start 40-44 cm forward. It isn't as flexible as Tasks 1 and 2.
+- **Simulation only:** rigid solid cups, a dark disc that represents the opening, a pinned pelvis, and a friction setting chosen because it worked.
+- **A real robot may behave differently.** Exact knowledge of the cup's position and tilt wouldn't be available.
+
+---
+
 ## 9. Worked example: putting the apple in the box
 
 Here's what happens for `{ "object": "apple", "reference": "box", "relation": "in" }`, using the default positions. Runs also randomise them by up to 3 cm.
@@ -948,6 +1004,7 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 | **mink** | The IK library we use |
 | **MuJoCo** | The physics simulator we use |
 | **Open loop** | Acting without checking the result |
+| **Impratio** | A MuJoCo setting; higher values stop objects slowly creeping in a grip |
 | **Pinned** | Fixed in place so it can't fall |
 | **Pitch, roll, yaw** | Nodding, tilting sideways, and turning |
 | **Policy** | A trained model that decides robot motions |
@@ -964,6 +1021,7 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 | **SAM 2** | AI that outlines and follows objects through video |
 | **Seed** | Number that makes "random" results repeatable |
 | **Savitzky-Golay filter** | Smooths a curve while keeping its dips in place |
+| **Singularity** | An arm pose where tiny hand motions demand huge joint motions |
 | **Sim-to-real gap** | Difference between simulated and real behaviour |
 | **SSR** | Step success rate |
 | **Stiffness** | How hard a motor pushes per unit of error |

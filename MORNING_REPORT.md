@@ -8,6 +8,7 @@
 |---|---|---|
 | **Sorting** | 20 of 20 on new setups | Hand-written plan, shifts up to 3 cm, pinned pelvis |
 | **Cup triangle** | 30 of 30 on new setups, 10 of 10 with 15 g cups | Hand-written plan, rigid simulated cups |
+| **Flipped fourth cup** | 21 of 24 on new setups | Programmed flip, restricted layout, no video link, branch `cup-flip` |
 | **Video to robot, sorting** | Correct plan, task completed | Rendered video only |
 | **Video to robot, cups** | Recognised the triangle and rebuilt it | Rendered video only, branch `cup-task` |
 | **Retry loop** | Weak grip: 0 of 8 to 8 of 8 | Conditions I chose; slipperiness barely improved |
@@ -30,12 +31,14 @@ Rendered video is much easier than real video, which has shadows, blur and a rea
 |---|---|
 | `main` branch | Sorting, the video chain, retry loop, docs |
 | `cup-task` branch | Everything above, plus cups. **Not merged** |
-| GitHub | Both are pushed to your **private** repo |
+| `cup-flip` branch | Cups, plus the flipped fourth cup. **Not merged** |
+| GitHub | All are pushed to your **private** repo |
 
 ## Videos to watch
 From `data/processed/`:
 - `phase1/pinned_trial_600.mp4`: sorting
 - `cups/cups_seed_0.mp4`: the cup triangle
+- `flip/flip_seed_200.mp4`: the flipped fourth cup
 - `cups/rendered_demo_video.mp4` then `cups/from_rendered_video_rollout.mp4`: a rendered demo, then the robot copying it
 
 ## What I need from you, in order

@@ -64,5 +64,8 @@ SeeDo has three gaps, and we turn each into something measurable:
 | Retry loop | Weak grip went from 0 of 8 to 8 of 8, after fixing a test that measured nothing |
 | Working area | 70 of 78 positions passed, larger than first estimated |
 
+### Task 3: the flipped cup
+Your idea: a fourth cup on the triangle, opening up, with the robot turning it over. It went from 1 of 9 to 21 of 24 on new setups, on its own branch. The flip is programmed, so it isn't learned from video.
+
 ### Still open
 AI model and API key, GPU access, and which tasks to show in the final submission.
