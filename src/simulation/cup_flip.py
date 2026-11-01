@@ -22,7 +22,6 @@ from src.verification.triangle import (
     CupPose,
     TriangleConfig,
     triangle_failures,
-    triangle_targets,
 )
 
 WRIST_ROLL_JOINT = "right_wrist_roll_joint"
@@ -37,6 +36,9 @@ AXIS_EPSILON = 1e-6
 SETTLE_AFTER_BUILD = 2.0
 MIN_LIFT = 0.05
 MAX_HOLD_DISTANCE = 0.06
+AIM_ROUNDS = 3
+AIM_TOLERANCE = 0.001
+AIM_SECONDS = 1.0
 logger = logging.getLogger(__name__)
 
 
@@ -57,6 +59,7 @@ class FlipConfig:
     hover_height: float
     twist_speed: float
     place_clearance: float
+    release_drift: tuple[float, float]
     lower_speed: float
     back_out_distance: float
     lift_after_release: float
@@ -76,7 +79,13 @@ class FlipResult:
 
 def load_flip_config(path: Path) -> FlipConfig:
     raw = yaml.safe_load(path.read_text())["flip"]
-    poses = ("open_pose", "close_pose", "release_pose", "finish_position")
+    poses = (
+        "open_pose",
+        "close_pose",
+        "release_pose",
+        "finish_position",
+        "release_drift",
+    )
     return FlipConfig(**{**raw, **{name: tuple(raw[name]) for name in poses}})
 
 
@@ -190,15 +199,52 @@ def rotation_between(start: np.ndarray, end: np.ndarray) -> np.ndarray:
     return Rotation.from_rotvec(axis / size * angle).as_matrix()
 
 
-def place_flipped(
-    env: RobotEnv, flip: FlipConfig, name: str, target: tuple[float, float, float]
+def placement_target(
+    top_position: tuple[float, float, float],
+    cup_height: float,
+    release_drift: tuple[float, float],
+) -> np.ndarray:
+    """Where the held cup should go: on the measured top cup, aimed against the drift.
+
+    The top cup settles up to 1.5 cm from its planned spot, and the cup shifts a few
+    millimetres the same way each time the fingers open.
+    """
+    x, y, z = top_position
+    return np.array([x - release_drift[0], y - release_drift[1], z + cup_height])
+
+
+def horizontal_error(cup_position: np.ndarray, target: np.ndarray) -> np.ndarray:
+    """How far the cup must still move sideways to be over the target."""
+    error = target - cup_position
+    return np.array([error[0], error[1], 0.0])
+
+
+def correct_aim(
+    env: RobotEnv, flip: FlipConfig, name: str, target: np.ndarray
 ) -> None:
-    """Lower the flipped cup straight down onto the target, let go, and lift clear."""
+    """Measure the cup just above the tower, and nudge the hand until it's on target."""
+    for _ in range(AIM_ROUNDS):
+        error = horizontal_error(env.object_position(name), target)
+        if float(np.linalg.norm(error)) < AIM_TOLERANCE:
+            return
+        env.move_hand(
+            env.hand_position + error,
+            speed=flip.lower_speed,
+            keep_waist=True,
+            min_seconds=AIM_SECONDS,
+        )
+
+
+def place_flipped(
+    env: RobotEnv, flip: FlipConfig, name: str, target: np.ndarray
+) -> None:
+    """Lower the flipped cup onto the target, correct its aim, let go, and lift clear."""
     level_cup(env, name)
     offset = env.hand_position - env.object_position(name)
-    final = np.array(target) + offset + [0.0, 0.0, flip.place_clearance]
+    final = target + offset + [0.0, 0.0, flip.place_clearance]
     env.move_hand(final, speed=flip.lower_speed, keep_waist=True)
     env.advance(env.motion.settle_time)
+    correct_aim(env, flip, name, target)
     env.relax_fingers()
     env.set_fingers(flip.release_pose)
     env.advance(env.motion.settle_time)
@@ -242,8 +288,8 @@ def build_flipped_tower(
     if not is_holding(env, flipped_name):
         logger.warning("Dropped '%s' during the twist", flipped_name)
         return FlipResult(built, True, ("dropped the fourth cup in the twist",))
-    _, _, top = triangle_targets(triangle, table)
-    target = (top[0], top[1], top[2] + triangle.cup_height)
+    top_position = tuple(env.object_position(order[2]))
+    target = placement_target(top_position, triangle.cup_height, flip.release_drift)
     place_flipped(env, flip, flipped_name, target)
     env.advance(SETTLE_AFTER_BUILD)
     left, right, top_cup = (cup_pose(env, name) for name in order)

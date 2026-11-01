@@ -6,6 +6,8 @@ import pytest
 from src.simulation.cup_flip import (
     flip_failures,
     hand_rotation,
+    horizontal_error,
+    placement_target,
     rotation_between,
     slerp_rotation,
 )
@@ -82,6 +84,24 @@ def test_rotation_between_identical_directions_does_nothing() -> None:
     same = np.array([0.0, 0.0, 1.0])
 
     assert rotation_between(same, same) == pytest.approx(np.eye(3))
+
+
+def test_placement_aims_at_the_measured_top_cup_not_the_planned_spot() -> None:
+    target = placement_target((0.35, -0.29, 0.855), 0.09, (0.0, 0.0))
+
+    assert target == pytest.approx([0.35, -0.29, 0.945])
+
+
+def test_placement_aims_against_the_drift_seen_on_release() -> None:
+    target = placement_target((0.35, -0.29, 0.855), 0.09, (0.004, -0.003))
+
+    assert target == pytest.approx([0.346, -0.287, 0.945])
+
+
+def test_horizontal_error_points_from_the_cup_to_the_target_and_ignores_height() -> None:
+    error = horizontal_error(np.array([0.36, -0.30, 1.0]), np.array([0.35, -0.29, 0.9]))
+
+    assert error == pytest.approx([-0.01, 0.01, 0.0])
 
 
 @pytest.mark.integration

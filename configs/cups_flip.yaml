@@ -89,6 +89,9 @@ flip:
   hover_height: 0.26
   twist_speed: 1.0
   place_clearance: 0.004
+  # The average sideways shift when the fingers open, measured on setups 100-102, 106,
+  # 114 and 123. The hand aims the opposite way to cancel it.
+  release_drift: [0.004, -0.003]
   lower_speed: 0.03
   back_out_distance: 0.12
   lift_after_release: 0.14
