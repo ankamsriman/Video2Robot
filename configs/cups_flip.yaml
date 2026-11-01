@@ -46,7 +46,7 @@ triangle:
 
 # Reading the triangle from a video. Replace the colours using scripts/read_colors.py.
 marker:
-  center: [0.24, -0.12]
+  center: [0.64, -0.10]
   side: 0.10
   marker_id: 0
 tracking:
