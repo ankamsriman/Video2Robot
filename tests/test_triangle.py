@@ -94,6 +94,6 @@ def test_top_cup_off_to_one_side_is_not_a_triangle() -> None:
 def test_g1_builds_the_triangle_in_physics() -> None:
     from scripts.cup_trial import run_trial
 
-    result = run_trial((1, False))
+    result = run_trial((1, False, "configs/cups.yaml"))
 
     assert result["success"], result

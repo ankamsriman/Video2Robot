@@ -1,0 +1,60 @@
+# The cup triangle with the user's real table and steel glasses, as measured.
+# size[0] is the width halfway up, the average of the rim and closed-end widths.
+# The glass's mass is a guess, and it is simulated as a solid rigid shape.
+paths:
+  g1_scene: third_party/mujoco_menagerie/unitree_g1/scene_with_hands.xml
+
+scene:
+  table:
+    near_edge_x: 0.16
+    depth: 0.50
+    width: 0.80
+    top_height: 0.72
+  objects:
+    cup_a: { shape: cup, size: [0.064, 0.064, 0.115], rim_radius: 0.0365, top_radius: 0.0275, position: [0.33, -0.05], mass: 0.06, rgba: [0.92, 0.78, 0.15, 1] }
+    cup_b: { shape: cup, size: [0.064, 0.064, 0.115], rim_radius: 0.0365, top_radius: 0.0275, position: [0.33, -0.17], mass: 0.06, rgba: [0.20, 0.65, 0.25, 1] }
+    cup_c: { shape: cup, size: [0.064, 0.064, 0.115], rim_radius: 0.0365, top_radius: 0.0275, position: [0.33, -0.29], mass: 0.06, rgba: [0.80, 0.15, 0.15, 1] }
+  containers: {}
+
+motion:
+  arm: right
+  grip_height: 0.06
+  hover_height: 0.24
+  release_clearance: 0.004
+  side_gap: 0.0
+  hand_speed: 0.20
+  finger_time: 0.5
+  settle_time: 0.6
+  control_rate_hz: 25
+  finger_force_limit: 1.0
+  hand_pitch: 0.20
+  open_width: 0.10
+  grip_squeeze: 0.015
+  release_margin: 0.035
+  home_position: [0.30, -0.10, 0.98]
+
+triangle:
+  center: [0.47, -0.13]
+  cup_spacing: 0.078
+  cup_height: 0.115
+  rim_radius: 0.0365
+  top_radius: 0.0275
+  position_tolerance: 0.02
+  max_tilt_degrees: 10.0
+
+# Reading the triangle from a video. Replace the colours using scripts/read_colors.py.
+marker:
+  center: [0.64, -0.10]
+  side: 0.10
+  marker_id: 0
+tracking:
+  min_area: 150
+  area_fraction: 0.3
+  frame_stride: 3
+observer:
+  move_threshold: 0.05
+  stable_seconds: 1.0
+colors:
+  cup_a: { hue: [22, 35], min_saturation: 100, min_value: 30 }
+  cup_b: { hue: [45, 80], min_saturation: 100, min_value: 30 }
+  cup_c: { hue: [170, 8], min_saturation: 100, min_value: 30 }

@@ -1,0 +1,111 @@
+"""Build the triangle with tall, real-size glasses, measuring and correcting each placement.
+
+Taller glasses tip more easily than the short cups, so the robot levels each glass, aims
+from where the glasses really are, and opens its fingers gently before lifting away.
+"""
+
+import logging
+
+import numpy as np
+
+from src.simulation.cup_flip import horizontal_error, rotation_between
+from src.simulation.cup_task import SETTLE_AFTER_BUILD, TriangleResult, cup_pose
+from src.simulation.primitives import pick
+from src.simulation.robot_env import RobotEnv, hand_pose_for_width
+from src.simulation.scene import SceneConfig
+from src.verification.triangle import (
+    TriangleConfig,
+    triangle_failures,
+    triangle_targets,
+)
+
+LOWER_SPEED = 0.04
+AIM_ROUNDS = 3
+AIM_TOLERANCE = 0.001
+AIM_SECONDS = 1.0
+LEVEL_ROUNDS = 2
+LIFT_AFTER_RELEASE = 0.16
+LEVEL_SECONDS = 1.0
+LEVEL_SPEED = 0.3
+logger = logging.getLogger(__name__)
+
+
+def _level(env: RobotEnv, name: str) -> None:
+    """Measure how far the held glass leans, and turn the hand to make it stand straight."""
+    for _ in range(LEVEL_ROUNDS):
+        rotation = env.data.xmat[env.model.body(name).id].reshape(3, 3)
+        correction = rotation_between(rotation[:, 2], np.array([0.0, 0.0, 1.0]))
+        hand = env.data.site_xmat[env.hand_site].reshape(3, 3)
+        env.move_hand(
+            env.hand_position,
+            rotation=correction @ hand,
+            twist_speed=LEVEL_SPEED,
+            keep_waist=True,
+            min_seconds=LEVEL_SECONDS,
+        )
+
+
+def _aim(env: RobotEnv, name: str, target: np.ndarray) -> None:
+    """Measure the held glass, and nudge the hand until it's over the target."""
+    for _ in range(AIM_ROUNDS):
+        error = horizontal_error(env.object_position(name), target)
+        if float(np.linalg.norm(error)) < AIM_TOLERANCE:
+            return
+        env.move_hand(
+            env.hand_position + error,
+            speed=LOWER_SPEED,
+            keep_waist=True,
+            min_seconds=AIM_SECONDS,
+        )
+
+
+def place_glass(
+    env: RobotEnv, config: SceneConfig, name: str, target: np.ndarray
+) -> None:
+    """Carry the glass over the target, set it down accurately, and let go gently."""
+    hover = config.table.top_height + env.motion.hover_height
+    offset = env.hand_position - env.object_position(name)
+    env.move_hand(np.array([target[0] + offset[0], target[1] + offset[1], hover]))
+    env.advance(env.motion.settle_time)
+    _level(env, name)
+    _aim(env, name, target)
+    offset = env.hand_position - env.object_position(name)
+    final = target + offset + [0.0, 0.0, env.motion.release_clearance]
+    env.move_hand(final, speed=LOWER_SPEED, keep_waist=True)
+    env.advance(env.motion.settle_time)
+    _aim(env, name, target)
+    env.relax_fingers()
+    env.advance(env.motion.settle_time)
+    width = next(item.size[0] for item in config.objects if item.name == name)
+    env.set_fingers(hand_pose_for_width(width + env.motion.release_margin))
+    env.advance(env.motion.settle_time)
+    # A glass on top of the stack reaches almost to the hover height, so the hand must
+    # rise well above it, or the fingers knock it over on the way back.
+    lifted = env.hand_position + [0.0, 0.0, LIFT_AFTER_RELEASE]
+    env.move_hand(lifted, speed=LOWER_SPEED, keep_waist=True)
+
+
+def build_glass_triangle(
+    env: RobotEnv,
+    config: SceneConfig,
+    triangle: TriangleConfig,
+    order: tuple[str, str, str],
+) -> TriangleResult:
+    """Place two glasses side by side, then the third across their measured tops."""
+    table = config.table.top_height
+    targets = tuple(np.array(t) for t in triangle_targets(triangle, table))
+    picked: tuple[bool, ...] = ()
+    for index, (name, target) in enumerate(zip(order, targets, strict=True)):
+        held = pick(env, config, name)
+        picked = (*picked, held)
+        if not held:
+            logger.warning("Could not pick '%s'", name)
+            break
+        if index == 2:
+            lower = (env.object_position(order[0]) + env.object_position(order[1])) / 2
+            target = np.array([lower[0], lower[1], target[2]])
+        place_glass(env, config, name, target)
+    env.move_hand(np.array(env.motion.home_position))
+    env.advance(SETTLE_AFTER_BUILD)
+    left, right, top = (cup_pose(env, name) for name in order)
+    return TriangleResult(picked, triangle_failures(left, right, top, triangle, table))

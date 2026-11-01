@@ -33,6 +33,8 @@ class ItemConfig:
     mass: float = 0.0
     shape: str = "box"
     opening: bool = False
+    rim_radius: float = CUP_RIM_RADIUS
+    top_radius: float = CUP_TOP_RADIUS
 
 
 @dataclass(frozen=True)
@@ -61,6 +63,8 @@ def _read_items(section: Mapping[str, Mapping]) -> tuple[ItemConfig, ...]:
             mass=item.get("mass", 0.0),
             shape=item.get("shape", "box"),
             opening=item.get("opening", False),
+            rim_radius=item.get("rim_radius", CUP_RIM_RADIUS),
+            top_radius=item.get("top_radius", CUP_TOP_RADIUS),
         )
         for name, item in section.items()
     )
@@ -96,7 +100,7 @@ def cup_vertices(item: ItemConfig) -> list[float]:
     """Points of an upside-down tapered cup, wide at the bottom, centred on its height."""
     half_height = item.size[2] / 2
     width_at_grip = item.size[0] / 2
-    slope = (CUP_RIM_RADIUS - CUP_TOP_RADIUS) / item.size[2]
+    slope = (item.rim_radius - item.top_radius) / item.size[2]
     rim = width_at_grip + slope * half_height
     top = width_at_grip - slope * half_height
     angles = np.linspace(0, 2 * np.pi, CUP_FACES, endpoint=False)
@@ -130,7 +134,7 @@ def _add_cup(spec: mujoco.MjSpec, item: ItemConfig, table_top: float) -> None:
         # The cup is solid, so a dark disc on its wide end shows where the opening is.
         rim = (
             item.size[0] / 2
-            + half_height * (CUP_RIM_RADIUS - CUP_TOP_RADIUS) / item.size[2]
+            + half_height * (item.rim_radius - item.top_radius) / item.size[2]
         )
         body.add_geom(
             type=mujoco.mjtGeom.mjGEOM_CYLINDER,
@@ -234,6 +238,8 @@ def build_model(
                 item.mass,
                 item.shape,
                 item.opening,
+                item.rim_radius,
+                item.top_radius,
             ),
             config.table.top_height,
         )
