@@ -41,3 +41,13 @@ def test_a_grey_sample_is_flagged_as_hard_to_track() -> None:
 
 def test_spec_type_is_reused() -> None:
     assert isinstance(suggest_spec("lime", _patch((40, 200, 40))).spec, ColorSpec)
+
+
+def test_the_range_keeps_a_much_darker_side_of_the_same_object() -> None:
+    # A top face this bright can have a front face as dark as value 74 under overhead light.
+    bright_top = np.full((10, 10, 3), (0, 210, 210), np.uint8)
+    sample = cv2.cvtColor(bright_top, cv2.COLOR_HSV2BGR)
+
+    spec = suggest_spec("apple", sample).spec
+
+    assert spec.min_value <= 60
