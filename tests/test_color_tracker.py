@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import pytest
 
-from src.perception.color_tracker import ColorSpec, track_colors
+from src.perception.color_tracker import ColorSpec, _bottom_middle, track_colors
 
 RED = ColorSpec(name="apple", hue=(170, 10), min_saturation=80, min_value=60)
 GREEN = ColorSpec(name="lime", hue=(45, 75), min_saturation=80, min_value=60)
@@ -77,3 +77,15 @@ def test_small_specks_of_colour_are_ignored() -> None:
     tracks = _track([frame], [RED])
 
     assert tracks["apple"][0] == pytest.approx((120, 90), abs=2)
+
+
+def test_a_slightly_tilted_bottom_edge_still_reports_the_edges_middle() -> None:
+    blob = np.zeros((100, 100), dtype=np.uint8)
+    # A block from columns 20 to 59, whose bottom edge drops 2 rows towards the right.
+    for column in range(20, 60):
+        blob[30 : 60 + (column - 20) // 20, column] = 1
+
+    x, y = _bottom_middle(blob.astype(bool))
+
+    assert x == pytest.approx(39.5, abs=1.0)
+    assert y == pytest.approx(60.0, abs=1.0)

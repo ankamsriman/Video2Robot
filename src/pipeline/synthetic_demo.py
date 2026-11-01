@@ -32,8 +32,9 @@ Position = tuple[float, float]
 class CameraView:
     """Where the phone would be: on the far side of the table, looking down."""
 
-    lookat: tuple[float, float, float] = (0.38, -0.10, 0.72)
-    distance: float = 1.1
+    lookat: tuple[float, float, float] = (0.42, -0.10, 0.72)
+    # About 75 cm above the tabletop, which a short tripod on a second table can reach.
+    distance: float = 0.98
     azimuth: float = 180.0
     elevation: float = -50.0
 

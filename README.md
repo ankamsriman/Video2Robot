@@ -37,6 +37,7 @@ All of these use hand-written plans unless stated, and a **pinned pelvis**.
 | Rendered video through to robot | Correct plan, task completed |
 | Cup triangle (separate `cup-task` branch), new setups | 30 of 30 |
 | Cup triangle with 15 g cups | 10 of 10 |
+| Flipped fourth cup (separate `cup-flip` branch), new setups | 50 of 50, up from 21 of 24 after an aiming fix; the motion is programmed, not learned from video |
 | Real phone video | **Not yet run** |
 
 ### Does the retry loop help?
