@@ -3,7 +3,7 @@
 The table's rough corners are hand-picked once per video, in data/labels/<video>_table.json.
 The video decides the order and the positions. The robot's grip is its own, and programmed.
 
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2.mov
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_right_take1.mov
 """
 
 import argparse

@@ -1,6 +1,6 @@
 """Put the person's video beside the robot's, ending together, with labels.
 
-PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/task2.mov
+PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/task2_triangle_right_take1.mov
 """
 
 import argparse
