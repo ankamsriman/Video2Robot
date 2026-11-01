@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 
 CLEANUP_KERNEL = np.ones((3, 3), np.uint8)
+GAP_KERNEL = np.ones((7, 7), np.uint8)
 HUE_MAX = 180
 SATURATION_VALUE_MAX = 255
 
@@ -33,7 +34,9 @@ def _mask(hsv: np.ndarray, spec: ColorSpec) -> np.ndarray:
         lower = np.array([start, spec.min_saturation, spec.min_value], np.uint8)
         upper = np.array([end, SATURATION_VALUE_MAX, SATURATION_VALUE_MAX], np.uint8)
         combined = cv2.bitwise_or(combined, cv2.inRange(hsv, lower, upper))
-    return cv2.morphologyEx(combined, cv2.MORPH_OPEN, CLEANUP_KERNEL)
+    # Remove specks, then join parts of one object split by noise or glare.
+    opened = cv2.morphologyEx(combined, cv2.MORPH_OPEN, CLEANUP_KERNEL)
+    return cv2.morphologyEx(opened, cv2.MORPH_CLOSE, GAP_KERNEL)
 
 
 def _largest_blob(mask: np.ndarray) -> tuple[np.ndarray, int] | None:

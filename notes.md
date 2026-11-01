@@ -860,6 +860,8 @@ speed
 
 **A tracker bug that this view exposed:** to find an object's base, the tracker used only the lowest row of its coloured pixels. If the bottom edge looks slightly tilted, that row is a single corner, so the position jumped sideways by up to half a block. A test block read 3 cm off. It now uses the lowest pixel in every column.
 
+**Testing against rough footage:** I damaged a rendered video the way a phone might, with dim light, noise, compression, colour-tinted light, shake and a passing hand. Blocks jumped about 7 cm off. A block's shaded front face fell below the tracker's brightness limit, so it mistook the top face for the whole block, and the colour-picking tool made this worse by setting the limit from the bright top face. With the limit lowered and colours picked per video, the worst block in those conditions was about 1.2 cm off, and trays about 1 cm. These are imitations of phone problems, so real footage can still surprise us. Two limits remain: moving the camera about 60 pixels during a video gave a wrong plan, and at 35% brightness a block was still 7 cm off. So keep the phone still and the room bright.
+
 It only works for points **on the table's surface**. A point at the top of an object would be misplaced, so we use the point where the object touches the table.
 
 **Pass if** the median error is 3 cm or less against a ruler.

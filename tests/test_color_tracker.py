@@ -89,3 +89,15 @@ def test_a_slightly_tilted_bottom_edge_still_reports_the_edges_middle() -> None:
 
     assert x == pytest.approx(39.5, abs=1.0)
     assert y == pytest.approx(60.0, abs=1.0)
+
+
+def test_a_thin_gap_does_not_split_an_object_from_its_bottom_edge() -> None:
+    # A bright top and a darker front, with a 2-pixel line of glare between them.
+    frame = np.full((240, 320, 3), 170, np.uint8)
+    cv2.rectangle(frame, (100, 50), (140, 90), RED_BGR, -1)
+    cv2.rectangle(frame, (100, 93), (140, 110), (15, 15, 105), -1)
+    spec = ColorSpec("apple", (170, 10), 80, 40)
+
+    tracks = _track([frame], [spec])
+
+    assert tracks["apple"][0] == pytest.approx((120, 110), abs=2)

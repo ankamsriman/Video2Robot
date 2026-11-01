@@ -11,7 +11,10 @@ HUE_MARGIN = 8
 HUE_RANGE = 180
 MIN_COLORFUL_SATURATION = 60
 MINIMUM_SATURATION = 40
-MINIMUM_VALUE = 40
+MINIMUM_VALUE = 30
+# An object's shaded side can be far darker than the lit part the sample comes from. It
+# must stay in range, as the tracker finds the object's base from that side's bottom edge.
+VALUE_FRACTION = 4
 
 
 @dataclass(frozen=True)
@@ -37,6 +40,6 @@ def suggest_spec(name: str, sample: np.ndarray) -> SuggestedColor:
         name=name,
         hue=((hue - HUE_MARGIN) % HUE_RANGE, (hue + HUE_MARGIN) % HUE_RANGE),
         min_saturation=max(MINIMUM_SATURATION, saturation // 2),
-        min_value=max(MINIMUM_VALUE, value // 2),
+        min_value=max(MINIMUM_VALUE, value // VALUE_FRACTION),
     )
     return SuggestedColor(spec, saturation >= MIN_COLORFUL_SATURATION)

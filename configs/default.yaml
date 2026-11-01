@@ -67,10 +67,10 @@ observer:
 # Replace them for real objects using scripts/read_colors.py. An item left out here stays
 # at its position in `scene`. A hue range whose start exceeds its end wraps round, as red does.
 colors:
-  apple: { hue: [170, 8], min_saturation: 100, min_value: 60 }
-  lemon: { hue: [22, 35], min_saturation: 100, min_value: 60 }
-  lime: { hue: [45, 80], min_saturation: 100, min_value: 60 }
-  box: { hue: [9, 20], min_saturation: 100, min_value: 60 }
+  apple: { hue: [170, 8], min_saturation: 100, min_value: 30 }
+  lemon: { hue: [22, 35], min_saturation: 100, min_value: 30 }
+  lime: { hue: [45, 80], min_saturation: 100, min_value: 30 }
+  box: { hue: [9, 20], min_saturation: 100, min_value: 30 }
 
 # Table area the arm can work in, from the measured reach. Forward (x) and sideways (y).
 work_area:
