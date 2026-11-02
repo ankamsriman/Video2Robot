@@ -102,8 +102,8 @@ flip:
 # Where the flip works, measured in simulator positions. x runs away from the robot, y is
 # the robot's left. Filled in from tests over the table; see README.
 flip_areas:
-  starts: { x: [0.28, 0.35], y: [-0.10, 0.14] }
-  flipped: { x: [0.40, 0.44], y: [-0.12, 0.06] }
-  tower: { x: [0.36, 0.37], y: [-0.31, -0.29] }
-  glass_gap: 0.11
+  starts: { x: [0.29, 0.35], y: [-0.10, 0.14] }
+  flipped: { x: [0.39, 0.44], y: [-0.10, 0.04] }
+  tower: { x: [0.36, 0.43], y: [-0.31, -0.26] }
+  glass_gap: 0.12
   tower_gap: 0.15

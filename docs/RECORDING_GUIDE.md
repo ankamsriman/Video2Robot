@@ -1,5 +1,27 @@
 # Recording guide
 
+**The current tasks use steel glasses, with no marker.** Follow "Steel glasses" below. The rest of this guide is for the earlier block-sorting pipeline, which needs a printed marker.
+
+## Steel glasses (Task 2 and Task 3)
+
+Keep the same camera and table position during a take, with all four table corners and the whole tower in view. Keep your hands off the table for 2 seconds at the start and end. Hold each glass from the side, around the middle, so its bright top stays visible, and move your hand clear after letting go.
+
+Everything below is measured to where each glass's **base** stands: from your edge of the table, and sideways from its centre line.
+
+| Task | Stage | Area | Picture |
+|---|---|---|---|
+| **Task 2** | Glasses start | 12-34 cm from your edge, from the centre line to 30 cm on your right | `recording_views/task2_initial_area.png` |
+| **Task 2** | Tower middle ends | 24-36 cm from your edge, 12 cm on your left to 24 cm on your right | `recording_views/task2_final_area.png` |
+| **Task 3** | Glasses 1, 2, 3 start | 13-19 cm from your edge, 14 cm on your left to 10 cm on your right | `recording_views/task3_initial_area.png` |
+| **Task 3** | Glass to flip starts | 23-28 cm from your edge, 4 cm on your left to 10 cm on your right | `recording_views/task3_initial_area.png` |
+| **Task 3** | Tower middle ends | 20-27 cm from your edge, 26-31 cm on your right | `recording_views/task3_final_area.png` |
+
+Keep glasses at least 12 cm apart, centre to centre, and at least 15 cm from where the tower will stand. In the phone's view, left and right are swapped, because the phone faces you.
+
+Name takes like `data/raw/task2_triangle_right_take2.mov`, and add `data/labels/<name>_table.json` with four rough table corners: near-left, near-right, far-right and far-left as they appear in the picture.
+
+# Block sorting (earlier work)
+
 This is how to film the demo videos for Phase 2. The layout matches what the simulated G1 can actually reach, so please keep to these measurements.
 
 ## What you need

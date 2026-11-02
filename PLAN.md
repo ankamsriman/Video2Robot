@@ -22,18 +22,19 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 
 ## Status
 
-| Phase | Name | Target (if deadline is Nov 4) | Status |
-|---|---|---|---|
-| 0 | Foundations | Sat Oct 31 | Done |
-| 1 | Digital twin, G1 runs a hand-written plan | Sat Oct 31 - Sun Nov 1 | Done, 20 of 20 on new setups, pinned pelvis |
-| 2 | Keyframes | Sun Nov 1 | Next, needs videos |
-| 3 | Perception and real positions | Sun Nov 1 | Not started |
-| 4 | Planner | Mon Nov 2 | Not started |
-| 5 | Closed loop | Mon Nov 2 - Tue Nov 3 | Not started |
-| 6 | Benchmark | Tue Nov 3 | Not started |
-| 7 | Demo and submission | Wed Nov 4 | Not started |
+**The plan changed on Mon Nov 2, once real videos arrived:** steel glasses, no marker, Task 2 and Task 3, with real-video sorting dropped. Phases 2-6 below describe the original sorting plan, and were replaced as follows.
 
-If time runs short, cut in this order: stretch, viewer polish, free-base standing, hybrid comparison depth. The closed loop and an honest demo video stay.
+| Step | Status |
+|---|---|
+| Real video to positions, without a marker | Done on 2 right-side videos; 2 old left-side videos are refused |
+| Task 2, video to robot | Done, one video, one run |
+| Task 3, video to robot | Done only by moving positions to fit, by up to 33 cm |
+| What the robot can do, in chosen areas | 28 of 30 for each task, pinned pelvis |
+| Test on new takes kept apart from tuning | **Waiting for recordings** |
+| README, data sample, example videos | Done, data note needs the user's details |
+| Repo public and submission | **The user decides** |
+
+Options B and C (retargeting the hand, training a policy) were not started. A works, but it isn't yet proven on new takes.
 
 ## Phase 0: Foundations (done)
 - [x] Git, `.gitignore`, virtual environment, dependencies, setup script

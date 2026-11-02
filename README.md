@@ -1,80 +1,101 @@
 # Video2Robot
 
-Record yourself doing a tabletop task on a phone, and a simulated Unitree G1 humanoid repeats it in MuJoCo.
+I film myself stacking steel glasses at a table. A simulated Unitree G1 watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo.
 
-> **Draft.** Real-video results are still to come. Numbers below come from simulation and a rendered test video.
+| Task | From my video | Video |
+|---|---|---|
+| **Task 2:** three glasses into a triangle | Order and positions come from the video, and the robot builds it | [Side by side](docs/videos/task2_video_to_robot.mp4) |
+| **Task 3:** a fourth glass flipped and stood on top, opening up | The video gives the order and the flip, but positions had to be **moved to fit the robot** | [Side by side](docs/videos/task3_video_to_robot_fitted.mp4) |
 
-## How it works
+## How my recording drives the robot
 
 ```
-phone video
-  -> follow each coloured object, and convert pixels to table positions using a printed marker
-  -> work out the plan: which objects moved, where to, and in what order
-  -> G1 carries out the plan in physics, gripping by friction
-  -> measure the result against the video's plan, and retry failed steps
+phone video of steel glasses, no marker
+  -> table corners and measured table size: pixels to real centimetres
+  -> bright closed glass tops: where each glass rests, and when it leaves
+  -> pair each spot left with the next new spot: the moves, in order
+  -> dark top on the finished tower: the last glass was flipped
+  -> G1 repeats it in physics, gripping by friction
+  -> check where the glasses really ended up
 ```
 
-Your recording decides the task, the order and the starting positions. Without it, the robot has nothing to do.
+Without the recording, the robot has no starting positions, no tower position and no order. The robot's grip and flip are programmed, and they aren't learned from my hand. So it copies **what happened and where**, not how my hand moved.
 
 ## Design choices
 
 | Choice | Why |
 |---|---|
-| Copy what happens to objects, not the hand | A human hand and a G1 hand differ, so the outcome is what transfers. This idea comes from Robot See Robot Do |
-| Positions decide the plan | SeeDo reports spatial errors as its largest failure source. Measuring positions avoids asking a model to judge them |
-| Fixed camera and printed marker | Gives real distances from one cheap phone |
-| Judge results by where objects end up | The goal is the object's position, not the hand's |
-| Retry from measured failures | Gives a number to improve: attempts to success |
+| Copy what happens to objects, not the hand | A human hand and the G1's three-finger hand differ, so the outcome is what transfers. This idea comes from Robot See Robot Do |
+| Identical steel glasses | Colour tracking can't tell them apart, so a glass is identified by where it rests. The order survives, with no labels and no large vision model |
+| The table as the ruler, no marker | Its four corners and measured size (80 x 50 cm) give real distances and the camera's position, with nothing printed |
+| Correct for height | A glass top is 11.5 cm above the table, and a stacked one 23 cm. Without this, positions come out several centimetres wrong |
+| Refuse rather than guess | If a video doesn't read as a clear task, the system says so and stops |
+| Report every compromise | Positions moved to fit the robot are listed in cm, in each report and on screen |
 
 ## Results
 
-All of these use hand-written plans unless stated, and a **pinned pelvis**.
+Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches my measured size (11.5 cm tall, 7.3 cm rim, 5.5 cm closed end), but it is solid and rigid, and its weight is a guess.
 
-| Test | Result |
+### From my real videos
+
+| Video | Reading | Robot |
+|---|---|---|
+| `task2_triangle_right_take1` | 3 of 3 moves in order | **Built the triangle**, tower 0.2 cm from where the video put it |
+| `task3_flip_right_take1`, positions moved to fit | 4 of 4 moves in order, flip recognised | **Built and flipped**, after moving glass starts by 9-33 cm and the tower by 31 cm |
+| `task3_flip_right_take1`, exact positions | As above | **Failed:** dropped the fourth glass in the twist |
+| `task2_triangle_left_take1`, my first video | **Refused:** 8 spots found, 6 expected | Not run. An earlier version read it, and the robot couldn't reach a glass on its far left |
+| `task3_flip_left_take1` | **Refused:** the order didn't make sense | Not run |
+
+**How far to trust this.** The Task 2 success is one run of one video, and I set the reading's settings while looking at these same videos. It hasn't been tested on a take kept apart from tuning.
+
+### Checks on the reading
+
+I have no ground-truth ruler measurements for the glass positions, so these are indirect:
+
+| Check | Result |
 |---|---|
-| Sorting 3 blocks, new random setups (shifts of up to 3 cm) | 20 of 20 |
-| Rendered video to plan: block position error | 0.1-0.7 cm |
-| Rendered video through to robot | Correct plan, task completed |
-| Cup triangle (separate `cup-task` branch), new setups | 30 of 30 |
-| Cup triangle with 15 g cups | 10 of 10 |
-| Flipped fourth cup (separate `cup-flip` branch), new setups | 50 of 50, up from 21 of 24 after an aiming fix; the motion is programmed, not learned from video |
-| Real phone video | **Not yet run** |
+| The two lower glasses touch, so their tops should be about one rim width apart (7.3 cm) | 7.9 cm and 8.2 cm |
+| The top glass should sit midway between the lower two | 0.2 cm and 0.7 cm off |
+| The table's corners, fitted back into the picture | About 1 pixel |
+| Hand-picked rough corners moved by up to 20 pixels, 25 tries each | Positions change by 0.11 cm at most |
+| Flip check at the tower's top | Correct for both right-side videos: dark opening in Task 3, none in Task 2 |
 
-### Does the retry loop help?
+### What the robot can physically do
 
-Harder conditions, 8 setups each. Three attempts is perfect for this 3-step plan.
+These tests use simulator positions and a hand-written plan, so they don't involve video. Each one is a full task from random spots. The areas were narrowed using earlier failures, then retested on fresh random setups.
 
-| Condition | One attempt per step | Up to 4 per step | Attempts when it worked |
-|---|---|---|---|
-| Normal, heavy or rotated objects | 8 of 8 | 8 of 8 | 3.0 |
-| Weak grip, 0.3 N m | 0 of 8 | 8 of 8 | 6.0 |
-| Very weak grip, 0.15 N m | 0 of 8 | 8 of 8 | 9.0 |
-| Slippery, friction 0.3 | 6 of 8 | 6 of 8 | 3.0 |
-| Very slippery, friction 0.15 | 5 of 8 | 6 of 8 | 3.2 |
-| Placed object knocked out | Recovered by the final recheck | 8 of 8 | 4.0 |
+| Task | Setups | Result |
+|---|---|---|
+| Triangle, across the table's right side | Glasses 12-34 cm from the edge, centre to 30 cm right. Tower middle 24-36 cm from the edge, 12 cm left to 24 cm right | **28 of 30** |
+| Flipped tower | Glasses 13-19 cm from the edge, 14 cm left to 10 cm right. Glass to flip 23-28 cm from the edge, 4 cm left to 10 cm right. Tower middle 20-27 cm from the edge, 26-31 cm right | **28 of 30** |
 
-Retries help when an adjustment fixes the cause, as with grip force, and barely help with slipperiness. These are conditions I chose to cause failures, not real-world measurements.
+Run these with `scripts/area_test.py`. Raw results and earlier area tests are in `docs/results/`. Pictures of the areas are in `docs/recording_views/`.
 
 ## What worked and what didn't
 
 **Worked:**
-- Gripping by friction alone, with no shortcut attaching objects to the hand.
-- Cup stacking, which went better than expected.
+- Following identical steel glasses by their bright tops, including recovering the order.
+- Using the table in place of a printed marker.
+- Gripping by friction alone, with no shortcut attaching the glass to the hand.
 
 **Didn't work, or needed fixing:**
-- **First full test: 0 of 10.** The arm snapped to its pose at the start and knocked objects over. `notes.md` section 10 lists every bug found.
-- **Unpinned robot:** it balances while idle but falls over reaching far, so the pelvis stays pinned.
-- **My first retry test showed nothing:** "grip harder" didn't change the force limit, and "slippery" had no effect in the simulator. Both were fixed before the results above.
-- **My first check was wrong:** it reported 16 of 20, but in all 4 failures the object had landed correctly. It was judging the hand. I changed it and retested on new setups.
+- **Real glasses broke the robot's motion, 0 of 6.** A motion that passed 30 of 30 with smaller cups failed with my taller glass. It needed a higher grip, levelling, measured aiming, and a higher lift, because the hand was knocking over the finished tower on its way back.
+- **The robot can't flip anywhere.** Across its chest, its right arm hits its own body. Flipping elsewhere and carrying the glass across made the arm swing and destroy the tower, so I removed that.
+- **Hand tracking wasn't useful for timing.** It found the hand in 93-96% of frames, but picked 13 moments for 6 real ones and 17 for 8. The system uses glass rest spots instead.
+- **Colour tracking and the marker were built first, then dropped for the real task.** My glasses are steel, and I recorded without a marker.
+- **Grip retries didn't help.** Rerunning the failed setups with up to three grip attempts rescued none of them, so I removed the retries. The working fix was keeping glasses 15 cm from the tower.
+- **My table estimate exposed a measuring error.** I was first told 80 x 60 cm, and the video said otherwise. The real size was 80 x 50.
 
 ## Limitations
 
-- Pelvis pinned, so there's no real balance.
-- Three-finger Dex3 hand, not the five-finger hands the challenge suggests.
-- Simplified objects: simple rigid shapes, and cups heavier than real paper cups.
-- The simulated robot knows exact object positions once the scene is built.
-- Colour tracking needs distinct, matte colours.
-- Reach is limited, as the arm is short and the pelvis is fixed. In single runs, 70 of 78 positions passed: object starts worked from 26-38 cm forward and 42 cm right to 14 cm left, and the far right corner failed.
+- **Pinned pelvis:** no balance, and reach is limited.
+- **Three-finger Dex3 hand,** not a five-finger hand.
+- **Programmed motion:** no learned policy, and no retargeting of my hand's motion.
+- **Task 3 from video needs positions moved,** unless it is recorded inside the flip's working area.
+- **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
+- **Hand-picked corners:** someone picks four rough table corners once per video, in `data/labels/`. A real fit then sharpens them.
+- **Narrow conditions:** a fixed camera, a dark table, bright closed tops and fairly bright light. The settings suit my setup and would probably need changing elsewhere.
+- **Flip check:** tested only on my two right-side videos.
 
 ## Running it
 
@@ -82,22 +103,27 @@ Retries help when an adjustment fixes the cause, as with grip force, and barely 
 scripts/setup.sh
 .venv/bin/pytest
 
-# Watch the robot do the task live
-PYTHONPATH=. .venv/bin/mjpython scripts/watch_live.py
+# A sample video, through to the robot. Output goes to data/processed/
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_right_take1.mp4
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task3_flip_right_take1.mp4 --fit-to-robot
 
-# Run on a video, after setting colours in configs/default.yaml
-PYTHONPATH=. .venv/bin/python main.py --video data/raw/video_01.mp4 --step full
+# Put the person and robot side by side, after running the matching line above
+PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/task2_triangle_right_take1.mp4
+
+# Test what the robot can do, with random setups
+PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123
+PYTHONPATH=. .venv/bin/python scripts/area_test.py flip --trials 30 --seed 9101
 ```
 
-Runs on a laptop CPU. It was developed on an M1 Mac with 8 GB of RAM.
+It runs on a laptop CPU, and was developed on an M1 Mac with 8 GB of RAM. A robot run takes a few minutes.
 
 ## Data
 
-To be added: recorded video samples in `data/raw/sample/`, and how they were collected. `docs/RECORDING_GUIDE.md` is the collection procedure.
+Samples are in `data/raw/sample/`, with the collection note in [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md). The samples are compressed, at full size, to keep the repo small. They read within 0.1 cm of the originals.
 
-## More detail
+## Earlier work in this repo
 
-`notes.md` explains the whole project from scratch.
+Before recording the steel glasses, I built a marker-and-colour pipeline for sorting blocks into trays. It's still here and tested on rendered video and in simulation (20 of 20 new setups, with a retry loop), but I never ran it on real footage, because I didn't have the blocks. `notes.md` explains the whole project from scratch.
 
 ## Credits
 

@@ -72,3 +72,25 @@ You asked to see what the phone should see. Drawing it showed the blocks hiding 
 
 ### Still open
 AI model and API key, GPU access, and which tasks to show in the final submission.
+
+---
+
+## Session 2: Monday, Nov 2, 2026
+
+### Your real videos changed the plan
+You recorded steel glasses with no marker, and with no blocks to hand. That ruled out colours and the marker, so the system now follows bright glass tops and uses the table as its ruler.
+
+| Decision | Why |
+|---|---|
+| Tasks are Task 2 and Task 3, and real-video sorting is dropped | You have no blocks, and the triangle already meets the hard rule |
+| No marker | The table's corners and measured size do the job |
+| Identical glasses kept | Rest spots keep the order, so no SAM 2 or coloured cups |
+| Task 3 can be recorded again in the flip's area | The arm can't flip across its own chest |
+| Positions may be moved to fit the robot, always reported | Better than hiding the limit or giving up on Task 3 |
+| Repo stays private until you say so | Your choice |
+
+### Corrections along the way
+The table was first given as 80 x 60 cm, and the video's shape disagreed, so it was measured again at 80 x 50. A rim of 1.3 cm was a voice-typing slip for 7.3 cm. I also wrongly said the robot always grips from the side: it grips the first three glasses from above.
+
+### Still open
+New takes, kept apart from tuning, to test the reading. The data collection note needs your details. You decide when the repo goes public.
