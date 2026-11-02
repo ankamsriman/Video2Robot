@@ -95,5 +95,8 @@ The table was first given as 80 x 60 cm, and the video's shape disagreed, so it 
 ### Task 3 no longer needs moved glasses
 The fitted layout showed your video was a mirror image of what the right arm wants. So the robot now picks its arm and standing spot from the layout. On your original video, that's the left arm, 23.4 cm right of the table's middle, with no glass moved. The robot starts at that spot, since it can't walk.
 
+### Task 2 uses the nearest arm
+You asked for the robot to choose the arm nearest the glasses. It helps on left-side layouts (24 of 30 against 10 of 30), and not on layouts spread across both sides (20 against 21 of 30). It keeps one arm for the whole task.
+
 ### Still open
 New takes, kept apart from tuning, to test the reading. The data collection note needs your details. You decide when the repo goes public.

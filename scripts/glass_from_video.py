@@ -7,6 +7,7 @@ The table's rough corners are hand-picked in data/labels: <video>_table.json for
 or current_setup_table.json for every new take from a camera that hasn't moved.
 The video decides the order and the positions. The robot's grip and flip are programmed.
 
+For a triangle, the robot stays mid-table and uses the arm nearest the glasses and tower.
 For a flip, the video's layout also decides which arm works and where the robot stands along
 the table, so no glass has to move. --fit-to-robot instead keeps the robot in the middle, using
 its right arm, and moves the glasses to suit it. --stay-in-middle keeps the robot there and
@@ -39,7 +40,13 @@ from src.perception.glass_tracker import (
     search_masks,
 )
 from src.perception.table_view import refine_corners, table_view
-from src.reasoning.fit_layout import Area, FittedLayout, fit_flip_layout, plan_stand
+from src.reasoning.fit_layout import (
+    Area,
+    FittedLayout,
+    fit_flip_layout,
+    nearest_arm,
+    plan_stand,
+)
 from src.simulation.cup_flip import build_flipped_tower, flip_for_arm, load_flip_config
 from src.simulation.glass_task import build_glass_triangle
 from src.simulation.recorder import video_recorder
@@ -188,6 +195,9 @@ def run_robot(
             "tower_used": _rounded(tower),
         }
     arm = motion.arm
+    if not is_flip:
+        arm = nearest_arm(starts, tower)
+        report["arm"] = arm
     if is_flip and not (fit or stay_in_middle):
         stand = plan_stand(starts, tower, _flip_tower_reach(), table_width / 2)
         arm = stand.arm

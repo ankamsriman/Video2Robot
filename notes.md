@@ -1082,6 +1082,8 @@ For your video, that means the left arm, standing 23.4 cm to the right of the ta
 
 Two older options remain. `--fit-to-robot` keeps the robot in the middle and moves the glasses, by up to 33 cm for your video. `--stay-in-middle` moves nothing, and fails by dropping the glass in the twist.
 
+**Which arm Task 2 uses.** `nearest_arm` in `src/reasoning/fit_layout.py` averages how far the glasses and tower are to the robot's side. If the average is on its left, it uses the left arm for the whole task. Tested on identical layouts, this gave 24 of 30 against 10 of 30 for the right arm alone when everything was on the left. It made no real difference, 20 against 21 of 30, when the layout was spread across both sides. The failures there are mostly knocked or tilted glasses, not glasses out of reach, so swapping arms wouldn't obviously fix them.
+
 **How the working areas were found.** For each task, I tried wide areas, looked at which setups failed, narrowed the areas, and then tested fresh random setups, which gave 28 of 30 for each task. These runs use exact simulator positions, and that's important: they show what the arm can do, not how well a video is read. Your new takes haven't been tested yet, and until they are, each task's video result rests on a single video. See `docs/results/`.
 
 **How the standing spot was tested.** `scripts/stand_test.py` wobbled your Task 3 layout by up to 1.5 cm, and passed 19 of 21. Random layouts along the whole table first passed only 12 of 30. Most failures were grips on a fourth glass close to the near edge. Requiring it to start at least 23 cm back gave 25 of 30 on new random layouts.

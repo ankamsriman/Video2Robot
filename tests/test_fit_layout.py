@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from src.reasoning.fit_layout import Area, fit_flip_layout, plan_stand
+from src.reasoning.fit_layout import Area, fit_flip_layout, nearest_arm, plan_stand
 
 STARTS = Area((0.30, 0.40), (-0.14, 0.14))
 FLIP = Area((0.40, 0.46), (-0.10, 0.05))
@@ -86,3 +86,22 @@ def test_the_robot_never_stands_past_the_end_of_the_table() -> None:
     far = _stand([(0.32, -0.3), (0.35, -0.3), (0.34, -0.3), (0.44, -0.3)], (0.40, -0.15))
     assert far.arm == "left"
     assert far.robot_y == pytest.approx(-0.40)
+
+
+def _nearest(starts: list[tuple[float, float]], tower: tuple[float, float]) -> str:
+    return nearest_arm([np.array(s) for s in starts], np.array(tower))
+
+
+def test_glasses_mostly_on_the_robots_right_use_the_right_arm() -> None:
+    # The layout read from task2_triangle_right_take1.
+    starts = [(0.331, -0.252), (0.437, -0.167), (0.513, -0.263)]
+
+    assert _nearest(starts, (0.427, 0.046)) == "right"
+
+
+def test_glasses_mostly_on_the_robots_left_use_the_left_arm() -> None:
+    assert _nearest([(0.33, 0.25), (0.44, 0.17), (0.51, 0.26)], (0.43, -0.05)) == "left"
+
+
+def test_an_exactly_centred_layout_keeps_the_usual_right_arm() -> None:
+    assert _nearest([(0.33, 0.1), (0.44, -0.1), (0.51, 0.0)], (0.43, 0.0)) == "right"

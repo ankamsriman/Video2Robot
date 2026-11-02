@@ -1,0 +1,811 @@
+[
+  {
+    "starts": [
+      [
+        26.869592694997007,
+        35.39771896300803
+      ],
+      [
+        16.941900429111087,
+        26.266478520133255
+      ],
+      [
+        16.35885206708829,
+        4.287846309984216
+      ]
+    ],
+    "tower": [
+      29.597973812224936,
+      -8.451021242509855
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is not standing on the table",
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        17.78148829804873,
+        30.188148397089908
+      ],
+      [
+        15.488033535022607,
+        1.1361253067634056
+      ],
+      [
+        32.102274155567464,
+        7.686567520509787
+      ]
+    ],
+    "tower": [
+      33.195689579137664,
+      -9.699188568677307
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        14.993484326407566,
+        10.497140225922337
+      ],
+      [
+        22.27832378365779,
+        27.880211522640987
+      ],
+      [
+        30.16937869734722,
+        17.540744997936972
+      ]
+    ],
+    "tower": [
+      33.13791811594497,
+      -8.756504882480618
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        29.085849252265206,
+        16.06876754851487
+      ],
+      [
+        20.468801112720257,
+        27.076850546692178
+      ],
+      [
+        13.042056647644523,
+        14.190640487346455
+      ]
+    ],
+    "tower": [
+      26.825670064456904,
+      -5.44674975428047
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        31.63418539695221,
+        34.4155961914855
+      ],
+      [
+        15.434465954948141,
+        24.459786493503177
+      ],
+      [
+        17.86445118595983,
+        3.845726956099207
+      ]
+    ],
+    "tower": [
+      31.216415125951215,
+      -8.6876672246717
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is not standing on the table",
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        25.85484708971205,
+        23.015745949606153
+      ],
+      [
+        19.18143177066245,
+        33.324956084883055
+      ],
+      [
+        33.9122862019544,
+        9.93338498741562
+      ]
+    ],
+    "tower": [
+      28.943617960517848,
+      -11.964254316647033
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "lower cups are not side by side"
+    ]
+  },
+  {
+    "starts": [
+      [
+        31.06795712201184,
+        9.722338824587514
+      ],
+      [
+        33.042852514553275,
+        25.126144211653408
+      ],
+      [
+        17.953225716851506,
+        23.491097964555802
+      ]
+    ],
+    "tower": [
+      31.85037443551422,
+      -11.163095860812287
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        30.756114332602262,
+        0.5257002452321133
+      ],
+      [
+        12.81817767742141,
+        28.583589954929842
+      ],
+      [
+        28.592884261852923,
+        35.31052392242737
+      ]
+    ],
+    "tower": [
+      25.209883391427326,
+      18.218455653473175
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is tilted",
+      "left cup is not standing on the table",
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        24.89212868644004,
+        27.151092360855873
+      ],
+      [
+        25.007237128982272,
+        3.746578797705768
+      ],
+      [
+        12.445505688844946,
+        20.607929528392518
+      ]
+    ],
+    "tower": [
+      35.19726931631725,
+      15.831990593501402
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        24.115303308643625,
+        32.15256663566668
+      ],
+      [
+        12.595146330762097,
+        1.2612627316455791
+      ],
+      [
+        32.1745111723845,
+        15.229499401889674
+      ]
+    ],
+    "tower": [
+      25.182521535616814,
+      -7.754866186261259
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        33.149888560648705,
+        14.08849944409134
+      ],
+      [
+        13.1190167537763,
+        8.562963458646708
+      ],
+      [
+        17.225278182395577,
+        31.02100759009253
+      ]
+    ],
+    "tower": [
+      29.476141239053288,
+      -8.277781337259682
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        12.31690800692043,
+        27.775674295392616
+      ],
+      [
+        27.47748674918108,
+        32.649363204418
+      ],
+      [
+        25.02711026136927,
+        20.437534417833668
+      ]
+    ],
+    "tower": [
+      33.49077774700421,
+      7.3263502537395215
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        14.431612821346247,
+        20.298503731100784
+      ],
+      [
+        25.955938397798704,
+        33.358722926441466
+      ],
+      [
+        18.77550030132393,
+        3.593302932498915
+      ]
+    ],
+    "tower": [
+      33.63297611739819,
+      12.656856530188406
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        12.286911094177926,
+        16.329447111036508
+      ],
+      [
+        21.40948366460532,
+        1.0257395888897234
+      ],
+      [
+        17.394292527627222,
+        32.914711343604786
+      ]
+    ],
+    "tower": [
+      34.330394671080036,
+      -10.254452285782003
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        12.732554963305548,
+        31.807296453475796
+      ],
+      [
+        25.082018314129936,
+        31.214743899534316
+      ],
+      [
+        13.140337441402824,
+        19.75124612020941
+      ]
+    ],
+    "tower": [
+      33.745340914286444,
+      7.9238430314112
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        29.19061266015616,
+        33.820699754136896
+      ],
+      [
+        12.718569169665887,
+        8.173433230687557
+      ],
+      [
+        29.216128245082327,
+        18.053696470752264
+      ]
+    ],
+    "tower": [
+      30.784485584016426,
+      -11.167436535719295
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is tilted",
+      "left cup is not standing on the table",
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        16.123395479477487,
+        2.8843821699658263
+      ],
+      [
+        27.704784031047943,
+        27.10705748177628
+      ],
+      [
+        28.98080032192599,
+        10.557268776714604
+      ]
+    ],
+    "tower": [
+      34.90007732550759,
+      -10.729386326816156
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        12.034327876804708,
+        11.067833435997708
+      ],
+      [
+        21.74049653560947,
+        33.31842188511444
+      ],
+      [
+        25.364264141604327,
+        21.809654821641793
+      ]
+    ],
+    "tower": [
+      25.103524247053848,
+      -7.583032661049305
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        16.40843215656997,
+        1.3088729326563313
+      ],
+      [
+        33.934645697093465,
+        26.352054735771937
+      ],
+      [
+        15.356800729162973,
+        28.10056965330174
+      ]
+    ],
+    "tower": [
+      31.422343146720227,
+      -8.228801424490348
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        27.966471936374546,
+        30.029151101355062
+      ],
+      [
+        23.385837572655156,
+        16.022802853135218
+      ],
+      [
+        13.771724079730957,
+        1.6706895735036316
+      ]
+    ],
+    "tower": [
+      34.926138639478566,
+      2.230743963161614
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        31.791126233523908,
+        32.20505918144679
+      ],
+      [
+        12.440631168036631,
+        31.190369187608756
+      ],
+      [
+        12.97237742793681,
+        3.9372224960264117
+      ]
+    ],
+    "tower": [
+      24.93970391526389,
+      16.232306586581593
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is tilted",
+      "left cup is not standing on the table",
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        17.962475423973526,
+        1.9370433523036468
+      ],
+      [
+        12.796708015644436,
+        16.003637159822215
+      ],
+      [
+        17.67630735286164,
+        30.726406190865774
+      ]
+    ],
+    "tower": [
+      33.001215098061245,
+      19.766173269956056
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        16.253063911687352,
+        13.40153491496951
+      ],
+      [
+        31.940455105884,
+        19.325333251834568
+      ],
+      [
+        25.262266511386976,
+        4.182295615989738
+      ]
+    ],
+    "tower": [
+      33.149309932367245,
+      -11.657470716950666
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        33.85460608656917,
+        13.168965656489359
+      ],
+      [
+        29.328440121319794,
+        25.36744175108225
+      ],
+      [
+        16.662514678434967,
+        15.472627947184932
+      ]
+    ],
+    "tower": [
+      30.910362802290365,
+      -4.400610631534464
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        28.283241239706992,
+        19.642237057310187
+      ],
+      [
+        12.617522769700113,
+        7.099989228897757
+      ],
+      [
+        16.08974642071991,
+        26.770973852719717
+      ]
+    ],
+    "tower": [
+      35.66031115760966,
+      -1.3544378627548102
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        12.263832201290157,
+        26.753613923190624
+      ],
+      [
+        20.947124885215445,
+        14.483903291064648
+      ],
+      [
+        14.855676630431654,
+        3.740938871578439
+      ]
+    ],
+    "tower": [
+      33.099252549693894,
+      -7.571817724155737
+    ],
+    "arm": "right",
+    "success": true,
+    "failures": []
+  },
+  {
+    "starts": [
+      [
+        12.141914233137424,
+        11.982170664666434
+      ],
+      [
+        22.417980228363607,
+        5.728938392178346
+      ],
+      [
+        25.02636103458429,
+        21.994604919113623
+      ]
+    ],
+    "tower": [
+      34.95743337241559,
+      -6.9868155153868186
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        14.551415978478834,
+        17.65353227606689
+      ],
+      [
+        29.114872635961362,
+        22.755328040039025
+      ],
+      [
+        32.54349318545019,
+        34.84299176269792
+      ]
+    ],
+    "tower": [
+      32.11153304099222,
+      2.0647156905292343
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is tilted",
+      "left cup is not standing on the table",
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        28.223815941326038,
+        31.635775062208673
+      ],
+      [
+        31.002654390068052,
+        14.041451799558477
+      ],
+      [
+        18.268476720965527,
+        6.213785989015699
+      ]
+    ],
+    "tower": [
+      26.44975917933855,
+      -10.085314193351897
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is tilted",
+      "left cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  },
+  {
+    "starts": [
+      [
+        33.56625177577463,
+        25.723778981207
+      ],
+      [
+        18.699421809600633,
+        35.952157447600406
+      ],
+      [
+        20.43221335917868,
+        6.317428983334208
+      ]
+    ],
+    "tower": [
+      34.801996677812525,
+      -5.628440188656787
+    ],
+    "arm": "right",
+    "success": false,
+    "failures": [
+      "left cup is tilted",
+      "left cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ]
+  }
+]

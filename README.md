@@ -34,6 +34,7 @@ Without the recording, the robot has no starting positions, no tower position, n
 | Identical steel glasses | Colour tracking can't tell them apart, so a glass is identified by where it rests. The order survives, with no labels and no large vision model |
 | The table as the ruler, no marker | Its four corners and measured size (80 x 50 cm) give real distances and the camera's position, with nothing printed |
 | Correct for height | A glass top is 11.5 cm above the table, and a stacked one 23 cm. Without this, positions come out several centimetres wrong |
+| Task 2 uses the nearest arm | Glasses and tower on the robot's left suit its left arm far better: 24 of 30 against 10 of 30 |
 | Let the layout choose the arm and standing spot | The flip only works towards the arm's own side. My video had the tower on the robot's left, which the right arm can't do, so the left arm mirrors the right arm's settings and no glass has to move |
 | Refuse rather than guess | If a video doesn't read as a clear task, the system says so and stops |
 | Report every compromise | The arm and standing spot go in each report, and any glass moved to fit is listed in cm |
@@ -75,7 +76,16 @@ These tests use simulator positions and a hand-written plan, so they don't invol
 | Triangle, across the table's right side | Glasses 12-34 cm from the edge, centre to 30 cm right. Tower middle 24-36 cm from the edge, 12 cm left to 24 cm right | **28 of 30** |
 | Flipped tower, robot mid-table, right arm | Glasses 13-19 cm from the edge, 14 cm left to 10 cm right. Glass to flip 23-28 cm from the edge, 4 cm left to 10 cm right. Tower middle 20-27 cm from the edge, 26-31 cm right | **28 of 30** |
 
-Letting the robot choose its arm and standing spot, with no glass moved:
+Letting Task 2 choose the nearest arm, compared on identical layouts:
+
+| Layouts | Nearest arm | Right arm only |
+|---|---|---|
+| Glasses 12-34 cm from the edge, up to 36 cm left. Tower middle 24-36 cm from the edge, 12 cm right to 24 cm left | **24 of 30** | 10 of 30 |
+| Glasses and tower spread across both sides | 20 of 30 | 21 of 30 |
+
+So it helps when everything is on one side, and doesn't when the layout is spread across both. The robot keeps one arm for the whole task, and doesn't swap arms between glasses. On my Task 2 video it picks the right arm.
+
+Letting Task 3 choose its arm and standing spot, with no glass moved:
 
 | Test | Setups | Result |
 |---|---|---|
@@ -127,6 +137,7 @@ PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/ta
 # Test what the robot can do, with random setups
 PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123
 PYTHONPATH=. .venv/bin/python scripts/area_test.py flip --trials 30 --seed 9101
+PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --spread left --arm nearest --trials 30 --seed 8600
 PYTHONPATH=. .venv/bin/python scripts/stand_test.py video --trials 21 --seed 7100
 PYTHONPATH=. .venv/bin/python scripts/stand_test.py wide --trials 30 --seed 7300
 ```

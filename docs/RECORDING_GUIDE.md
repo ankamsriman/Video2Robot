@@ -18,6 +18,8 @@ Everything below is measured to where each glass's **base** stands: from your ed
 
 Keep glasses at least 12 cm apart, centre to centre, and at least 15 cm from where the tower will stand. In the phone's view, left and right are swapped, because the phone faces you.
 
+**Task 2 can now also be recorded on the robot's left,** because it uses the nearest arm. It passed 24 of 30 there, against 28 of 30 for the areas above: glasses 12-34 cm from your edge and up to 36 cm on your left, with the tower middle 24-36 cm from your edge, from 12 cm on your right to 24 cm on your left. Keep all the glasses on one side, because layouts spread across both sides passed only 20 of 30.
+
 **Task 3 now has a freer option,** because the robot chooses its arm and where it stands. It passed 25 of 30 random layouts, against 28 of 30 for the areas above:
 
 - Glasses 1, 2, 3: 13-33 cm from your edge, grouped within about 20 cm side to side.

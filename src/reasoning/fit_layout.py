@@ -42,6 +42,12 @@ class StandPlan:
     robot_y: float
 
 
+def nearest_arm(starts: Sequence[np.ndarray], tower: np.ndarray) -> str:
+    """The arm on the side where the glasses and the tower mostly are. y is the robot's left."""
+    sideways = float(np.mean([*(start[1] for start in starts), tower[1]]))
+    return "left" if sideways > 0.0 else "right"
+
+
 def plan_stand(
     starts: Sequence[np.ndarray],
     tower: np.ndarray,

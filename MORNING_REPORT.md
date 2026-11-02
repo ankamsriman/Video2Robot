@@ -9,6 +9,7 @@
 | **Task 2 from your video** | Built the triangle, tower 0.2 cm from the video's spot | One video, one run, settings tuned on it |
 | **Task 3 from your video** | Built and flipped, tower 0.5 cm from the video's spot, no glass moved | One video, one run. Left arm, robot starts 23.4 cm right of the table's middle |
 | **Task 3, robot kept mid-table** | **Failed**, dropped in the twist | Why the arm and standing spot are chosen |
+| **Task 2, nearest arm** | 24 of 30 against 10 of 30 for the right arm, on left-side layouts | No gain when spread across both sides, 20 against 21 of 30 |
 | **Task 3 layout, wobbled up to 1.5 cm** | 19 of 21 | Exact simulator positions, pinned pelvis |
 | **Random layouts, robot chooses** | 25 of 30 | Glass to flip 23-33 cm from your edge. 12 of 30 without that rule |
 | **Flip recognised from video** | Correct on your 2 right-side videos | Only those 2 tested |
