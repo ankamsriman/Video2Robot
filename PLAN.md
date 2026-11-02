@@ -32,7 +32,7 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | Task 2 nearest arm | 24 of 30 against 10 of 30 on left-side layouts; 20 against 21 of 30 when spread across both sides |
 | Choosing arm and standing spot | 19 of 21 on the video's layout wobbled; 25 of 30 on random layouts |
 | What the robot can do, in chosen areas | 28 of 30 for each task, pinned pelvis |
-| Test on new takes kept apart from tuning | Task 3: **0 of 6.** One more video in a tested layout is pending |
+| Test on new takes kept apart from tuning | Task 3: **0 of 6** in varied layouts. In a chosen layout, 1 of 2 (take 9; 3 of 6 when nudged) |
 | README, data sample, example videos | Done, data note needs the user's details |
 | Repo public and submission | **The user decides** |
 

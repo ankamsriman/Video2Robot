@@ -10,10 +10,11 @@
 | `task3_flip_right_take1` | Triangle, then a fourth glass flipped and placed opening up | 45 s | My right side of the table |
 | `task2_triangle_take2` to `take8`, and `task2_triangle_check` | Triangle, eight takes in different layouts, camera moved slightly from take 1 | 17-24 s | Various, including both sides |
 | `task3_flip_take2` to `take7` | Flipped tower, six takes in different layouts, same camera as the Task 2 takes above | 23-34 s | Various, including both sides |
+| `task3_flip_take8`, `take9` | Flipped tower, in a layout chosen to suit the robot | 29-30 s | My right side of the table |
 | `old_left_side/task2_triangle_left_take1` | Triangle | 25 s | My left side |
 | `old_left_side/task3_flip_left_take1` | Flipped tower | 32 s | My left side |
 
-Samples of the first two, and of `task2_triangle_take5`, are in `data/raw/sample/`. They are compressed `.mp4` copies of the originals, at full size.
+Samples of the first two, and of `task2_triangle_take5` and `task3_flip_take9`, are in `data/raw/sample/`. They are compressed `.mp4` copies of the originals, at full size.
 
 ## Setup
 

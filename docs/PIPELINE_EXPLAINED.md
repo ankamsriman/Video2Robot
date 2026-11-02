@@ -525,7 +525,7 @@ The robot didn't learn its movements from watching your hand. In fact, the pipel
 
 Before I added the rule for an unseen top glass, 0 of these 8 succeeded. After it, 2 of 8 did. I wrote that rule after seeing these videos, so **they aren't a fair test of it.**
 
-**Six later Task 3 videos were a fair test,** run with nothing changed, in varied layouts. **None succeeded:** three were refused, and the robot failed the other three. The README lists each one.
+**Six later Task 3 videos were a fair test,** run with nothing changed, in varied layouts. **None succeeded:** three were refused, and the robot failed the other three. The README lists each one. In a layout chosen to suit the robot, take 8 was refused and take 9 succeeded, though that layout passed only 3 of 6 simulator runs when nudged.
 
 **Other limits to be honest about:**
 

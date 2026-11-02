@@ -107,5 +107,8 @@ You recorded eight takes. The reader accepted 2 and the robot failed both, so no
 ### Six new Task 3 takes
 You recorded six Task 3 takes in different layouts, and I ran them with nothing changed. None succeeded: the reader refused three, and the robot failed the other three. Updating the table's corners changed no result. We agreed the order: one more Task 3 video, make the submission safe, then improve Task 2 with your two-arm idea and a better reader.
 
+### Task 3 works on a new video
+Take 8 was refused, and the glass to flip was too far for the robot. Take 9 succeeded with nothing changed: left arm, tower 0.4 cm off. It's one run of a chosen layout, and that layout passed only 3 of 6 simulator runs when nudged.
+
 ### Still open
-One more Task 3 video in a tested layout. The data collection note needs your details. You decide when the repo goes public.
+Improve Task 2 with the two-arm idea and a better reader. The data collection note needs your details. You decide when the repo goes public.
