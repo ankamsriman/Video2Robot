@@ -3,7 +3,8 @@
 Works for the triangle (three glasses) and the flipped tower (a fourth glass on top, with
 its opening up). The kind of task comes from what the video shows.
 
-The table's rough corners are hand-picked once per video, in data/labels/<video>_table.json.
+The table's rough corners are hand-picked in data/labels: <video>_table.json for one video,
+or current_setup_table.json for every new take from a camera that hasn't moved.
 The video decides the order and the positions. The robot's grip and flip are programmed.
 
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_right_take1.mov
@@ -41,6 +42,8 @@ from src.simulation.robot_env import RobotEnv, load_motion_config
 from src.simulation.scene import ROOT, SceneConfig, build_model, load_scene_config
 from src.verification.triangle import load_triangle_config
 
+LABELS = ROOT / "data/labels"
+CURRENT_SETUP = "current_setup_table.json"
 CONFIG_PATH = ROOT / "configs/cups_real.yaml"
 FLIP_CONFIG_PATH = ROOT / "configs/flip_real.yaml"
 BACKGROUND_SAMPLES = 40
@@ -65,10 +68,23 @@ def _background(capture: cv2.VideoCapture) -> np.ndarray:
     return np.median(np.stack(frames), axis=0).astype(np.uint8)
 
 
+def rough_corners(video: Path, labels: Path = LABELS) -> np.ndarray:
+    """A video's own hand-picked corners, or else those of the current camera setup.
+
+    New takes from a camera that hasn't moved share a table position, so they need no new
+    corners. The edges are always fitted again from each video.
+    """
+    for name in (f"{video.stem}_table.json", CURRENT_SETUP):
+        path = labels / name
+        if path.exists():
+            corners = json.loads(path.read_text())["rough_corners"]
+            return np.array(corners, dtype=float)
+    raise VideoReadError(f"No table corners for {video.name} in {labels}")
+
+
 def read_video(video: Path, config: GlassVideoConfig) -> tuple[TriangleDemo, bool]:
     """Return what the video shows, and whether it shows a flipped fourth glass."""
-    labels = ROOT / "data/labels" / f"{video.stem}_table.json"
-    rough = np.array(json.loads(labels.read_text())["rough_corners"], dtype=float)
+    rough = rough_corners(video)
     capture = cv2.VideoCapture(str(video))
     if not capture.isOpened():
         raise VideoReadError(f"Could not open video: {video}")

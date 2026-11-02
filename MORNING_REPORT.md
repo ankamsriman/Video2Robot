@@ -23,9 +23,10 @@
 
 1. **Record 2 new Task 2 takes,** the fresh test. Areas are in `docs/recording_views/task2_initial_area.png` and `task2_final_area.png`.
 2. **Record 1 new Task 3 take,** so the robot can use your real positions. Areas are in `task3_initial_area.png` and `task3_final_area.png`.
-3. **Add 4 rough table corners per new video,** or tell me and I'll do it.
-4. **Fill in `docs/DATA_COLLECTION.md`:** the lines marked "to confirm".
-5. **Tell me when to make the repo public,** then submit before Wed 4 Nov, 23:59 IST.
+3. **Fill in `docs/DATA_COLLECTION.md`:** the lines marked "to confirm".
+4. **Tell me when to make the repo public,** then submit before Wed 4 Nov, 23:59 IST.
+
+**Keep the camera and table where they were for `task2_triangle_right_take1`.** New takes then need no table corners. If either has moved, tell me, and I'll update the corners.
 
 ## Before going public
 

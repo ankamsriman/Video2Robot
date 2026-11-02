@@ -18,7 +18,7 @@ Everything below is measured to where each glass's **base** stands: from your ed
 
 Keep glasses at least 12 cm apart, centre to centre, and at least 15 cm from where the tower will stand. In the phone's view, left and right are swapped, because the phone faces you.
 
-Name takes like `data/raw/task2_triangle_right_take2.mov`, and add `data/labels/<name>_table.json` with four rough table corners: near-left, near-right, far-right and far-left as they appear in the picture.
+Name takes like `data/raw/task2_triangle_right_take2.mov`. If the camera and table haven't moved, that's all. If they have, update `data/labels/current_setup_table.json` with four rough table corners: near-left, near-right, far-right and far-left as they appear in the picture.
 
 # Block sorting (earlier work)
 

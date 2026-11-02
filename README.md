@@ -2,10 +2,14 @@
 
 I film myself stacking steel glasses at a table. A simulated Unitree G1 watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo.
 
+![Task 2: my video beside the robot, at the end of the task](docs/videos/task2_final.jpg)
+
 | Task | From my video | Video |
 |---|---|---|
 | **Task 2:** three glasses into a triangle | Order and positions come from the video, and the robot builds it | [Side by side](docs/videos/task2_video_to_robot.mp4) |
 | **Task 3:** a fourth glass flipped and stood on top, opening up | The video gives the order and the flip, but positions had to be **moved to fit the robot** | [Side by side](docs/videos/task3_video_to_robot_fitted.mp4) |
+
+![Task 3: my video beside the robot, with positions moved to fit](docs/videos/task3_final.jpg)
 
 ## How my recording drives the robot
 
@@ -93,7 +97,7 @@ Run these with `scripts/area_test.py`. Raw results and earlier area tests are in
 - **Programmed motion:** no learned policy, and no retargeting of my hand's motion.
 - **Task 3 from video needs positions moved,** unless it is recorded inside the flip's working area.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
-- **Hand-picked corners:** someone picks four rough table corners once per video, in `data/labels/`. A real fit then sharpens them.
+- **Hand-picked corners:** someone picks four rough table corners once per camera position, in `data/labels/`. A fit to each video's table edges then sharpens them.
 - **Narrow conditions:** a fixed camera, a dark table, bright closed tops and fairly bright light. The settings suit my setup and would probably need changing elsewhere.
 - **Flip check:** tested only on my two right-side videos.
 
