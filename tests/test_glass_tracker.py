@@ -39,6 +39,7 @@ CONFIG = GlassVideoConfig(
     min_run_seconds=1.0,
     min_run_density=0.15,
     max_top_offset=0.03,
+    max_lower_spacing=0.12,
     opening_radius=0.025,
     max_opening_brightness=110,
 )
@@ -262,4 +263,49 @@ def test_the_wrong_number_of_spots_is_refused() -> None:
     view = table_view(_corners(), WIDTH, DEPTH, SIZE)
 
     with pytest.raises(VideoReadError, match="Expected 6"):
-        read_triangle(_triangle_spots()[:5], view, 30.0, CONFIG)
+        read_triangle(_triangle_spots()[:4], view, 30.0, CONFIG)
+
+
+def test_a_top_glass_lost_against_the_floor_is_worked_out_from_the_others() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+
+    demo = read_triangle(_triangle_spots()[:5], view, 30.0, CONFIG)
+
+    assert not demo.top_seen
+    assert demo.top_offset is None
+    assert len(demo.starts) == 3
+    assert np.allclose(demo.tower_center, (0.27, 0.44), atol=0.004)
+    assert np.allclose(demo.ends[2], demo.tower_center)
+
+
+def test_a_seen_top_glass_is_reported_as_seen() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+
+    assert read_triangle(_triangle_spots(), view, 30.0, CONFIG).top_seen
+
+
+def test_a_lost_start_is_refused_when_the_top_glass_was_seen() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    spots = _triangle_spots()
+    spots = [*spots[:2], *spots[3:5], replace(spots[5], last=700)]
+
+    with pytest.raises(VideoReadError, match="Expected 6"):
+        read_triangle(spots, view, 30.0, CONFIG)
+
+
+def test_lower_glasses_too_far_apart_with_no_top_seen_are_refused() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    spots = _triangle_spots()[:5]
+    spots[4] = _spot(0.27, 0.20, CONFIG.glass_height, 500, 880)
+
+    with pytest.raises(VideoReadError, match="Expected 6"):
+        read_triangle(spots, view, 30.0, CONFIG)
+
+
+def test_a_glass_still_standing_at_the_end_with_no_top_seen_is_refused() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    spots = _triangle_spots()[:5]
+    spots[2] = replace(spots[2], last=880)
+
+    with pytest.raises(VideoReadError, match="Expected 6"):
+        read_triangle(spots, view, 30.0, CONFIG)

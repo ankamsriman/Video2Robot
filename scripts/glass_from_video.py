@@ -183,7 +183,10 @@ def run_robot(
         "starts_from_video": [_rounded(s) for s in starts],
         "tower_from_video": _rounded(tower),
         "lower_spacing_in_video_cm": round(demo.lower_spacing * 100, 1),
-        "top_glass_offset_in_video_cm": round(demo.top_offset * 100, 1),
+        "top_glass_seen_in_video": demo.top_seen,
+        "top_glass_offset_in_video_cm": (
+            round(demo.top_offset * 100, 1) if demo.top_seen else None
+        ),
     }
     if fit:
         fitted = _fit(starts, tower)

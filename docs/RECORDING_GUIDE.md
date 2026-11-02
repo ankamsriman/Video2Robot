@@ -27,6 +27,8 @@ Keep glasses at least 12 cm apart, centre to centre, and at least 15 cm from whe
 - Tower middle: 20-27 cm from your edge, and 18-40 cm to either side of the group's middle.
 - Glasses at least 9 cm apart, and at least 15 cm from the tower. Everything at least 5 cm from the table's ends.
 
+**What helps the reader see the glasses.** It follows bright tops, and it can miss dull ones or ones seen against a bright floor. Of eight later takes, four were refused because a starting glass was missed. So keep hands off the table for 3 seconds at the start, keep starting glasses at least 20 cm from your edge, stand behind the tower when placing the top glass, and stay there for 5 seconds at the end. Keep glasses within about 32 cm of your edge: the robot's hand knocked a neighbour reaching for one at 37 cm.
+
 Name takes like `data/raw/task2_triangle_right_take2.mov`. If the camera and table haven't moved, that's all. If they have, update `data/labels/current_setup_table.json` with four rough table corners: near-left, near-right, far-right and far-left as they appear in the picture.
 
 # Block sorting (earlier work)

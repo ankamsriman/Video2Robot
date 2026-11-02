@@ -42,6 +42,7 @@ class GlassVideoConfig:
     min_run_seconds: float
     min_run_density: float
     max_top_offset: float
+    max_lower_spacing: float
     opening_radius: float
     max_opening_brightness: float
 
@@ -64,7 +65,11 @@ class TriangleDemo:
     starts: tuple[np.ndarray, ...]
     ends: tuple[np.ndarray, np.ndarray, np.ndarray]
     moved_at: tuple[float, ...]
-    top_offset: float
+    top_offset: float | None
+
+    @property
+    def top_seen(self) -> bool:
+        return self.top_offset is not None
 
     @property
     def tower_center(self) -> np.ndarray:
@@ -226,10 +231,49 @@ def _read_moves(
     )
 
 
+def _read_with_top_unseen(
+    spots: Sequence[Spot], view: TableView, fps: float, config: GlassVideoConfig
+) -> TriangleDemo | None:
+    """Work out a triangle whose top glass was never seen, or None if it isn't clearly one.
+
+    A top seen against the bright floor doesn't stand out, so it can be missed. The third
+    glass must be on top if all three starts were left, two glasses stand side by side at
+    the end, and no spot sits over those two. A spot that does means a start was missed.
+    """
+    height = config.glass_height
+    latest = max(spot.last for spot in spots)
+    near_end = latest - config.run_gap_seconds * fps
+    lower = sorted((s for s in spots if s.last >= near_end), key=lambda spot: spot.first)
+    starts = sorted((s for s in spots if s.last < near_end), key=lambda spot: spot.last)
+    if len(lower) != 2 or len(starts) != GLASSES_IN_TRIANGLE:
+        return None
+    ends = tuple(view.position((s.x, s.y), height) for s in lower)
+    if np.linalg.norm(ends[0] - ends[1]) > config.max_lower_spacing:
+        return None
+    middle = (ends[0] + ends[1]) / 2
+    for spot in starts:
+        raised = view.position((spot.x, spot.y), 2 * height)
+        if np.linalg.norm(raised - middle) <= config.max_top_offset:
+            return None
+    for start, end in zip(starts, lower, strict=False):
+        if start.last > end.first:
+            return None
+    return TriangleDemo(
+        tuple(view.position((s.x, s.y), height) for s in starts),
+        (ends[0], ends[1], middle),
+        tuple(s.last / fps for s in starts),
+        None,
+    )
+
+
 def read_triangle(
     spots: Sequence[Spot], view: TableView, fps: float, config: GlassVideoConfig
 ) -> TriangleDemo:
     """Read a video of three glasses built into a triangle."""
+    if len(spots) == SPOTS_IN_TRIANGLE - 1:
+        demo = _read_with_top_unseen(spots, view, fps, config)
+        if demo is not None:
+            return demo
     if len(spots) != SPOTS_IN_TRIANGLE:
         raise VideoReadError(
             f"Expected {SPOTS_IN_TRIANGLE} resting spots for a triangle, found {len(spots)}"

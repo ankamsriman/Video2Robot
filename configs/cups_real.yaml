@@ -78,5 +78,6 @@ real_video:
   min_run_seconds: 1.0
   min_run_density: 0.15
   max_top_offset: 0.03
+  max_lower_spacing: 0.12
   opening_radius: 0.025
   max_opening_brightness: 110

@@ -98,5 +98,8 @@ The fitted layout showed your video was a mirror image of what the right arm wan
 ### Task 2 uses the nearest arm
 You asked for the robot to choose the arm nearest the glasses. It helps on left-side layouts (24 of 30 against 10 of 30), and not on layouts spread across both sides (20 against 21 of 30). It keeps one arm for the whole task.
 
+### Eight new Task 2 takes
+You recorded eight takes. The reader accepted 2 and the robot failed both, so none succeeded. I added a rule that works out an unseen top glass from the other glasses, and takes 2 and 5 then succeeded with the left arm. The rule came after seeing these videos, so they aren't a fair test of it. Takes 3, 4, 7 and 8 are still refused because a starting glass is missed. Take 4 and take 6 are mixed layouts one arm can't do, so they suit your two-arm idea.
+
 ### Still open
-New takes, kept apart from tuning, to test the reading. The data collection note needs your details. You decide when the repo goes public.
+A new take, kept apart from tuning, to test the reading. The data collection note needs your details. You decide when the repo goes public.

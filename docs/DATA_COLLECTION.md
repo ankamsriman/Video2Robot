@@ -8,6 +8,7 @@
 |---|---|---|---|
 | `task2_triangle_right_take1` | Three glasses built into a triangle | 29 s | My right side of the table |
 | `task3_flip_right_take1` | Triangle, then a fourth glass flipped and placed opening up | 45 s | My right side of the table |
+| `task2_triangle_take2` to `take8`, and `task2_triangle_check` | Triangle, eight takes in different layouts, camera moved slightly from take 1 | 17-24 s | Various, including both sides |
 | `old_left_side/task2_triangle_left_take1` | Triangle | 25 s | My left side |
 | `old_left_side/task3_flip_left_take1` | Flipped tower | 32 s | My left side |
 
