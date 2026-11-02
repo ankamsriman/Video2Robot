@@ -1,9 +1,13 @@
-"""Read a real triangle video of steel glasses, and have the G1 repeat it in simulation.
+"""Read a real video of steel glasses, and have the G1 repeat it in simulation.
+
+Works for the triangle (three glasses) and the flipped tower (a fourth glass on top, with
+its opening up). The kind of task comes from what the video shows.
 
 The table's rough corners are hand-picked once per video, in data/labels/<video>_table.json.
-The video decides the order and the positions. The robot's grip is its own, and programmed.
+The video decides the order and the positions. The robot's grip and flip are programmed.
 
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_right_take1.mov
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task3_flip_right_take1.mov --fit-to-robot
 """
 
 import argparse
@@ -17,15 +21,20 @@ import numpy as np
 import yaml
 
 from src.perception.glass_tracker import (
+    SPOTS_IN_FLIP,
     GlassVideoConfig,
     TriangleDemo,
     VideoReadError,
     find_tops,
+    opening_faces_up,
+    read_flip,
     read_triangle,
     rest_spots,
     search_masks,
 )
 from src.perception.table_view import refine_corners, table_view
+from src.reasoning.fit_layout import Area, FittedLayout, fit_flip_layout
+from src.simulation.cup_flip import build_flipped_tower, load_flip_config
 from src.simulation.glass_task import build_glass_triangle
 from src.simulation.recorder import video_recorder
 from src.simulation.robot_env import RobotEnv, load_motion_config
@@ -33,8 +42,11 @@ from src.simulation.scene import ROOT, SceneConfig, build_model, load_scene_conf
 from src.verification.triangle import load_triangle_config
 
 CONFIG_PATH = ROOT / "configs/cups_real.yaml"
+FLIP_CONFIG_PATH = ROOT / "configs/flip_real.yaml"
 BACKGROUND_SAMPLES = 40
+LAST_FRAMES = 30
 GLASS_NAMES = ("cup_a", "cup_b", "cup_c")
+FLIPPED_NAME = "cup_d"
 logger = logging.getLogger("glass_from_video")
 
 
@@ -53,13 +65,15 @@ def _background(capture: cv2.VideoCapture) -> np.ndarray:
     return np.median(np.stack(frames), axis=0).astype(np.uint8)
 
 
-def read_video(video: Path, config: GlassVideoConfig) -> TriangleDemo:
+def read_video(video: Path, config: GlassVideoConfig) -> tuple[TriangleDemo, bool]:
+    """Return what the video shows, and whether it shows a flipped fourth glass."""
     labels = ROOT / "data/labels" / f"{video.stem}_table.json"
     rough = np.array(json.loads(labels.read_text())["rough_corners"], dtype=float)
     capture = cv2.VideoCapture(str(video))
     if not capture.isOpened():
         raise VideoReadError(f"Could not open video: {video}")
     fps = capture.get(cv2.CAP_PROP_FPS)
+    count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     size = (
         int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
         int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
@@ -68,53 +82,108 @@ def read_video(video: Path, config: GlassVideoConfig) -> TriangleDemo:
     view = table_view(corners, config.table_width, config.table_depth, size)
     table, search = search_masks(size, corners, config.room_above_table)
     tops = []
+    ending = []
     while True:
         ok, frame = capture.read()
         if not ok:
             break
         tops.append(find_tops(frame, table, search, config))
+        if len(tops) > count - LAST_FRAMES:
+            ending.append(frame)
     capture.release()
-    return read_triangle(rest_spots(tops, fps, config), view, fps, config)
+    spots = rest_spots(tops, fps, view, config)
+    if len(spots) != SPOTS_IN_FLIP:
+        return read_triangle(spots, view, fps, config), False
+    demo = read_flip(spots, view, fps, config)
+    last_frame = np.median(np.stack(ending), axis=0).astype(np.uint8)
+    if not opening_faces_up(last_frame, demo, view, config):
+        raise VideoReadError(
+            "Four glasses were seen, but the tower's top doesn't look like an opening"
+        )
+    return demo, True
 
 
-def _to_robot(place: np.ndarray, scene: SceneConfig, table_width: float) -> tuple[float, float]:
+def _to_robot(place: np.ndarray, scene: SceneConfig, table_width: float) -> np.ndarray:
     """Table positions to simulator positions, with the robot at the middle of the edge."""
-    return (
-        float(place[0] + scene.table.near_edge_x),
-        float(place[1] - table_width / 2),
+    return np.array(
+        [place[0] + scene.table.near_edge_x, place[1] - table_width / 2], dtype=float
     )
 
 
-def run_robot(video: Path, demo: TriangleDemo, config: GlassVideoConfig) -> dict:
-    scene = load_scene_config(CONFIG_PATH)
-    motion = load_motion_config(CONFIG_PATH)
-    starts = {
-        name: _to_robot(place, scene, config.table_width)
-        for name, place in zip(GLASS_NAMES, demo.starts, strict=True)
-    }
-    center = _to_robot(demo.tower_center, scene, config.table_width)
-    triangle = dataclasses.replace(load_triangle_config(CONFIG_PATH), center=center)
-    model = build_model(scene, starts)
-    output = ROOT / "data/processed" / video.stem
-    output.mkdir(parents=True, exist_ok=True)
-    with video_recorder(model, output / "robot.mp4") as on_frame:
-        env = RobotEnv(model, motion, on_frame=on_frame)
-        result = build_glass_triangle(env, scene, triangle, GLASS_NAMES)
-    placed = {name: env.object_position(name).tolist() for name in GLASS_NAMES}
-    built = (np.array(placed["cup_a"])[:2] + np.array(placed["cup_b"])[:2]) / 2
-    report = {
+def _rounded(point: np.ndarray) -> list[float]:
+    return [round(float(value), 3) for value in point]
+
+
+def _fit(starts: list[np.ndarray], tower: np.ndarray) -> FittedLayout:
+    raw = yaml.safe_load(FLIP_CONFIG_PATH.read_text())["flip_areas"]
+    return fit_flip_layout(
+        starts,
+        tower,
+        Area(tuple(raw["starts"]["x"]), tuple(raw["starts"]["y"])),
+        Area(tuple(raw["flipped"]["x"]), tuple(raw["flipped"]["y"])),
+        Area(tuple(raw["tower"]["x"]), tuple(raw["tower"]["y"])),
+        raw["glass_gap"],
+        raw["tower_gap"],
+    )
+
+
+def run_robot(
+    video: Path, demo: TriangleDemo, is_flip: bool, fit: bool, config: GlassVideoConfig
+) -> dict:
+    """Place the glasses as the video shows, run the robot, and report the outcome."""
+    path = FLIP_CONFIG_PATH if is_flip else CONFIG_PATH
+    scene = load_scene_config(path)
+    motion = load_motion_config(path)
+    table_width = config.table_width
+    starts = [_to_robot(place, scene, table_width) for place in demo.starts]
+    tower = _to_robot(demo.tower_center, scene, table_width)
+    report: dict = {
         "video": video.name,
-        "success": result.success,
-        "picked": list(result.picked),
-        "failures": list(result.failures),
-        "moved_at_seconds": [round(t, 1) for t in demo.moved_at],
-        "starts_from_video": {k: [round(v, 3) for v in p] for k, p in starts.items()},
-        "tower_from_video": [round(v, 3) for v in center],
+        "task": "flipped tower" if is_flip else "triangle",
+        "moved_at_seconds": [round(float(t), 1) for t in demo.moved_at],
+        "starts_from_video": [_rounded(s) for s in starts],
+        "tower_from_video": _rounded(tower),
         "lower_spacing_in_video_cm": round(demo.lower_spacing * 100, 1),
         "top_glass_offset_in_video_cm": round(demo.top_offset * 100, 1),
-        "robot_tower_error_cm": round(float(np.linalg.norm(built - center)) * 100, 1),
     }
-    (output / "report.json").write_text(json.dumps(report, indent=2))
+    if fit:
+        fitted = _fit(starts, tower)
+        starts, tower = list(fitted.starts), fitted.tower
+        report["moved_to_fit_robot"] = {
+            "start_shifts_cm": [round(s * 100, 1) for s in fitted.start_shifts],
+            "tower_shift_cm": round(fitted.tower_shift * 100, 1),
+            "starts_used": [_rounded(s) for s in starts],
+            "tower_used": _rounded(tower),
+        }
+    names = (*GLASS_NAMES, FLIPPED_NAME) if is_flip else GLASS_NAMES
+    layout = {name: tuple(start) for name, start in zip(names, starts, strict=True)}
+    triangle = dataclasses.replace(load_triangle_config(path), center=tuple(tower))
+    model = build_model(scene, layout)
+    suffix = "_fitted" if fit else ""
+    output = ROOT / "data/processed" / video.stem
+    output.mkdir(parents=True, exist_ok=True)
+    with video_recorder(model, output / f"robot{suffix}.mp4") as on_frame:
+        env = RobotEnv(model, motion, on_frame=on_frame)
+        if is_flip:
+            result = build_flipped_tower(
+                env,
+                scene,
+                triangle,
+                load_flip_config(path),
+                GLASS_NAMES,
+                FLIPPED_NAME,
+                build_glass_triangle,
+            )
+        else:
+            result = build_glass_triangle(env, scene, triangle, GLASS_NAMES)
+    lower = [env.object_position(name)[:2] for name in GLASS_NAMES[:2]]
+    built = (lower[0] + lower[1]) / 2
+    report.update(
+        success=result.success,
+        failures=list(result.failures),
+        robot_tower_error_cm=round(float(np.linalg.norm(built - tower)) * 100, 1),
+    )
+    (output / f"report{suffix}.json").write_text(json.dumps(report, indent=2))
     return report
 
 
@@ -122,15 +191,21 @@ def main() -> None:
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--video", type=Path, required=True)
+    parser.add_argument(
+        "--fit-to-robot",
+        action="store_true",
+        help="for a flip, move positions to where the robot can flip, and report the shifts",
+    )
     args = parser.parse_args()
     raw = yaml.safe_load(CONFIG_PATH.read_text())["real_video"]
     config = GlassVideoConfig(**raw)
     try:
-        demo = read_video(args.video, config)
+        demo, is_flip = read_video(args.video, config)
     except VideoReadError as error:
         logger.error("Couldn't read %s: %s", args.video.name, error)
         raise SystemExit(1) from error
-    print(json.dumps(run_robot(args.video, demo, config), indent=2))
+    report = run_robot(args.video, demo, is_flip, args.fit_to_robot, config)
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":

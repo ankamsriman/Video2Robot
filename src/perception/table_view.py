@@ -32,6 +32,13 @@ class TableView:
         side = 1.0 if self.camera[2] > 0 else -1.0
         return (self.camera + (side * height - self.camera[2]) / ray[2] * ray)[:2]
 
+    def pixel(self, place: np.ndarray, height: float) -> np.ndarray:
+        """Where a (forward, left) position at a height above the table shows in the picture."""
+        side = 1.0 if self.camera[2] > 0 else -1.0
+        point = np.array([place[0], place[1], side * height])
+        seen = self.lens @ (self.rotation @ (point - self.camera))
+        return seen[:2] / seen[2]
+
 
 def table_view(
     corners: np.ndarray, width: float, depth: float, image_size: tuple[int, int]

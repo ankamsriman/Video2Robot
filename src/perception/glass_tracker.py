@@ -15,6 +15,8 @@ from src.perception.table_view import TableView
 OPEN_KERNEL = np.ones((5, 5), np.uint8)
 GLASSES_IN_TRIANGLE = 3
 SPOTS_IN_TRIANGLE = 2 * GLASSES_IN_TRIANGLE
+GLASSES_IN_FLIP = 4
+SPOTS_IN_FLIP = GLASSES_IN_FLIP + GLASSES_IN_TRIANGLE
 
 
 class VideoReadError(ValueError):
@@ -35,9 +37,13 @@ class GlassVideoConfig:
     min_roundness: float
     room_above_table: float
     same_spot_pixels: float
-    min_seen_seconds: float
-    min_presence: float
+    merge_pixels: float
+    run_gap_seconds: float
+    min_run_seconds: float
+    min_run_density: float
     max_top_offset: float
+    opening_radius: float
+    max_opening_brightness: float
 
 
 @dataclass(frozen=True)
@@ -55,9 +61,9 @@ class Spot:
 class TriangleDemo:
     """What the person did, in table positions, in the order they did it."""
 
-    starts: tuple[np.ndarray, np.ndarray, np.ndarray]
+    starts: tuple[np.ndarray, ...]
     ends: tuple[np.ndarray, np.ndarray, np.ndarray]
-    moved_at: tuple[float, float, float]
+    moved_at: tuple[float, ...]
     top_offset: float
 
     @property
@@ -112,60 +118,98 @@ def find_tops(
     return tops
 
 
+def _visible_runs(frames: np.ndarray, fps: float, config: GlassVideoConfig) -> list[np.ndarray]:
+    """Split the frames a top was seen in into runs, keeping the steady, lasting ones."""
+    pieces = np.split(frames, np.nonzero(np.diff(frames) > config.run_gap_seconds * fps)[0] + 1)
+    return [
+        piece
+        for piece in pieces
+        if (piece[-1] - piece[0]) / fps >= config.min_run_seconds
+        and len(piece) / (piece[-1] - piece[0] + 1) >= config.min_run_density
+    ]
+
+
+def _on_table(spot: Spot, view: TableView, config: GlassVideoConfig) -> bool:
+    """Whether a top at this pixel could belong to a glass standing on the table."""
+    forward, left = view.position((spot.x, spot.y), config.glass_height)
+    return 0.0 <= forward <= config.table_depth and 0.0 <= left <= config.table_width
+
+
+def _merge_close(spots: list[Spot], config: GlassVideoConfig) -> list[Spot]:
+    """Treat nearby spots as one glass, since two glasses can't stand that close.
+
+    A glass partly covered by another shows a top that seems to shift a little.
+    """
+    merged: list[Spot] = []
+    for spot in sorted(spots, key=lambda item: item.first):
+        for index, kept in enumerate(merged):
+            if np.hypot(spot.x - kept.x, spot.y - kept.y) < config.merge_pixels:
+                merged[index] = replace(
+                    kept,
+                    first=min(kept.first, spot.first),
+                    last=max(kept.last, spot.last),
+                    seen=kept.seen + spot.seen,
+                )
+                break
+        else:
+            merged.append(spot)
+    return merged
+
+
 def rest_spots(
     tops_per_frame: Iterable[Sequence[tuple[float, float]]],
     fps: float,
+    view: TableView,
     config: GlassVideoConfig,
 ) -> tuple[Spot, ...]:
-    """Group tops into spots, and keep those seen for long enough and steadily enough.
+    """Find where glasses stood, ignoring reflections and glasses passing through.
 
-    Reflections flicker across the table, so they are seen only now and then, while a glass
-    stays visible for most of the time it stands somewhere.
+    A reflection is off the table when treated as a glass top, or flickers too briefly. A
+    carried glass doesn't stay in one spot for long enough to count.
     """
-    spots: list[Spot] = []
+    found: list[dict] = []
     for frame, tops in enumerate(tops_per_frame):
         for x, y in tops:
-            for index, spot in enumerate(spots):
-                if np.hypot(x - spot.x, y - spot.y) < config.same_spot_pixels:
-                    count = spot.seen + 1
-                    spots[index] = replace(
-                        spot,
-                        x=(spot.x * spot.seen + x) / count,
-                        y=(spot.y * spot.seen + y) / count,
-                        last=frame,
-                        seen=count,
-                    )
+            for spot in found:
+                if np.hypot(x - spot["x"], y - spot["y"]) < config.same_spot_pixels:
+                    count = len(spot["frames"]) + 1
+                    spot["x"] = (spot["x"] * (count - 1) + x) / count
+                    spot["y"] = (spot["y"] * (count - 1) + y) / count
+                    spot["frames"].append(frame)
                     break
             else:
-                spots.append(Spot(x, y, frame, frame, 1))
+                found.append({"x": x, "y": y, "frames": [frame]})
+    spots = []
+    for spot in found:
+        runs = _visible_runs(np.array(spot["frames"]), fps, config)
+        if runs:
+            spots.append(
+                Spot(
+                    spot["x"],
+                    spot["y"],
+                    int(runs[0][0]),
+                    int(runs[-1][-1]),
+                    sum(len(run) for run in runs),
+                )
+            )
     return tuple(
         sorted(
-            (
-                spot
-                for spot in spots
-                if spot.seen >= config.min_seen_seconds * fps
-                and spot.seen / (spot.last - spot.first + 1) >= config.min_presence
-            ),
+            _merge_close([s for s in spots if _on_table(s, view, config)], config),
             key=lambda spot: spot.first,
         )
     )
 
 
-def read_triangle(
-    spots: Sequence[Spot], view: TableView, fps: float, config: GlassVideoConfig
+def _read_moves(
+    spots: Sequence[Spot], glasses: int, view: TableView, fps: float, config: GlassVideoConfig
 ) -> TriangleDemo:
     """Pair each spot a glass left with the next new spot, and check the top glass's place."""
-    if len(spots) != SPOTS_IN_TRIANGLE:
-        raise VideoReadError(
-            f"Expected {SPOTS_IN_TRIANGLE} resting spots for a triangle, found {len(spots)}"
-        )
-    starts = sorted(spots[:GLASSES_IN_TRIANGLE], key=lambda spot: spot.last)
-    ends = sorted(spots[GLASSES_IN_TRIANGLE:], key=lambda spot: spot.first)
-    for start, end in zip(starts, ends, strict=True):
+    starts = sorted(spots[:glasses], key=lambda spot: spot.last)
+    ends = sorted(spots[glasses:], key=lambda spot: spot.first)
+    for start, end in zip(starts, ends, strict=False):
         if start.last > end.first:
             raise VideoReadError("A glass seems to arrive before any glass left its spot")
     height = config.glass_height
-    start_places = tuple(view.position((s.x, s.y), height) for s in starts)
     lower = tuple(view.position((s.x, s.y), height) for s in ends[:2])
     top = view.position((ends[2].x, ends[2].y), 2 * height)
     offset = float(np.linalg.norm(top - (lower[0] + lower[1]) / 2))
@@ -175,8 +219,52 @@ def read_triangle(
             "so it doesn't look like a triangle"
         )
     return TriangleDemo(
-        start_places,  # type: ignore[arg-type]
+        tuple(view.position((s.x, s.y), height) for s in starts),
         (*lower, top),
-        tuple(s.last / fps for s in starts),  # type: ignore[arg-type]
+        tuple(s.last / fps for s in starts),
         offset,
     )
+
+
+def read_triangle(
+    spots: Sequence[Spot], view: TableView, fps: float, config: GlassVideoConfig
+) -> TriangleDemo:
+    """Read a video of three glasses built into a triangle."""
+    if len(spots) != SPOTS_IN_TRIANGLE:
+        raise VideoReadError(
+            f"Expected {SPOTS_IN_TRIANGLE} resting spots for a triangle, found {len(spots)}"
+        )
+    return _read_moves(spots, GLASSES_IN_TRIANGLE, view, fps, config)
+
+
+def read_flip(
+    spots: Sequence[Spot], view: TableView, fps: float, config: GlassVideoConfig
+) -> TriangleDemo:
+    """Read a video of a triangle, plus a fourth glass that leaves and shows no top again.
+
+    The fourth start is included in `starts`. A flipped glass has no bright top to be seen,
+    so it adds a start spot but no end spot. `opening_faces_up` then checks the tower.
+    """
+    if len(spots) != SPOTS_IN_FLIP:
+        raise VideoReadError(
+            f"Expected {SPOTS_IN_FLIP} resting spots for a flipped tower, found {len(spots)}"
+        )
+    return _read_moves(spots, GLASSES_IN_FLIP, view, fps, config)
+
+
+def opening_faces_up(
+    frame: np.ndarray, demo: TriangleDemo, view: TableView, config: GlassVideoConfig
+) -> bool:
+    """Check that the spot above the tower's third glass is dark, as an opening is.
+
+    Nothing can hide the top of a tower from the phone. A closed top there would be bright,
+    and an empty spot would show the bright floor or wall behind it.
+    """
+    rim_height = 3 * config.glass_height
+    center = view.pixel(demo.tower_center, rim_height)
+    edge = view.pixel(demo.tower_center + [0.0, config.opening_radius], rim_height)
+    width = max(int(np.linalg.norm(edge - center)), 1)
+    mask = np.zeros(frame.shape[:2], np.uint8)
+    cv2.ellipse(mask, tuple(center.astype(int)), (width, int(width * 0.7)), 0, 0, 360, 255, -1)
+    value = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)[..., 2][mask > 0]
+    return value.size > 0 and float(np.median(value)) < config.max_opening_brightness

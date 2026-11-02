@@ -41,12 +41,19 @@ def _read_all(path: Path) -> tuple[list[np.ndarray], float]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--video", type=Path, required=True)
+    parser.add_argument(
+        "--fitted",
+        action="store_true",
+        help="use the robot run whose positions were moved to fit, and say so on screen",
+    )
     args = parser.parse_args()
     output = ROOT / "data/processed" / args.video.stem
+    suffix = "_fitted" if args.fitted else ""
+    source = "order from this video, positions moved to fit" if args.fitted else "from this video"
     person, fps = _read_all(args.video)
-    robot, robot_fps = _read_all(output / "robot.mp4")
+    robot, robot_fps = _read_all(output / f"robot{suffix}.mp4")
     speed = (len(robot) / robot_fps) / (len(person) / fps)
-    robot_label = f"G1 in simulation, from this video ({speed:.1f}x speed)"
+    robot_label = f"G1 in simulation, {source} ({speed:.1f}x speed)"
     writer = None
     for index, frame in enumerate(person):
         match = robot[min(int(index * len(robot) / len(person)), len(robot) - 1)]
@@ -55,7 +62,7 @@ def main() -> None:
         )
         if writer is None:
             writer = cv2.VideoWriter(
-                str(output / "side_by_side.mp4"),
+                str(output / f"side_by_side{suffix}.mp4"),
                 cv2.VideoWriter.fourcc(*"mp4v"),
                 fps,
                 (joined.shape[1], joined.shape[0]),
@@ -63,7 +70,7 @@ def main() -> None:
         writer.write(joined)
     if writer is not None:
         writer.release()
-    print(output / "side_by_side.mp4")
+    print(output / f"side_by_side{suffix}.mp4")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 """Reading identical glasses from a video, using made-up cameras and pictures."""
 
+from dataclasses import replace
+
 import cv2
 import numpy as np
 import pytest
@@ -9,6 +11,8 @@ from src.perception.glass_tracker import (
     Spot,
     VideoReadError,
     find_tops,
+    opening_faces_up,
+    read_flip,
     read_triangle,
     rest_spots,
     search_masks,
@@ -30,9 +34,13 @@ CONFIG = GlassVideoConfig(
     min_roundness=0.45,
     room_above_table=150,
     same_spot_pixels=16,
-    min_seen_seconds=0.5,
-    min_presence=0.4,
+    merge_pixels=30,
+    run_gap_seconds=1.0,
+    min_run_seconds=1.0,
+    min_run_density=0.15,
     max_top_offset=0.03,
+    opening_radius=0.025,
+    max_opening_brightness=110,
 )
 
 
@@ -128,14 +136,89 @@ def test_a_thin_bright_reflection_is_not_a_top() -> None:
     assert tops == []
 
 
-def test_a_steady_top_is_a_spot_and_a_flicker_is_not() -> None:
-    frames = [[(100.0, 100.0)] for _ in range(60)]
-    for index in range(0, 60, 15):
-        frames[index] = [*frames[index], (500.0, 500.0)]
+def _middle_pixel() -> tuple[float, float]:
+    x, y = _project((0.25, 0.40, CONFIG.glass_height))
+    return float(x), float(y)
 
-    spots = rest_spots(frames, 30.0, CONFIG)
 
-    assert [(round(s.x), round(s.y)) for s in spots] == [(100, 100)]
+def test_a_steady_top_is_a_spot_and_a_brief_one_is_not() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    middle = _middle_pixel()
+    passing = (middle[0] + 200, middle[1])
+    frames = [[middle] for _ in range(60)]
+    for index in range(10, 20):
+        frames[index] = [*frames[index], passing]
+
+    spots = rest_spots(frames, 30.0, view, CONFIG)
+
+    assert [(round(s.x), round(s.y)) for s in spots] == [tuple(map(round, middle))]
+
+
+def test_a_reflection_off_the_table_is_not_a_spot() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    far_edge = tuple(float(v) for v in _project((DEPTH, WIDTH / 2, 0)))
+
+    assert rest_spots([[far_edge] for _ in range(90)], 30.0, view, CONFIG) == ()
+
+
+def test_a_partly_covered_top_that_shifts_is_still_one_glass() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    x, y = _middle_pixel()
+    frames = [[(x, y)] for _ in range(60)] + [[(x + 20, y)] for _ in range(60)]
+
+    spots = rest_spots(frames, 30.0, view, CONFIG)
+
+    assert len(spots) == 1
+    assert (spots[0].first, spots[0].last) == (0, 119)
+
+
+def _flip_spots() -> list[Spot]:
+    spots = _triangle_spots()
+    return [*spots[:3], _spot(0.20, 0.10, CONFIG.glass_height, 0, 800), *spots[3:]]
+
+
+def test_a_flip_video_has_a_fourth_start_and_no_fourth_end() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    spots = _flip_spots()
+    spots[-1] = replace(spots[-1], last=900)
+
+    demo = read_flip(spots, view, 30.0, CONFIG)
+
+    assert len(demo.starts) == 4
+    assert np.allclose(demo.starts[3], (0.20, 0.10), atol=0.004)
+    assert np.allclose(demo.tower_center, (0.27, 0.44), atol=0.004)
+
+
+def _flip_demo():
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    return view, read_flip(_flip_spots(), view, 30.0, CONFIG)
+
+
+def _tower_top_picture(value: int) -> np.ndarray:
+    view, demo = _flip_demo()
+    center = view.pixel(demo.tower_center, 3 * CONFIG.glass_height)
+    image = np.full((SIZE[1], SIZE[0], 3), 240, np.uint8)
+    cv2.circle(image, tuple(center.astype(int)), 60, (value, value, value), -1)
+    return image
+
+
+def test_a_dark_tower_top_means_the_opening_faces_up() -> None:
+    view, demo = _flip_demo()
+
+    assert opening_faces_up(_tower_top_picture(50), demo, view, CONFIG)
+
+
+def test_a_bright_tower_top_is_not_an_opening() -> None:
+    view, demo = _flip_demo()
+
+    assert not opening_faces_up(_tower_top_picture(225), demo, view, CONFIG)
+
+
+def test_an_empty_spot_above_the_tower_is_not_an_opening() -> None:
+    view, demo = _flip_demo()
+    empty = np.full((SIZE[1], SIZE[0], 3), 240, np.uint8)
+
+    assert not opening_faces_up(empty, demo, view, CONFIG)
 
 
 def _spot(forward: float, left: float, height: float, first: int, last: int) -> Spot:
