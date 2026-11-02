@@ -22,6 +22,16 @@ Choose objects that look clearly different, ideally in different colours, with t
 ## What the phone should see
 Pictures of the exact view for each task are in `docs/recording_views/`. They're drawn in the simulator to real measurements, and they aren't photos. `task1_start.png` and `task1_end.png` show Task 1, and Tasks 2 and 3 have the same pair.
 
+## What of you should be in the video
+Pictures are in `docs/recording_views/`, named `person_1_start.png` to `person_4_mistake.png`. They use a simple simulator model of a person, not a photo.
+
+- **In the shot:** your hand and forearm while you work, and possibly your waist at the top edge. Your head and face aren't needed, so keep them out, since this data will be public.
+- **Your hand:** one bare hand with all five fingers showing, no gloves. Hand detection needs to see the fingers.
+- **Your grip:** for blocks, from above or the sides, so the phone can still see the object's front. For steel glasses, always from the side around the middle, because glasses are followed by their bright closed tops, so those must stay uncovered.
+- **Your reach:** come from your side of the table, and never reach past the trays to the marker.
+- **Your clothes:** a plain shirt, not the same colour as any object or tray, because objects are followed by colour. Don't use a tray close to your skin colour.
+- **Nobody else in the shot.**
+
 ## Table layout
 Stand on the **robot side** of the table, where the robot would stand. Measure from that near edge, and mark the spots with tape:
 

@@ -1045,3 +1045,17 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 | **VLM** | Vision language model: images and text to text |
 | **Waypoint** | An intermediate target along a path |
 | **World model** | A model that predicts what happens next |
+
+## Your real videos and real glasses
+
+You recorded the triangle and the flip with steel glasses and no marker. Here's what those videos taught us.
+
+**Finding glasses with no colour.** Steel has almost no colour, so colour tracking can't work. But each glass's closed top is a bright circle against the dark table. A glass "rests" where a bright circle stays put, and a move is one rest ending and another starting nearby in time. In both videos this recovered every move a closed top showed, in the right order. These tests were exploratory: the settings were chosen by looking at the same two videos, so they still need trying on new takes.
+
+**Recognising a flip.** A flipped glass has no bright top. At the top of the tower, closed tops measured 80-88% bright pixels, and the opening measured 0%. This was measured at spots picked by hand, and the automatic check isn't built yet.
+
+**Using the table instead of a marker.** The table's four corners and its measured size (80 x 50 cm) can turn pixels on the table into centimetres. Glass tops sit above the table, so they need a height correction as well.
+
+**Robot test with your glass size.** The simulated glass is now 11.5 cm tall, 7.3 cm at the rim and 5.5 cm at the closed end, on an 80 x 50 cm table. The old motion failed, so the robot now grips higher, levels the glass, aims from measured positions, and lifts well clear after letting go. It built the triangle in 19 of 20 new random setups. The one failure was a glass it couldn't pick up. This test uses simulator positions and a hand-written plan, not your video. The pelvis is pinned, the glass is solid and rigid, and its weight is a guess. This work is on the `real-glasses` branch.
+
+**Video to robot, automatically.** `scripts/glass_from_video.py` on the `real-glasses` branch now reads `task2_triangle_right_take1.mov`, finds the three moves in order, converts them to table positions, and runs the robot from those positions. The robot built the triangle, with its tower 0.2 cm from where the video put it. That's one run on one video, and the settings were tuned on the same four videos, so a new take is the real test. Your first video, `old_left_side/task2_triangle_left_take1.mov`, is read correctly too, but its glasses are on the robot's left, beyond the right arm's reach, so the robot fails there. You still pick the table's rough corners by hand once per video. The robot's grip is programmed, not copied from you.
