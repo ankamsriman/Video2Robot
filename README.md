@@ -70,7 +70,7 @@ I have no ground-truth ruler measurements for the glass positions, so these are 
 |---|---|
 | The two lower glasses touch, so their tops should be about one rim width apart (7.3 cm) | 7.9 cm and 8.2 cm |
 | The top glass should sit midway between the lower two | 0.2 cm and 0.7 cm off |
-| The table's corners, fitted back into the picture | About 1 pixel |
+| The table's corners, fitted back into the picture | About 1 pixel on the first two videos. 2.5 to 5.3 pixels on later takes I checked, after the camera moved |
 | Hand-picked rough corners moved by up to 20 pixels, 25 tries each | Positions change by 0.11 cm at most |
 | Flip check at the tower's top | Correct for both right-side videos: dark opening in Task 3, none in Task 2 |
 

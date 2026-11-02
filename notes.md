@@ -4,6 +4,8 @@ These notes explain the whole project from zero. You don't need any Python or ro
 
 Throughout, **[Built]** means the code exists and has been tested. **[Planned]** means it doesn't exist yet.
 
+**To follow one video through every step, with real numbers, see [`docs/PIPELINE_EXPLAINED.md`](docs/PIPELINE_EXPLAINED.md).**
+
 ## Contents
 1. [The project in one story](#1-the-project-in-one-story)
 2. [What the challenge asks for](#2-what-the-challenge-asks-for)

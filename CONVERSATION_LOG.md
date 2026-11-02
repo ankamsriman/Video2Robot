@@ -70,6 +70,9 @@ Your idea: a fourth cup on the triangle, opening up, with the robot turning it o
 ### Picturing the recording view
 You asked to see what the phone should see. Drawing it showed the blocks hiding the marker from a 75 cm tripod, so the marker moved to the phone's end of the table. It also exposed a tracker bug that put positions up to half a block off, now fixed. Pictures are in `docs/recording_views/`.
 
+### The pipeline, explained step by step
+You asked for the whole pipeline from scratch. `docs/PIPELINE_EXPLAINED.md` follows take 5 through every step. No AI model runs in this pipeline: it uses image processing and hand-written rules. Writing it showed that the corner fit is worse on takes since the camera moved.
+
 ### Still open
 AI model and API key, GPU access, and which tasks to show in the final submission.
 
