@@ -104,5 +104,8 @@ You asked for the robot to choose the arm nearest the glasses. It helps on left-
 ### Eight new Task 2 takes
 You recorded eight takes. The reader accepted 2 and the robot failed both, so none succeeded. I added a rule that works out an unseen top glass from the other glasses, and takes 2 and 5 then succeeded with the left arm. The rule came after seeing these videos, so they aren't a fair test of it. Takes 3, 4, 7 and 8 are still refused because a starting glass is missed. Take 4 and take 6 are mixed layouts one arm can't do, so they suit your two-arm idea.
 
+### Six new Task 3 takes
+You recorded six Task 3 takes in different layouts, and I ran them with nothing changed. None succeeded: the reader refused three, and the robot failed the other three. Updating the table's corners changed no result. We agreed the order: one more Task 3 video, make the submission safe, then improve Task 2 with your two-arm idea and a better reader.
+
 ### Still open
-A new take, kept apart from tuning, to test the reading. The data collection note needs your details. You decide when the repo goes public.
+One more Task 3 video in a tested layout. The data collection note needs your details. You decide when the repo goes public.

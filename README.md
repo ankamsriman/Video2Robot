@@ -51,7 +51,7 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 | `task3_flip_right_take1` | 4 of 4 moves in order, flip recognised | **Built and flipped with no glass moved.** Left arm, robot standing 23.4 cm right of the table's middle. Tower 0.5 cm from where the video put it |
 | The same video, robot kept mid-table with its right arm | As above | **Failed:** dropped the fourth glass in the twist |
 | `task2_triangle_take2`, glasses on both sides | 3 of 3 moves. **Top glass not seen, worked out from the others** | **Built the triangle** with the left arm, tower 0.4 cm off |
-| `task2_triangle_take5`, glasses on my left | As above | **Built the triangle** with the left arm, tower 0.4 cm off |
+| `task2_triangle_take5`, glasses on my left | As above | **Built the triangle** with the left arm, tower 0.5 cm off |
 | `task2_triangle_check`, glasses on my left | 3 of 3 moves | **Failed:** the hand knocked a glass while reaching for a far one, 37 cm from my edge |
 | `task2_triangle_take6`, glasses on both sides | 3 of 3 moves | **Failed:** glasses knocked or tilted. The same layout also failed all 12 simulator runs, including a changed order and one glass moved closer |
 | `task2_triangle_take3`, `take4`, `take7`, `take8` | **Refused:** a starting glass was missed | Not run |
@@ -59,6 +59,19 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 | `task3_flip_left_take1` | **Refused:** the order didn't make sense | Not run |
 
 **Eight later Task 2 takes.** With the reader as it stood, 2 of the 8 could be read and the robot failed both, so **0 of 8 succeeded**. It missed dull glass tops, and tops against the bright floor. I then added one rule: if all three starts were left and two glasses end side by side, the third must be on top. That made 4 of 8 readable and **2 of 8 succeed**, shown in `docs/videos/task2_left_arm_video_to_robot.mp4`. I wrote that rule after seeing these videos, so they aren't a fair test of it. Gentler brightness limits made reading worse, so I dropped them.
+
+**Six later Task 3 takes, the fair test.** I recorded these in deliberately different layouts, and ran them with nothing changed. **None of the 6 succeeded:**
+
+| Video | Glasses | Reading | Robot |
+|---|---|---|---|
+| `task3_flip_take2` | Grouped on my left | Read | **Failed:** knocked glasses that stood close together, so the triangle failed |
+| `task3_flip_take3` | Three on my left, one on my right | Read | **Failed:** couldn't grip the fourth glass, far across the table |
+| `task3_flip_take7` | Spread on both sides | Read | **Failed:** the arm couldn't reach, so the triangle failed |
+| `task3_flip_take4` | Spread on both sides | **Refused:** 8 spots found, 7 expected | Not run |
+| `task3_flip_take5` | Three on my right, one on my left | **Refused:** missed a starting glass, and saw the top glass twice | Not run |
+| `task3_flip_take6` | Spread on both sides | **Refused:** missed a starting glass | Not run |
+
+So Task 3 doesn't yet handle layouts it wasn't set up for. It uses one arm from one standing spot, which can't serve glasses spread across the table. Updating the table's corners afterwards didn't change which videos passed or failed, for these 6 or the 8 Task 2 takes.
 
 **How far to trust this.** Each success is one run of one video, and I set the reading's settings while looking at these same videos. I also came up with the arm and standing-spot idea from the Task 3 video's own layout. Neither has been tested on a take kept apart from tuning. The robot doesn't walk to its standing spot: the simulation simply starts it there.
 
@@ -70,7 +83,7 @@ I have no ground-truth ruler measurements for the glass positions, so these are 
 |---|---|
 | The two lower glasses touch, so their tops should be about one rim width apart (7.3 cm) | 7.9 cm and 8.2 cm |
 | The top glass should sit midway between the lower two | 0.2 cm and 0.7 cm off |
-| The table's corners, fitted back into the picture | About 1 pixel on the first two videos. 2.5 to 5.3 pixels on later takes I checked, after the camera moved |
+| The table's corners, fitted back into the picture | About 1 pixel on the first two videos. After the camera moved and I updated the rough corners, 0.75 to 4.3 pixels on the later takes I checked |
 | Hand-picked rough corners moved by up to 20 pixels, 25 tries each | Positions change by 0.11 cm at most |
 | Flip check at the tower's top | Correct for both right-side videos: dark opening in Task 3, none in Task 2 |
 

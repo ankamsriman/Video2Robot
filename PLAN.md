@@ -27,12 +27,12 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | Step | Status |
 |---|---|
 | Real video to positions, without a marker | Done on 2 right-side videos; 2 old left-side videos are refused |
-| Task 2, video to robot | Done, one video, one run |
+| Task 2, video to robot | 3 videos succeed (takes 1, 2, 5); of 8 later takes, 4 read and 2 succeed, not a fair test of the top-glass rule |
 | Task 3, video to robot | Done with no glass moved: the layout picks the arm and standing spot. One video, one run |
 | Task 2 nearest arm | 24 of 30 against 10 of 30 on left-side layouts; 20 against 21 of 30 when spread across both sides |
 | Choosing arm and standing spot | 19 of 21 on the video's layout wobbled; 25 of 30 on random layouts |
 | What the robot can do, in chosen areas | 28 of 30 for each task, pinned pelvis |
-| Test on new takes kept apart from tuning | **Waiting for recordings** |
+| Test on new takes kept apart from tuning | Task 3: **0 of 6.** One more video in a tested layout is pending |
 | README, data sample, example videos | Done, data note needs the user's details |
 | Repo public and submission | **The user decides** |
 

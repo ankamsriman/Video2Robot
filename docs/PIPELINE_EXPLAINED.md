@@ -2,6 +2,8 @@
 
 This follows one real video, `task2_triangle_take5`, through every step. Every number below comes from running the code on that video.
 
+> **Later change.** After this was written, I updated the rough corners in Step 1 to `[347, 433], [1292, 440], [1418, 892], [200, 888]`. On this video, positions then moved by under 0.4 cm, and the tower error became 0.5 cm rather than 0.4 cm. The worked numbers below are from before that update, and the idea is the same.
+
 ## Contents
 
 1. [The whole pipeline on one page](#1-the-whole-pipeline-on-one-page)
@@ -522,6 +524,8 @@ The robot didn't learn its movements from watching your hand. In fact, the pipel
 | Takes 3, 4, 7 and 8 | Refused, because a starting glass was missed |
 
 Before I added the rule for an unseen top glass, 0 of these 8 succeeded. After it, 2 of 8 did. I wrote that rule after seeing these videos, so **they aren't a fair test of it.**
+
+**Six later Task 3 videos were a fair test,** run with nothing changed, in varied layouts. **None succeeded:** three were refused, and the robot failed the other three. The README lists each one.
 
 **Other limits to be honest about:**
 
