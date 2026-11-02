@@ -5,13 +5,19 @@ cd "$(dirname "$0")/.."
 
 [ -d .venv ] || python3 -m venv .venv
 .venv/bin/pip install -q --upgrade pip
-.venv/bin/pip install -q -r requirements.txt
+# The exact versions tested. A newer solver or robot model changes how the robot moves.
+.venv/bin/pip install -q -r requirements.lock.txt
 
+MENAGERIE_VERSION=a662de603224c47123b0783821c58ad4402ad3e3
 if [ ! -d third_party/mujoco_menagerie ]; then
   mkdir -p third_party
-  git clone -q --depth 1 --filter=blob:none --sparse \
+  git clone -q --filter=blob:none --sparse \
     https://github.com/google-deepmind/mujoco_menagerie.git third_party/mujoco_menagerie
   git -C third_party/mujoco_menagerie sparse-checkout set unitree_g1
+  git -C third_party/mujoco_menagerie checkout -q "$MENAGERIE_VERSION"
+fi
+if [ "$(git -C third_party/mujoco_menagerie rev-parse HEAD)" != "$MENAGERIE_VERSION" ]; then
+  echo "Warning: third_party/mujoco_menagerie isn't the tested version, $MENAGERIE_VERSION" >&2
 fi
 
 if [ ! -f checkpoints/hand_landmarker.task ]; then
