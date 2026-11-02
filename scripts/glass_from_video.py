@@ -7,8 +7,13 @@ The table's rough corners are hand-picked in data/labels: <video>_table.json for
 or current_setup_table.json for every new take from a camera that hasn't moved.
 The video decides the order and the positions. The robot's grip and flip are programmed.
 
+For a flip, the video's layout also decides which arm works and where the robot stands along
+the table, so no glass has to move. --fit-to-robot instead keeps the robot in the middle, using
+its right arm, and moves the glasses to suit it. --stay-in-middle keeps the robot there and
+moves nothing.
+
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_right_take1.mov
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task3_flip_right_take1.mov --fit-to-robot
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task3_flip_right_take1.mov
 """
 
 import argparse
@@ -34,11 +39,11 @@ from src.perception.glass_tracker import (
     search_masks,
 )
 from src.perception.table_view import refine_corners, table_view
-from src.reasoning.fit_layout import Area, FittedLayout, fit_flip_layout
-from src.simulation.cup_flip import build_flipped_tower, load_flip_config
+from src.reasoning.fit_layout import Area, FittedLayout, fit_flip_layout, plan_stand
+from src.simulation.cup_flip import build_flipped_tower, flip_for_arm, load_flip_config
 from src.simulation.glass_task import build_glass_triangle
 from src.simulation.recorder import video_recorder
-from src.simulation.robot_env import RobotEnv, load_motion_config
+from src.simulation.robot_env import RobotEnv, load_motion_config, motion_for_arm
 from src.simulation.scene import ROOT, SceneConfig, build_model, load_scene_config
 from src.verification.triangle import load_triangle_config
 
@@ -126,6 +131,12 @@ def _to_robot(place: np.ndarray, scene: SceneConfig, table_width: float) -> np.n
     )
 
 
+def _flip_tower_reach() -> float:
+    """How far to the working arm's side the tower stands, from the middle of the tested area."""
+    raw = yaml.safe_load(FLIP_CONFIG_PATH.read_text())["flip_areas"]
+    return abs(sum(raw["tower"]["y"]) / 2)
+
+
 def _rounded(point: np.ndarray) -> list[float]:
     return [round(float(value), 3) for value in point]
 
@@ -144,7 +155,12 @@ def _fit(starts: list[np.ndarray], tower: np.ndarray) -> FittedLayout:
 
 
 def run_robot(
-    video: Path, demo: TriangleDemo, is_flip: bool, fit: bool, config: GlassVideoConfig
+    video: Path,
+    demo: TriangleDemo,
+    is_flip: bool,
+    fit: bool,
+    stay_in_middle: bool,
+    config: GlassVideoConfig,
 ) -> dict:
     """Place the glasses as the video shows, run the robot, and report the outcome."""
     path = FLIP_CONFIG_PATH if is_flip else CONFIG_PATH
@@ -171,21 +187,37 @@ def run_robot(
             "starts_used": [_rounded(s) for s in starts],
             "tower_used": _rounded(tower),
         }
+    arm = motion.arm
+    if is_flip and not (fit or stay_in_middle):
+        stand = plan_stand(starts, tower, _flip_tower_reach(), table_width / 2)
+        arm = stand.arm
+        starts = [start - [0.0, stand.robot_y] for start in starts]
+        tower = tower - [0.0, stand.robot_y]
+        scene = dataclasses.replace(
+            scene, table=dataclasses.replace(scene.table, center_y=-stand.robot_y)
+        )
+        report["robot_stands"] = {
+            "arm": arm,
+            "cm_along_table_from_middle_to_its_left": round(stand.robot_y * 100, 1),
+            "glasses_moved": False,
+        }
     names = (*GLASS_NAMES, FLIPPED_NAME) if is_flip else GLASS_NAMES
     layout = {name: tuple(start) for name, start in zip(names, starts, strict=True)}
-    triangle = dataclasses.replace(load_triangle_config(path), center=tuple(tower))
+    triangle = dataclasses.replace(
+        load_triangle_config(path), center=tuple(tower), first_on_left=arm == "right"
+    )
     model = build_model(scene, layout)
-    suffix = "_fitted" if fit else ""
+    suffix = "_fitted" if fit else "_middle" if stay_in_middle else ""
     output = ROOT / "data/processed" / video.stem
     output.mkdir(parents=True, exist_ok=True)
     with video_recorder(model, output / f"robot{suffix}.mp4") as on_frame:
-        env = RobotEnv(model, motion, on_frame=on_frame)
+        env = RobotEnv(model, motion_for_arm(motion, arm), on_frame=on_frame)
         if is_flip:
             result = build_flipped_tower(
                 env,
                 scene,
                 triangle,
-                load_flip_config(path),
+                flip_for_arm(load_flip_config(path), arm),
                 GLASS_NAMES,
                 FLIPPED_NAME,
                 build_glass_triangle,
@@ -212,6 +244,11 @@ def main() -> None:
         action="store_true",
         help="for a flip, move positions to where the robot can flip, and report the shifts",
     )
+    parser.add_argument(
+        "--stay-in-middle",
+        action="store_true",
+        help="for a flip, keep the robot mid-table with its right arm and move nothing",
+    )
     args = parser.parse_args()
     raw = yaml.safe_load(CONFIG_PATH.read_text())["real_video"]
     config = GlassVideoConfig(**raw)
@@ -220,7 +257,9 @@ def main() -> None:
     except VideoReadError as error:
         logger.error("Couldn't read %s: %s", args.video.name, error)
         raise SystemExit(1) from error
-    report = run_robot(args.video, demo, is_flip, args.fit_to_robot, config)
+    report = run_robot(
+        args.video, demo, is_flip, args.fit_to_robot, args.stay_in_middle, config
+    )
     print(json.dumps(report, indent=2))
 
 

@@ -18,6 +18,13 @@ Everything below is measured to where each glass's **base** stands: from your ed
 
 Keep glasses at least 12 cm apart, centre to centre, and at least 15 cm from where the tower will stand. In the phone's view, left and right are swapped, because the phone faces you.
 
+**Task 3 now has a freer option,** because the robot chooses its arm and where it stands. It passed 25 of 30 random layouts, against 28 of 30 for the areas above:
+
+- Glasses 1, 2, 3: 13-33 cm from your edge, grouped within about 20 cm side to side.
+- Glass to flip: 23-33 cm from your edge, in the same group. **This one matters most.**
+- Tower middle: 20-27 cm from your edge, and 18-40 cm to either side of the group's middle.
+- Glasses at least 9 cm apart, and at least 15 cm from the tower. Everything at least 5 cm from the table's ends.
+
 Name takes like `data/raw/task2_triangle_right_take2.mov`. If the camera and table haven't moved, that's all. If they have, update `data/labels/current_setup_table.json` with four rough table corners: near-left, near-right, far-right and far-left as they appear in the picture.
 
 # Block sorting (earlier work)

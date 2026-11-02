@@ -92,5 +92,8 @@ You recorded steel glasses with no marker, and with no blocks to hand. That rule
 ### Corrections along the way
 The table was first given as 80 x 60 cm, and the video's shape disagreed, so it was measured again at 80 x 50. A rim of 1.3 cm was a voice-typing slip for 7.3 cm. I also wrongly said the robot always grips from the side: it grips the first three glasses from above.
 
+### Task 3 no longer needs moved glasses
+The fitted layout showed your video was a mirror image of what the right arm wants. So the robot now picks its arm and standing spot from the layout. On your original video, that's the left arm, 23.4 cm right of the table's middle, with no glass moved. The robot starts at that spot, since it can't walk.
+
 ### Still open
 New takes, kept apart from tuning, to test the reading. The data collection note needs your details. You decide when the repo goes public.

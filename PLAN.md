@@ -28,7 +28,8 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 |---|---|
 | Real video to positions, without a marker | Done on 2 right-side videos; 2 old left-side videos are refused |
 | Task 2, video to robot | Done, one video, one run |
-| Task 3, video to robot | Done only by moving positions to fit, by up to 33 cm |
+| Task 3, video to robot | Done with no glass moved: the layout picks the arm and standing spot. One video, one run |
+| Choosing arm and standing spot | 19 of 21 on the video's layout wobbled; 25 of 30 on random layouts |
 | What the robot can do, in chosen areas | 28 of 30 for each task, pinned pelvis |
 | Test on new takes kept apart from tuning | **Waiting for recordings** |
 | README, data sample, example videos | Done, data note needs the user's details |

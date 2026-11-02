@@ -43,6 +43,8 @@ class TableConfig:
     depth: float
     width: float
     top_height: float
+    # How far the table's middle is to the robot's left, when it stands off-centre.
+    center_y: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -85,7 +87,7 @@ def _add_table(spec: mujoco.MjSpec, table: TableConfig) -> None:
     thickness = 0.02
     center_x = table.near_edge_x + table.depth / 2
     body = spec.worldbody.add_body(
-        name="table", pos=[center_x, 0, table.top_height - thickness]
+        name="table", pos=[center_x, table.center_y, table.top_height - thickness]
     )
     body.add_geom(
         name="table_top",

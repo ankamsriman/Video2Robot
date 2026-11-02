@@ -22,6 +22,8 @@ class TriangleConfig:
     top_radius: float
     position_tolerance: float
     max_tilt_degrees: float
+    # The hand passes over the side it fills first, so the arm's far side goes first.
+    first_on_left: bool = True
 
 
 @dataclass(frozen=True)
@@ -38,7 +40,7 @@ def load_triangle_config(path: Path) -> TriangleConfig:
 def triangle_targets(config: TriangleConfig, table: float) -> tuple[Vec3, Vec3, Vec3]:
     """Return where the centres of the left, right and top cups should be."""
     x, y = config.center
-    half_gap = config.cup_spacing / 2
+    half_gap = config.cup_spacing / 2 if config.first_on_left else -config.cup_spacing / 2
     lower = table + config.cup_height / 2
     return (
         (x, y + half_gap, lower),

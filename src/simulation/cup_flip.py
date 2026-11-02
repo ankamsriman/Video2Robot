@@ -5,6 +5,7 @@ turns the cup over, like a spit, and the palm ends on the cup's other side, neve
 So nothing is in the way when the cup is lowered. The flip is programmed, not learned.
 """
 
+import dataclasses
 import logging
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -16,6 +17,11 @@ from scipy.spatial.transform import Rotation, Slerp
 
 from src.simulation.cup_task import TriangleResult, build_triangle, cup_pose
 from src.simulation.ik import palm_down_rotation
+from src.simulation.mirror import (
+    mirror_joint_targets,
+    mirror_point,
+    mirror_rotation,
+)
 from src.simulation.robot_env import RobotEnv
 from src.simulation.scene import SceneConfig
 from src.verification.triangle import (
@@ -24,7 +30,6 @@ from src.verification.triangle import (
     triangle_failures,
 )
 
-WRIST_ROLL_JOINT = "right_wrist_roll_joint"
 MAX_FLIP_ANGLE_DEGREES = 15.0
 RESTING_TOLERANCE = 0.015
 CENTRING_TOLERANCE = 0.02
@@ -89,14 +94,36 @@ def load_flip_config(path: Path) -> FlipConfig:
     return FlipConfig(**{**raw, **{name: tuple(raw[name]) for name in poses}})
 
 
-def hand_rotation(roll: float, yaw: float = 0.0) -> np.ndarray:
+def flip_for_arm(flip: FlipConfig, arm: str) -> FlipConfig:
+    """Settings are written for the right arm. The left arm uses their mirror image.
+
+    The hand's start_roll and hand_yaw stay as they are, since hand_rotation mirrors them.
+    """
+    if arm == "right":
+        return flip
+    return dataclasses.replace(
+        flip,
+        twist_angle=-flip.twist_angle,
+        twist_pose=mirror_joint_targets(flip.twist_pose),
+        release_drift=mirror_point(flip.release_drift),
+        finish_position=mirror_point(flip.finish_position),
+    )
+
+
+def hand_rotation(roll: float, yaw: float = 0.0, arm: str = "right") -> np.ndarray:
     """A level hand, turned `roll` radians around its length from palm-down.
 
     `yaw` points it sideways. The cup is round, so any level direction flips it equally.
     """
     turn = Rotation.from_euler("x", roll).as_matrix()
     heading = Rotation.from_euler("z", yaw).as_matrix()
-    return heading @ turn @ palm_down_rotation("right")
+    rotation = heading @ turn @ palm_down_rotation("right")
+    return rotation if arm == "right" else mirror_rotation(rotation)
+
+
+def palm_direction(hand: np.ndarray, arm: str) -> np.ndarray:
+    """Which way the palm faces. The wrists' side axes point the same way on both arms."""
+    return hand[:, 1] if arm == "right" else -hand[:, 1]
 
 
 def slerp_rotation(start: np.ndarray, end: np.ndarray, fraction: float) -> np.ndarray:
@@ -126,13 +153,13 @@ def grip_from_side(
 ) -> bool:
     """Grip a cup with the palm beside it, and lift it. Returns whether it's held."""
     table = config.table.top_height
-    side = hand_rotation(flip.start_roll, flip.hand_yaw)
+    side = hand_rotation(flip.start_roll, flip.hand_yaw, env.motion.arm)
     x, y, start_z = env.object_position(name)
-    palm_direction = side[:2, 1]
+    palm = palm_direction(side, env.motion.arm)[:2]
     # Come down beside the cup, as going straight in would clip its wide base with the
     # palm. Then slide in, with the fingertips reaching past the cup's centre.
-    bx, by = np.array([x, y]) - flip.approach_clearance * palm_direction
-    x, y = np.array([x, y]) + flip.grip_depth * palm_direction
+    bx, by = np.array([x, y]) - flip.approach_clearance * palm
+    x, y = np.array([x, y]) + flip.grip_depth * palm
     hover = table + flip.hover_height
     grip = table + flip.grip_height
     env.set_fingers(flip.open_pose)
@@ -164,8 +191,10 @@ def twist_over(env: RobotEnv, flip: FlipConfig, name: str) -> None:
     """
     env.move_joints(flip.twist_pose, flip.pose_seconds)
     env.advance(env.motion.settle_time)
-    angle = env.joint_angle(WRIST_ROLL_JOINT)
-    env.move_joints({WRIST_ROLL_JOINT: angle + flip.twist_angle}, flip.twist_seconds)
+    wrist = f"{env.motion.arm}_wrist_roll_joint"
+    env.move_joints(
+        {wrist: env.joint_angle(wrist) + flip.twist_angle}, flip.twist_seconds
+    )
     env.advance(env.motion.settle_time)
     if is_holding(env, name):
         level_cup(env, name)
@@ -254,12 +283,12 @@ def place_flipped(
     # and carry it away. So the hand centres itself to touch nothing, backs out sideways,
     # and only then lifts.
     hand = env.data.site_xmat[env.hand_site].reshape(3, 3)
-    palm_direction = hand[:, 1]
+    palm = palm_direction(hand, env.motion.arm)
     along_hand = hand[:, 0]
     miss = float((env.object_position(name) - env.hand_position) @ along_hand)
     centred = env.hand_position + miss * along_hand
     env.move_hand(centred, speed=flip.lower_speed, keep_waist=True, min_seconds=1.0)
-    backed_out = env.hand_position - flip.back_out_distance * palm_direction
+    backed_out = env.hand_position - flip.back_out_distance * palm
     env.move_hand(backed_out, speed=flip.lower_speed, keep_waist=True)
     lift = env.hand_position + [0.0, 0.0, flip.lift_after_release]
     env.move_hand(lift, speed=flip.lower_speed, keep_waist=True)

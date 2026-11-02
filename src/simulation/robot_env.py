@@ -1,5 +1,6 @@
 """Run the G1 in real physics: smooth hand motion and finger control via joint motors."""
 
+import dataclasses
 import logging
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -12,12 +13,13 @@ from scipy.spatial.transform import Rotation, Slerp
 
 from src.simulation.ik import (
     ARM_JOINTS,
-    READY_POSE,
     WAIST_LEAN_JOINT,
     WAIST_TWIST_JOINT,
     ArmIK,
     palm_down_rotation,
+    ready_poses,
 )
+from src.simulation.mirror import mirror_fingers, mirror_point
 from src.simulation.scene import CONFIG_PATH
 
 FINGER_JOINTS = (
@@ -73,6 +75,15 @@ def load_motion_config(path: Path = CONFIG_PATH) -> MotionConfig:
     return MotionConfig(**{**raw, "home_position": tuple(raw["home_position"])})
 
 
+def motion_for_arm(motion: MotionConfig, arm: str) -> MotionConfig:
+    """Settings are written for the right arm. The left arm uses their mirror image."""
+    if arm == motion.arm:
+        return motion
+    return dataclasses.replace(
+        motion, arm=arm, home_position=mirror_point(motion.home_position)
+    )
+
+
 def hand_pose_for_width(width: float) -> tuple[float, ...]:
     """Return all finger joint angles for a given gap between thumb and fingertips."""
     columns = zip(*GRIP_ANGLES, strict=True)
@@ -125,10 +136,10 @@ class RobotEnv:
                 self.model.actuator_forcerange[index] = (-limit, limit)
 
     def _set_ready_pose(self) -> None:
-        for side, pose in READY_POSE.items():
+        for side, pose in ready_poses(self.motion.arm).items():
             for name, value in zip(ARM_JOINTS, pose, strict=True):
                 self._set_joint(f"{side}_{name}_joint", value)
-        open_pose = hand_pose_for_width(self.motion.open_width)
+        open_pose = self._finger_angles(hand_pose_for_width(self.motion.open_width))
         for name, angle in zip(FINGER_JOINTS, open_pose, strict=True):
             self._set_joint(f"{self.motion.arm}_hand_{name}_joint", angle)
         self._start_palm_down()
@@ -137,6 +148,10 @@ class RobotEnv:
             name: float(self.data.qpos[self.model.joint(name).qposadr[0]])
             for name in self._actuators
         }
+
+    def _finger_angles(self, pose: tuple[float, ...]) -> tuple[float, ...]:
+        """Finger poses are written for the right hand."""
+        return pose if self.motion.arm == "right" else mirror_fingers(pose)
 
     def _start_palm_down(self) -> None:
         """Begin in the palm-down pose that motions keep, so the arm never snaps to it."""
@@ -294,7 +309,8 @@ class RobotEnv:
         self.advance(self.motion.settle_time)
 
     def set_fingers(self, pose: tuple[float, ...]) -> None:
-        """Move the active hand's fingers smoothly to a pose."""
+        """Move the active hand's fingers smoothly to a pose, written for the right hand."""
+        angles = self._finger_angles(pose)
         prefix = f"{self.motion.arm}_hand_"
         names = [f"{prefix}{finger}_joint" for finger in FINGER_JOINTS]
         begin = [self._command[name] for name in names]
@@ -304,7 +320,7 @@ class RobotEnv:
             progress = min_jerk(index / waypoints)
             updates = {
                 name: first + progress * (last - first)
-                for name, first, last in zip(names, begin, pose, strict=True)
+                for name, first, last in zip(names, begin, angles, strict=True)
             }
             self._command = {**self._command, **updates}
             self.advance(control_dt)

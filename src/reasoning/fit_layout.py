@@ -34,6 +34,32 @@ class FittedLayout:
     tower_shift: float
 
 
+@dataclass(frozen=True)
+class StandPlan:
+    """Which arm does the work, and where the robot stands along the table's edge."""
+
+    arm: str
+    robot_y: float
+
+
+def plan_stand(
+    starts: Sequence[np.ndarray],
+    tower: np.ndarray,
+    tower_reach: float,
+    table_half_width: float,
+) -> StandPlan:
+    """Choose the arm and standing spot that suit a layout, without moving any glass.
+
+    The flip's twist carries a glass towards the working arm's own side and past the
+    robot's centre line, so the tower must end on that side of the glasses. The robot then
+    stands so that the tower sits `tower_reach` to that side of it.
+    """
+    is_left = float(tower[1]) > float(np.mean([start[1] for start in starts]))
+    arm = "left" if is_left else "right"
+    wanted = float(tower[1]) - (tower_reach if is_left else -tower_reach)
+    return StandPlan(arm, float(np.clip(wanted, -table_half_width, table_half_width)))
+
+
 def _nearest_free(
     wanted: np.ndarray, area: Area, keep_clear: Sequence[tuple[np.ndarray, float]]
 ) -> np.ndarray:

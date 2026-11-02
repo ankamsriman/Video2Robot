@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from src.reasoning.fit_layout import Area, fit_flip_layout
+from src.reasoning.fit_layout import Area, fit_flip_layout, plan_stand
 
 STARTS = Area((0.30, 0.40), (-0.14, 0.14))
 FLIP = Area((0.40, 0.46), (-0.10, 0.05))
@@ -56,3 +56,33 @@ def test_a_layout_with_no_room_is_refused() -> None:
             GAP,
             0.15,
         )
+
+
+def _stand(starts: list[tuple[float, float]], tower: tuple[float, float]):
+    return plan_stand(
+        [np.array(s) for s in starts], np.array(tower), 0.285, table_half_width=0.40
+    )
+
+
+def test_a_tower_left_of_the_glasses_calls_for_the_left_arm() -> None:
+    plan = _stand([(0.32, -0.19), (0.39, -0.25), (0.46, -0.16), (0.49, -0.26)], (0.41, 0.05))
+
+    assert plan.arm == "left"
+    assert plan.robot_y == pytest.approx(0.05 - 0.285)
+
+
+def test_a_tower_right_of_the_glasses_calls_for_the_right_arm() -> None:
+    plan = _stand([(0.32, 0.1), (0.35, 0.0), (0.34, -0.1), (0.44, 0.0)], (0.40, -0.29))
+
+    assert plan.arm == "right"
+    assert plan.robot_y == pytest.approx(-0.29 + 0.285)
+
+
+def test_the_robot_never_stands_past_the_end_of_the_table() -> None:
+    plan = _stand([(0.32, 0.3), (0.35, 0.3), (0.34, 0.3), (0.44, 0.3)], (0.40, -0.35))
+
+    assert plan.arm == "right"
+    assert plan.robot_y == pytest.approx(-0.35 + 0.285)
+    far = _stand([(0.32, -0.3), (0.35, -0.3), (0.34, -0.3), (0.44, -0.3)], (0.40, -0.15))
+    assert far.arm == "left"
+    assert far.robot_y == pytest.approx(-0.40)

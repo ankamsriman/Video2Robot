@@ -6,6 +6,8 @@ import mink
 import mujoco
 import numpy as np
 
+from src.simulation.mirror import mirror_arm_pose
+
 ARM_JOINTS = (
     "shoulder_pitch",
     "shoulder_roll",
@@ -30,6 +32,18 @@ READY_POSE = {
     "right": (-0.5, -0.1, 0.3, 0.9, 1.2, 0.0, 0.0),
     "left": (0.7, 0.45, 0.0, 1.28, 0.0, 0.0, 0.0),
 }
+
+
+def ready_poses(arm: str) -> dict[str, tuple[float, ...]]:
+    """The starting poses when `arm` does the work. The other arm hangs back at the side."""
+    if arm == "right":
+        return dict(READY_POSE)
+    return {
+        "left": mirror_arm_pose(READY_POSE["right"]),
+        "right": mirror_arm_pose(READY_POSE["left"]),
+    }
+
+
 SOLVER = "daqp"
 IK_DT = 0.02
 IK_MAX_ITERATIONS = 200

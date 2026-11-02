@@ -1069,8 +1069,21 @@ You recorded the triangle and the flip with steel glasses and no marker. Here's 
 7. **Recognise the flip.** A flipped glass has no bright top, so Task 3 shows four starts and only three new spots. To confirm it, the code looks where the tower's top should be. A dark patch means an opening. A bright patch means a closed top, or just the floor behind an empty spot.
 8. **Run the robot,** then check where the glasses really ended up.
 
-**Why Task 3 needs `--fit-to-robot`.** The flip needs a level forearm. Across its chest, the robot's right arm hits its own body, so your video's tower spot can't work. With this option, every position moves to the nearest place the robot can use, and each shift is written in `report_fitted.json` and shown on the video. The order and the flip still come from you. In your video, the tower moved 31 cm and the glasses moved 9-33 cm. A new recording inside the areas in `docs/recording_views/` would need almost no moving.
+**How Task 3 works without moving any glass.** The flip needs a level forearm, and it only works towards the working arm's own side. Across its chest, the robot's right arm hits its own body. Your video has the tower on the robot's left of the glasses, so the right arm can't do it from the middle of the table.
 
-**How the working areas were found.** For each task, I tried wide areas, looked at which setups failed, narrowed the areas, and then tested fresh random setups, which gave 28 of 30 for each task. These runs use exact simulator positions, and that's important: they show what the arm can do, not how well a video is read. Your new takes haven't been tested yet, and until they are, the Task 2 result rests on a single video. See `docs/results/`.
+The fix has two parts, both in `plan_stand` in `src/reasoning/fit_layout.py`:
+
+1. **Choose the arm.** If the tower is on the robot's left of the glasses, use the left arm.
+2. **Choose where to stand.** Stand so that the tower sits 28.5 cm to the working arm's side, which is the middle of the area where the flip was tested.
+
+For your video, that means the left arm, standing 23.4 cm to the right of the table's middle. The simulation starts the robot there; it doesn't walk.
+
+**Why the left arm needed no new tuning.** The G1's arms are mirror images. So `src/simulation/mirror.py` turns right-arm settings into left-arm ones. Imagine a mirror along the robot's centre line: a joint that swings forward and back (pitch) keeps its angle, and one that turns sideways (roll, yaw) changes sign. A point at 10 cm right becomes 10 cm left. Settings are still written once, for the right arm.
+
+Two older options remain. `--fit-to-robot` keeps the robot in the middle and moves the glasses, by up to 33 cm for your video. `--stay-in-middle` moves nothing, and fails by dropping the glass in the twist.
+
+**How the working areas were found.** For each task, I tried wide areas, looked at which setups failed, narrowed the areas, and then tested fresh random setups, which gave 28 of 30 for each task. These runs use exact simulator positions, and that's important: they show what the arm can do, not how well a video is read. Your new takes haven't been tested yet, and until they are, each task's video result rests on a single video. See `docs/results/`.
+
+**How the standing spot was tested.** `scripts/stand_test.py` wobbled your Task 3 layout by up to 1.5 cm, and passed 19 of 21. Random layouts along the whole table first passed only 12 of 30. Most failures were grips on a fourth glass close to the near edge. Requiring it to start at least 23 cm back gave 25 of 30 on new random layouts.
 
 **Things that were tried and removed.** Retrying a missed grip rescued none of the failed setups, so it went. Flipping in open space and then carrying the glass across destroyed the tower, so that went too. The hand tracker works, finding your hand in 93-96% of frames, but it found 13 moments for 6 real ones, so rest spots decide the timing instead.
