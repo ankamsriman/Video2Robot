@@ -6,7 +6,7 @@ So nothing is in the way when the cup is lowered. The flip is programmed, not le
 """
 
 import logging
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -275,10 +275,11 @@ def build_flipped_tower(
     flip: FlipConfig,
     order: tuple[str, str, str],
     flipped_name: str,
+    build_base: Callable[..., TriangleResult] = build_triangle,
 ) -> FlipResult:
     """Build the triangle, then flip the fourth cup and stand it on top."""
     table = config.table.top_height
-    built = build_triangle(env, config, triangle, order)
+    built = build_base(env, config, triangle, order)
     if not built.success:
         return FlipResult(built, False, ("triangle failed",))
     held = grip_from_side(env, config, flip, flipped_name)
