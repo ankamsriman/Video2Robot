@@ -1,9 +1,9 @@
 """A small learned model that predicts whether a Task 2 run will succeed.
 
-This is the simplest kind of world model: given a layout and a way of doing the task, it
-predicts the outcome, so the robot can pick the way most likely to work before it moves. It
-predicts only success, not how the scene changes step by step, and it learns from saved
-simulator runs. It's logistic regression, written with NumPy alone.
+It's logistic regression, written with NumPy alone: given a layout and a way of doing the
+task, it predicts the chance of success, so the robot can pick the way most likely to work
+before it moves. It isn't a world model: it predicts only success, not how the scene changes
+step by step. It learns from saved simulator runs.
 """
 
 from collections.abc import Sequence

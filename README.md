@@ -132,14 +132,14 @@ With Claude's positions and with the true ones, the robot passed and failed on e
 
 *Which Claude model.* On the same 10 pictures, 5 real frames and 5 cluttered scenes, Haiku, Sonnet and Opus each found exactly the glasses in 9 of 10. The tenth, my first Task 3 video, may well be a correct glass my reader only saw later. Mean errors were 0.65, 0.33 and 0.37 cm, so I use Sonnet. Opus also used about 70,000 input tokens per picture, roughly 50 times what Sonnet used for the same pictures, which used up most of my small API budget. See `docs/results/vlm_model_comparison.json`.
 
-**A small learned outcome model, Task 2.** This is the simplest kind of world model: it predicts whether a run will succeed, not how the scene changes step by step. It's a logistic regression in NumPy, on numbers describing the layout. I ran 150 random layouts both ways, one arm and two arms, so each layout's true outcome is known for both choices.
+**A small logistic regression model, Task 2.** It predicts only whether a run will succeed: one weighted sum of 7 layout numbers, about 16 learned weights, written in NumPy. It isn't a world model, which would predict how the scene changes step by step. In the code it's called the outcome model. I ran 150 random layouts both ways, one arm and two arms, so each layout's true outcome is known for both choices.
 
 | Choosing per layout, on layouts never trained on | 60 test layouts | 30 fresh layouts (seed 9000) |
 |---|---|---|
 | Always one arm | 43 | 22 |
 | Always two arms | 44 | 22 |
 | Hand rule: two arms if the tower is within 14 cm of the middle | 49 | 25 |
-| **Outcome model** | **50** | **26** |
+| **Logistic regression model** | **50** | **26** |
 | Best possible, knowing the answers | 51 | 27 |
 
 It learned the pattern I'd only spotted by eye, and it does slightly better than the hand rule. The samples are small, so the gap between them isn't proven. I first noticed the pattern in seed 8700, one of the test sets, so seed 9000 is the fair column. With `--choose-arms`, the model picks before the robot moves. On my real Task 2 videos it chose two arms every time, which fits, because my towers were all near the middle. With `--find-glasses --choose-arms` and no other options, the robot built **8 of my 9 Task 2 videos**. Only the check video failed, as it does every other way. Run `scripts/outcome_test.py` to repeat the test above.
@@ -259,7 +259,7 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sampl
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --find-glasses
 PYTHONPATH=. .venv/bin/python scripts/clutter_test.py --trials 5 --seed 4100 --two-arms
 
-# Optional: let the small outcome model choose one arm or two, and test it on unseen layouts
+# Optional: let the logistic regression model choose one arm or two, and test it on unseen layouts
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --choose-arms
 PYTHONPATH=. .venv/bin/python scripts/outcome_test.py
 
@@ -282,7 +282,7 @@ Samples are in `data/raw/sample/`, with the collection note in [`docs/DATA_COLLE
 
 ## What I'd do next
 
-- **Learn more from these runs.** The outcome model is a first step. Each successful simulator run can also become a demonstration for an ACT policy, a fuller world model that predicts each step, or reinforcement learning.
+- **Learn more from these runs.** The logistic regression model is a small first step. Each successful simulator run can also become a demonstration for an ACT policy, a real world model that predicts each step, or reinforcement learning.
 - **Fix far-off towers** by passing a glass between hands through the middle of the table, instead of one arm reaching across the body.
 - **A better video reader.** A vision language model already rescues most refused Task 2 videos. A trained tracker such as SAM 2 could follow glasses through the whole video.
 - **A closer, first-person camera,** so that finger poses can be seen and retargeted to the robot's hand.

@@ -122,5 +122,8 @@ You added an API key and asked for a VLM. Claude now turns typed instructions in
 ### A small learned model, and the API limit
 A small outcome model now predicts whether one arm or two will work for a layout, and `--choose-arms` uses it. On 30 fresh layouts it chose well enough for 26 builds, against 25 for the hand rule. Sonnet and Opus pointed at glasses about equally well, and Haiku less precisely. Your account then hit its monthly API spending limit, mostly because of a costly Opus comparison. Once you raised it, `--find-glasses --choose-arms` built 8 of your 9 Task 2 videos with no options set by hand.
 
+### Not a world model
+You asked why I called the outcome model a "world model". That overclaimed. It's logistic regression with about 16 learned weights that predicts only success or failure. A world model predicts how the scene changes step by step. I renamed it in the README, the code's description and every image, and renamed `world_model_where_it_matters.png` to `arm_choice_where_it_matters.png`. Uses that mean real world models, in `task.md` and the glossary in `notes.md`, stay. The results didn't change.
+
 ### Still open
 Raising the API limit, new videos to test the VLM fairly, making the repo public, and submitting. The data collection note needs your details. You decide when the repo goes public.
