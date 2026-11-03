@@ -53,7 +53,7 @@ Doing this on a real humanoid would be expensive and risky, so we use a **simula
 
 **Where we are (4 Nov):** the robot now learns from **your real phone videos** of steel glasses. For Task 2, the triangle, it builds 8 of your 9 videos with Claude's help, and 3 of 9 without it. For Task 3, the flip, it builds 2 of 9; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
 
-Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 21 has the numbers to quote.
+**To read the project as a story of ideas, from the first failure to today, start with chapter 22.** Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 21 has the numbers to quote.
 
 ---
 
@@ -1402,25 +1402,168 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 Real projects don't go in a straight line. This one went in a loop, again and again:
 
 ```
-try the simplest thing ──► test it on real data ──► count the failures
-        ▲                                                  │
-        │                                                  ▼
- keep it only if it helped ◄── retest ◄── one idea aimed at the cause
+try the simplest thing ──► test it on stated data ──► count the failures
+        ▲                                                    │
+        │                                                    ▼
+ keep it only if it helped ◄── retest on NEW data ◄── one idea aimed at the cause
 ```
 
-**A worked example of one loop (Task 3, the flip):**
-1. **Try:** grip the cup beside it and turn the wrist. **Test:** 9 new setups. **Result:** 1 of 9.
-2. **Look at the failures:** cups were thrown, slipped out of the fingertips, or ended off-centre.
-3. **One idea at a time:** turn only the wrist; hold the cup deeper; back out sideways; slide in beside the cup.
-4. **Retest each time on new setups:** 1 of 12, then 5 of 12, then 9 of 15, then 21 of 24.
-5. **Look again:** the last 3 failures were flipped but more than 2 cm off-centre.
-6. **Final idea:** aim at the top cup's measured position. **Result:** 50 of 50 on new setups.
+This chapter tells the whole project through that loop, in seven stages. Each stage says:
+- what we started with;
+- what we tested it on;
+- how often it failed, and what the failures showed;
+- the idea that came from them;
+- what happened after.
 
-**Why "new setups" each time?** If you test on the same setups you tuned on, the score flatters you, like a student who has seen the exam. Where that wasn't possible, as with my 9 real videos, the result is marked "not a fair test".
+**Why "new data" each time?** If you test on the same setups you tuned on, the score flatters you, like a student who has seen the exam. Where that wasn't possible, as with your 9 real videos, the result is marked **not a fair test**.
 
-**Ideas that failed are part of the story.** Copying my grip, finding key moments from hand speed, retrying a missed grip on glasses, and moving glasses to fit the robot were all tried and dropped. Each one taught something.
+The same story, row by row, is in `docs/JOURNEY.md`.
 
-**The whole journey,** about 40 ideas in seven stages, each with its problem, test and before-and-after numbers, is in `docs/JOURNEY.md`. Every new experiment gets added there in the same format.
+---
+
+### Stage 1: teaching the robot to pick and place (simulator, coloured blocks)
+
+**Starting point.** The G1 sorts three blocks into trays. It uses inverse kinematics (chapter 3) and a plan written by hand.
+**Tested on:** 10 random setups. **Result: 0 of 10.** Nothing worked.
+
+**What the failures showed, and what each led to:**
+
+| Failure seen | What it told us | Idea | After |
+|---|---|---|---|
+| The hand slammed into the table half a second in | The arm started in a twisted pose and snapped to the target | Start palm-down; log every contact with its time | The slam stopped |
+| The hand stopped 21 cm short, but the code said "reached" | "Reached" only meant the maths found an answer, not that the hand arrived | Measure where the hand really is | Silent failures were caught |
+| Blocks slid 2–3 cm when let go, and were held tilted 15–18° | The fingers pushed past the block, and the finger pads are angled | Finger poses set from the block's width; tip the hand forward 0.2 rad | Sliding and tilting fixed |
+| 4 of 20 "failures" had put the object exactly right | The check judged the hand's position, not the object's | Judge where the **object** ends up | **20 of 20** on new setups |
+
+**Then a stress test.** With a deliberately weak grip, objects slipped every time: **0 of 8**. The idea was to measure the failed lift and retry with a stronger grip. Result: **8 of 8**.
+
+**Lesson:** measure what you care about (where the object lands), not a stand-in for it (where the hand went).
+
+---
+
+### Stage 2: the real tasks in the simulator (cups)
+
+**Task 2, the triangle.** The idea: place two cups side by side, then the third across their **measured** tops. **Tested on 30 setups: 30 of 30.** It worked first time, because stage 1's lessons carried over.
+
+**Task 3, the flip.** Turning a cup over with the palm above it would leave the palm underneath at the end, where it would hit the tower. So the idea was to grip the cup **beside** it and turn it like food on a spit.
+
+**First test, 9 new setups: 1 of 9.** Then one fix at a time, each tested on new setups:
+
+| Failure seen | Idea | Result |
+|---|---|---|
+| The cup crept out of the hand over a few seconds | Stiffer friction setting (`impratio`) | 1 of 12: a new problem showed up |
+| Fingers carried the cup away when lifting; the robot's last arm swing knocked the tower | Back out sideways before lifting; remove the swing | 5 of 12 |
+| The palm hit the cup's wide base on the way down | Come down beside it, slide in, then centre the hand | 9 of 15 |
+| Cups thrown, slipping out of the fingertips, flips ending short | Turn only the wrist; hold the cup deeper; keep the forearm level | 21 of 24 |
+| The last 3 failures were flipped, but over 2 cm off-centre | Aim at the top cup's **measured** position, and cancel a small shift on release | **50 of 50** |
+
+**Lesson:** one fix at a time shows which fix helped. A fix can also reveal the next problem, as the 1 of 12 did.
+
+---
+
+### Stage 3: your real videos and real glasses
+
+**Starting point.** The block version: colour tracking and a printed marker.
+**Tested on:** your first Task 2 video.
+**Result:** unusable. Your glasses are steel, with almost no colour, and there was no marker.
+
+| Failure seen | Idea | Result |
+|---|---|---|
+| No colour to track | Follow the **bright closed tops** of the upside-down glasses | Every move in take 1 found, in order |
+| No marker to measure with | Use the **table's corners** and its measured size (80 × 50 cm) as the ruler | Tower position from the video matched within 0.2 cm |
+| Taller real glasses broke the robot's motion: **0 of 6** | Grip higher, level the glass, aim from measurements, lift clear after letting go | **19 of 20**, then **28 of 30** for each task once its working area was found |
+| Task 3 take 1: the right arm can't flip across its own chest | Move the glasses to fit the robot | Worked, but moved glasses up to 33 cm, a poor copy. **Dropped** |
+| Same problem | Choose the **arm and where to stand** from the layout, moving nothing | Take 1 builds; 25 of 30 random layouts |
+
+**A fair test on new videos.** You recorded 8 more Task 2 takes:
+- **0 of 8** succeeded, and only 2 were even read.
+- The top glass was often lost against the bright floor, so I added a rule that works out an unseen top glass from the others. Result: **2 of 8** (takes 2 and 5). That's not a fair test, because the rule came from those videos.
+- 4 were still refused, because a starting glass was missed. That led to stage 5.
+
+You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in a layout chosen to suit the robot, built with nothing changed. That's one run, and when nudged by 1.5 cm in the simulator, it passed only 3 of 6.
+
+**Lesson:** a method tuned on one video can fail on the next. That's why new videos matter.
+
+---
+
+### Stage 4: which arm to use
+
+| Failure seen | Idea | Tested on | Result |
+|---|---|---|---|
+| Layouts on the robot's left failed with the right arm: **10 of 30** | Use the **nearest arm** for the whole task | 30 left-side layouts | **24 of 30** |
+| Layouts spread across both sides: the nearest arm gave no gain (21 vs 20 of 30) | **An arm per glass** | 30 spread layouts | First version **9 of 30**: the swapping arm knocked glasses |
+| The old arm swept glasses during the swap | The old hand rises and goes out beside the body; the new one comes in the same way | Two sets of 30 | A tie with one arm (20 vs 20, 22 vs 21), but real take 6 now builds |
+| Neither choice wins everywhere | A **logistic regression model** (chapter 16) learns from 180 saved runs which choice will work | 60 new layouts | Model **50**, hand rule 49, always one way 43–44, best possible 51 |
+
+**Lesson:** a smarter choice can only help as much as the gap between the options. The model beat the simple rule by just one layout.
+
+---
+
+### Stage 5: when the reader misses glasses
+
+**Problem.** After stage 3, Task 2 built **4 of your 9 videos**. Most failures were a starting glass the reader never saw.
+
+**Idea.** Ask Claude (chapter 17) to point at every glass in an early frame, and add the ones the reader missed. The measured positions stay in charge.
+
+| Test | Before | After |
+|---|---|---|
+| Your 9 real Task 2 videos | 4 of 9 | **8 of 9** (not a fair test) |
+| 10 cluttered simulated tables | a brightness rule saw 20 bright patches | **10 of 10** found exactly the glasses |
+| Which Claude model? (10 cases) | — | All 9 of 10; Sonnet most accurate and far cheaper than Opus, so Sonnet is used |
+| Your 9 real Task 3 videos | 2 of 9 | 2 of 9: no change, so Task 3's problem isn't reading (stage 7) |
+
+---
+
+### Stage 6: copying how you move, not just what you did
+
+| Problem | Idea | Result | Kept? |
+|---|---|---|---|
+| The robot needs the key moments of a video | Find them from where the hand slows down | 13 moments for 6 real ones | **Dropped**: glass rest spots decide timing |
+| The robot copied *what* you did, not *how* you moved | Copy your hand's **height and timing** while carrying | 4 of 4 videos built (not a fair test) | Optional |
+| Copy your grip too? | Measure the thumb–finger gap around each pick | No reliable pattern: the glass hides your fingers | **Dropped** |
+| Could the robot copy you live? | Webcam hand tracking drives the arm, wrist and fingers | First live try failed: the arm flew up, the body spun | Fixed below |
+| Control started on a moving hand; the waist turned | Start only on a still hand; lock the waist; start over after 2 s without a hand | Followed your hand in 941 of 1460 frames | Yes |
+| Copying a video means little if the simulated glasses stand elsewhere | Place the video's glasses; put your hand on the table in 3D (chapter 19) | Your palm within 0.9–1.3 cm of each glass you took | Yes |
+
+---
+
+### Stage 7: finding where Task 3 fails, and fixing it
+
+**Problem.** A failed run only said "the tower is wrong". That doesn't tell you what to fix.
+
+**Idea 1: step checks** (chapter 20). After each step, measure whether it worked. Tested on 30 flip layouts: the same **28 of 30**, the same failures, and no false alarms. So the checks only measure, as intended.
+
+**What they found.** Your real Task 3 takes 2, 3 and 7 all fail at **reach**. The hand stopped 11, 31 and 41 cm short. You'd put the glasses 36–55 cm into the table, but the flip was only tested on 29–35 cm.
+
+**Idea 2: stand closer to the table.**
+
+| Take | Normal | 6 cm closer | 10 cm closer |
+|---|---|---|---|
+| 2 | 11 cm short | 8 cm short | **built and flipped** |
+| 7 | 41 cm short | 4 cm short | reached it, then missed the fourth glass by 5 cm |
+| 3 | 31 cm short | 45 cm short | its glass is 47 cm to the side, not too deep |
+
+**Where this stands.** One take is rescued, in one run. Next comes a rule for how close to stand, then retesting:
+- takes 1 and 9, which work now, must still work;
+- the simulator's working-area tests must not get worse.
+
+Take 3 shows the real limit: a robot that can't walk can't reach glasses spread that widely.
+
+---
+
+### Ideas discussed but not built
+- **A recurrent network (RNN/GRU) trained on demonstrations.** It was in one plan, but there was no time to collect training data. The only thing trained in this project is the 16-weight logistic regression model.
+- **SAM 2 and dex-retargeting.** Not needed. The glasses are identical, and rest spots keep their order.
+
+### The journey in one table
+
+| What | Where it started | Where it is now |
+|---|---|---|
+| Block sorting, simulator | 0 of 10 | 20 of 20 |
+| Task 3 flip, simulator | 1 of 9 | 50 of 50 |
+| Real glasses, robot body | 0 of 6 | 28 of 30 |
+| Task 2, your real videos | 1 video | 4 of 9, and **8 of 9** with Claude |
+| Task 3, your real videos | 1 video, then 0 of 6 varied | 2 of 9, and take 2 promising with the robot closer |
 
 ---
 
