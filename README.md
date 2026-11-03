@@ -2,14 +2,23 @@
 
 I film myself stacking steel glasses at a table. A simulated Unitree G1 watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo.
 
-![Task 2: my video beside the robot, at the end of the task](docs/videos/task2_final.jpg)
+![Task 3 from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
 
-| Task | From my video | Video |
-|---|---|---|
-| **Task 2:** three glasses into a triangle | Order and positions come from the video, and the robot builds it | [Side by side](docs/videos/task2_video_to_robot.mp4) |
-| **Task 3:** a fourth glass flipped and stood on top, opening up | Order, positions and the flip come from the video, and the layout also picks **which arm works and where the robot stands** | [Side by side](docs/videos/task3_video_to_robot.mp4) |
+**Watch first: [the two-minute demo reel](docs/videos/demo_reel.mp4).**
 
-![Task 3: my video beside the robot, at the end of the task](docs/videos/task3_final.jpg)
+## At a glance
+
+| What | Result |
+|---|---|
+| **Task 2:** three glasses into a triangle | Built from 4 of my 9 videos ([video](docs/videos/task2_video_to_robot.mp4)). The rest were refused while reading (4) or the robot failed (1) |
+| **Task 3:** a fourth glass flipped and stood on top, opening up | Built from 2 of my 9 videos ([video](docs/videos/task3_new_video_to_robot.mp4)). One of the two, take 9, was new and untuned, in a layout I chose to suit the robot. 0 of 6 deliberately varied layouts worked |
+| **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](docs/videos/task2_two_arms_video_to_robot.mp4)) |
+| **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](docs/videos/task2_hand_path_video_to_robot.mp4)) |
+| **What the robot can do** | 28 of 30 random layouts for each task, within tested areas, in simulation |
+
+**What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Nothing is trained,** and no AI model reads the video except the optional hand tracker. Everything runs in simulation, with the robot's pelvis pinned.
+
+A full walkthrough of one video through every step is in [`docs/PIPELINE_EXPLAINED.md`](docs/PIPELINE_EXPLAINED.md).
 
 ## How my recording drives the robot
 
@@ -24,7 +33,7 @@ phone video of steel glasses, no marker
   -> check where the glasses really ended up
 ```
 
-Without the recording, the robot has no starting positions, no tower position, no order, no arm and no standing spot. The robot's grip and flip are programmed, and they aren't learned from my hand. So it copies **what happened and where**, not how my hand moved.
+Without the recording, the robot has no starting positions, no tower position, no order, no arm and no standing spot. The robot's grip and flip are programmed, and they aren't learned from my hand. By default it copies **what happened and where**. With `--hand-path`, it also copies my hand's height and timing while carrying.
 
 ## Design choices
 
@@ -160,7 +169,8 @@ Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results a
 **Didn't work, or needed fixing:**
 - **Real glasses broke the robot's motion, 0 of 6.** A motion that passed 30 of 30 with smaller cups failed with my taller glass. It needed a higher grip, levelling, measured aiming, and a higher lift, because the hand was knocking over the finished tower on its way back.
 - **One arm can't flip anywhere.** Across its chest, the right arm hits the robot's own body. Flipping elsewhere and carrying the glass across made the arm swing and destroy the tower, so I removed that. Moving the glasses to fit worked, by up to 33 cm, but copied my layout badly. Choosing the arm and standing spot replaced it.
-- **Hand tracking wasn't useful for timing.** It found the hand in 93-96% of frames, but picked 13 moments for 6 real ones and 17 for 8. The system uses glass rest spots instead.
+- **Hand tracking wasn't useful for timing.** It found the hand in 93-96% of frames, but picked 13 moments for 6 real ones and 17 for 8. The system uses glass rest spots instead. Later, the same tracker worked well for copying the hand's path.
+- **Copying my grip didn't work.** I measured the gap between thumb and index finger around every pick and release, in three videos. There was no reliable pattern, probably because the glass hides my fingers, so I didn't build it.
 - **Colour tracking and the marker were built first, then dropped for the real task.** My glasses are steel, and I recorded without a marker.
 - **Grip retries didn't help.** Rerunning the failed setups with up to three grip attempts rescued none of them, so I removed the retries. The working fix was keeping glasses 15 cm from the tower.
 - **My table estimate exposed a measuring error.** I was first told 80 x 60 cm, and the video said otherwise. The real size was 80 x 50.
@@ -169,7 +179,7 @@ Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results a
 
 - **Pinned pelvis:** no balance, and reach is limited.
 - **Three-finger Dex3 hand,** not a five-finger hand.
-- **Programmed motion:** no learned policy, and no retargeting of my hand's motion.
+- **Programmed motion:** no learned policy. The optional hand path copies only my hand's height and timing, not my fingers or wrist.
 - **The standing spot is set, not walked to,** and the glass to flip must start 23 cm or more from the table's near edge. Closer in, most runs failed to grip it.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
 - **Hand-picked corners:** someone picks four rough table corners once per camera position, in `data/labels/`. A fit to each video's table edges then sharpens them.
@@ -207,7 +217,14 @@ It runs on a laptop CPU, and was developed on an M1 Mac with 8 GB of RAM. A robo
 
 ## Data
 
-Samples are in `data/raw/sample/`, with the collection note in [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md). The samples are compressed, at full size, to keep the repo small. They read within 0.1 cm of the originals.
+Samples are in `data/raw/sample/`, with the collection note in [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md). The samples are compressed, at full size, to keep the repo small. The first two read within 0.1 cm of their originals. Compression can still change a reading: the take 5 sample saw a top glass that the original missed, with the same robot result.
+
+## What I'd do next
+
+- **Learn from these runs.** Each successful simulator run can become a demonstration. An ACT policy, a world model or reinforcement learning could start from that data. I didn't try this before the deadline.
+- **Fix far-off towers** by passing a glass between hands through the middle of the table, instead of one arm reaching across the body.
+- **A better video reader.** Most failed videos were refused while reading, not by the robot. A trained tracker such as SAM 2 should help.
+- **A closer, first-person camera,** so that finger poses can be seen and retargeted to the robot's hand.
 
 ## Earlier work in this repo
 
