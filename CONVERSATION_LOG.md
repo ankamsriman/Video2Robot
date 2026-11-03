@@ -120,7 +120,7 @@ You pointed out that the video told the robot what to do, not how to move. So th
 You added an API key and asked for a VLM. Claude now turns typed instructions into checked plans, chooses which glass to flip, and finds glasses the reader missed. Task 2 went from 4 to 8 of your 9 videos built, though I adjusted it on those same videos. On 10 cluttered simulated tables it found exactly the three glasses every time, within 1.5 cm. Grip timing was dropped: the tracker couldn't see the fingers around the glass.
 
 ### A small learned model, and the API limit
-A small outcome model now predicts whether one arm or two will work for a layout, and `--choose-arms` uses it. On 30 fresh layouts it chose well enough for 26 builds, against 25 for the hand rule. Sonnet and Opus pointed at glasses about equally well, and Haiku less precisely. Your account then hit its monthly API spending limit, so the last VLM runs couldn't happen until it's raised in the Console.
+A small outcome model now predicts whether one arm or two will work for a layout, and `--choose-arms` uses it. On 30 fresh layouts it chose well enough for 26 builds, against 25 for the hand rule. Sonnet and Opus pointed at glasses about equally well, and Haiku less precisely. Your account then hit its monthly API spending limit, mostly because of a costly Opus comparison. Once you raised it, `--find-glasses --choose-arms` built 8 of your 9 Task 2 videos with no options set by hand.
 
 ### Still open
 Raising the API limit, new videos to test the VLM fairly, making the repo public, and submitting. The data collection note needs your details. You decide when the repo goes public.

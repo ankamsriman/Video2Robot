@@ -4,13 +4,13 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 
 ![Task 3 from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
 
-**Watch first: [the two-minute demo reel](docs/videos/demo_reel.mp4).**
+**Watch first: [the three-minute demo reel](docs/videos/demo_reel.mp4).**
 
 ## At a glance
 
 | What | Result |
 |---|---|
-| **Task 2:** three glasses into a triangle | Built from 4 of my 9 videos ([video](docs/videos/task2_video_to_robot.mp4)). With a vision language model finding glasses my reader missed, **8 of 9** |
+| **Task 2:** three glasses into a triangle | Built from 4 of my 9 videos ([video](docs/videos/task2_video_to_robot.mp4)). With a vision language model finding glasses my reader missed, and the small learned model choosing one arm or two, **8 of 9**, with no options set by hand |
 | **Task 3:** a fourth glass flipped and stood on top, opening up | Built from 2 of my 9 videos ([video](docs/videos/task3_new_video_to_robot.mp4)). One of the two, take 9, was new and untuned, in a layout I chose to suit the robot. 0 of 6 deliberately varied layouts worked |
 | **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](docs/videos/task2_two_arms_video_to_robot.mp4)) |
 | **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](docs/videos/task2_hand_path_video_to_robot.mp4)) |
@@ -128,7 +128,7 @@ I built and adjusted this on these same failed videos, including fixing a versio
 
 With Claude's positions and with the true ones, the robot passed and failed on exactly the same scenes, so the remaining failures are the robot's. These are rendered pictures, not real video. See `docs/results/clutter/`.
 
-*Which Claude model.* On the same 10 pictures, 5 real frames and 5 cluttered scenes, Haiku, Sonnet and Opus each found exactly the glasses in 9 of 10. The tenth, my first Task 3 video, may well be a correct glass my reader only saw later. Mean errors were 0.65, 0.33 and 0.37 cm, so I use Sonnet. See `docs/results/vlm_model_comparison.json`.
+*Which Claude model.* On the same 10 pictures, 5 real frames and 5 cluttered scenes, Haiku, Sonnet and Opus each found exactly the glasses in 9 of 10. The tenth, my first Task 3 video, may well be a correct glass my reader only saw later. Mean errors were 0.65, 0.33 and 0.37 cm, so I use Sonnet. Opus also used about 70,000 input tokens per picture, roughly 50 times what Sonnet used for the same pictures, which used up most of my small API budget. See `docs/results/vlm_model_comparison.json`.
 
 **A small learned outcome model, Task 2.** This is the simplest kind of world model: it predicts whether a run will succeed, not how the scene changes step by step. It's a logistic regression in NumPy, on numbers describing the layout. I ran 150 random layouts both ways, one arm and two arms, so each layout's true outcome is known for both choices.
 
@@ -140,7 +140,7 @@ With Claude's positions and with the true ones, the robot passed and failed on e
 | **Outcome model** | **50** | **26** |
 | Best possible, knowing the answers | 51 | 27 |
 
-It learned the pattern I'd only spotted by eye, and it does slightly better than the hand rule. The samples are small, so the gap between them isn't proven. I first noticed the pattern in seed 8700, one of the test sets, so seed 9000 is the fair column. With `--choose-arms`, the model picks before the robot moves. On my real Task 2 videos it chose two arms every time, which fits, because my towers were all near the middle. That built 5 of the 6 it ran on (takes 1, 2, 3, 5 and 6, not the check video). Three more needed the vision model, which my account's API limit then blocked. Run `scripts/outcome_test.py` to repeat the test above.
+It learned the pattern I'd only spotted by eye, and it does slightly better than the hand rule. The samples are small, so the gap between them isn't proven. I first noticed the pattern in seed 8700, one of the test sets, so seed 9000 is the fair column. With `--choose-arms`, the model picks before the robot moves. On my real Task 2 videos it chose two arms every time, which fits, because my towers were all near the middle. With `--find-glasses --choose-arms` and no other options, the robot built **8 of my 9 Task 2 videos**. Only the check video failed, as it does every other way. Run `scripts/outcome_test.py` to repeat the test above.
 
 **What goes wrong when the tower is far to one side, Task 2.** In 60 random layouts with two arms, towers within 12 cm of the table's middle passed 34 of 35, and those further out passed 8 of 25 (one arm: 27 of 35, and 14 of 25). I chose the 12 cm line after seeing results. Replaying the 25 far towers showed why: when an arm reached across the body to the far side, its hand stopped short in 25 of 46 placements, against 1 of 25 for the arm on the tower's side. My own towers were all within about 7 cm of the middle. Task 3 doesn't show this, because the robot stands somewhere different for each layout.
 
@@ -232,7 +232,7 @@ Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results a
 - **The standing spot is set, not walked to,** and the glass to flip must start 23 cm or more from the table's near edge. Closer in, most runs failed to grip it.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
 - **Hand-picked corners:** someone picks four rough table corners once per camera position, in `data/labels/`. A fit to each video's table edges then sharpens them.
-- **Vision model:** needs an API key and an internet connection, and sends frames to an outside service. My account hit its spending limit during testing, so some planned VLM runs didn't happen. Its answers can vary, so the code checks them and refuses anything outside the allowed options.
+- **Vision model:** needs an API key and an internet connection, and sends frames to an outside service. My account hit its monthly spending limit during testing, mostly because of the Opus comparison, and the last runs waited until I raised it. Its answers can vary, so the code checks them and refuses anything outside the allowed options.
 - **Narrow conditions:** a fixed camera, a dark table, bright closed tops and fairly bright light. The settings suit my setup and would probably need changing elsewhere.
 - **Flip check:** tested only on my two right-side videos.
 

@@ -49,5 +49,32 @@
   "success": false,
   "error_cm": 22.1,
   "with_find_glasses": false
+ },
+ {
+  "video": "task2_triangle_take4",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.74, \"two\": 0.85 }",
+  "success": true,
+  "error_cm": 0.5,
+  "with_find_glasses": true,
+  "problem": null
+ },
+ {
+  "video": "task2_triangle_take7",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.71, \"two\": 0.8 }",
+  "success": true,
+  "error_cm": 0.3,
+  "with_find_glasses": true,
+  "problem": null
+ },
+ {
+  "video": "task2_triangle_take8",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.83, \"two\": 0.92 }",
+  "success": true,
+  "error_cm": 0.2,
+  "with_find_glasses": true,
+  "problem": null
  }
 ]

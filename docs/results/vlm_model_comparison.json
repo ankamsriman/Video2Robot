@@ -1,8 +1,21 @@
 {
   "what": "Each model was asked for every glass top, in 5 real frames (compared with the bright-top reader's spots) and 5 cluttered simulated scenes (compared with true positions). A point within 4 cm of a glass counts as finding it.",
   "cases": 10,
-  "claude-haiku-5-5": {"all_found_none_false": 9, "mean_error_cm": 0.65, "max_error_cm": 1.2},
-  "claude-sonnet-5-5": {"all_found_none_false": 9, "mean_error_cm": 0.33, "max_error_cm": 0.8},
-  "claude-opus-5-5": {"all_found_none_false": 9, "mean_error_cm": 0.37, "max_error_cm": 1.0},
-  "note": "Every model gave one extra point in task3_flip_right_take1. That video's reader spots were counted only in the first 2 s, so the extra point may be a real glass the reader saw later, not a mistake."
+  "claude-haiku-5-5": {
+    "all_found_none_false": 9,
+    "mean_error_cm": 0.65,
+    "max_error_cm": 1.2
+  },
+  "claude-sonnet-5-5": {
+    "all_found_none_false": 9,
+    "mean_error_cm": 0.33,
+    "max_error_cm": 0.8
+  },
+  "claude-opus-5-5": {
+    "all_found_none_false": 9,
+    "mean_error_cm": 0.37,
+    "max_error_cm": 1.0
+  },
+  "note": "Every model gave one extra point in task3_flip_right_take1. That video's reader spots were counted only in the first 2 s, so the extra point may be a real glass the reader saw later, not a mistake.",
+  "cost_note": "The Console showed 10 Opus requests using about 704,000 input tokens, against about 36,000 for 24 Sonnet requests that day. Check one request's cost before running a model comparison."
 }
