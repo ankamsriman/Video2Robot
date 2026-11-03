@@ -48,6 +48,13 @@ from src.perception.hand_trajectory import (
     profile_from_pixels,
 )
 from src.perception.table_view import TableView, refine_corners, table_view
+from src.perception.vlm_rescue import (
+    departure_frame,
+    missing_points,
+    patch_change,
+    rescued_spot,
+    seen_from_start,
+)
 from src.reasoning.fit_layout import (
     Area,
     FittedLayout,
@@ -56,6 +63,15 @@ from src.reasoning.fit_layout import (
     fit_flip_layout,
     nearest_arm,
     plan_stand,
+)
+from src.reasoning.instruction import InstructionError, choose_glasses
+from src.reasoning.vlm_client import (
+    AnthropicVision,
+    VlmConfig,
+    find_glass_tops,
+    load_api_key,
+    plan_from_instruction,
+    video_frames,
 )
 from src.simulation.cup_flip import build_flipped_tower, flip_for_arm, load_flip_config
 from src.simulation.glass_task import CopiedCarries, build_glass_triangle
@@ -105,8 +121,37 @@ def rough_corners(video: Path, labels: Path = LABELS) -> np.ndarray:
     raise VideoReadError(f"No table corners for {video.name} in {labels}")
 
 
-def read_video(video: Path, config: GlassVideoConfig) -> tuple[TriangleDemo, bool]:
-    """Return what the video shows, and whether it shows a flipped fourth glass."""
+def glasses_from_model(video: Path) -> list[tuple[float, float]]:
+    """Ask a vision language model where every glass top is, early in the video, in pixels."""
+    raw = yaml.safe_load(CONFIG_PATH.read_text())
+    vlm = VlmConfig(**raw["vlm"])
+    rescue = raw["vlm_rescue"]
+    capture = cv2.VideoCapture(str(video))
+    capture.set(cv2.CAP_PROP_POS_MSEC, rescue["frame_seconds"] * 1000)
+    ok, frame = capture.read()
+    capture.release()
+    if not ok:
+        raise VideoReadError(f"Couldn't read an early frame of {video.name}")
+    scale = vlm.image_width / frame.shape[1]
+    small = cv2.resize(frame, (vlm.image_width, int(frame.shape[0] * scale)))
+    model = AnthropicVision(vlm, load_api_key(ROOT / ".env"))
+    picture = cv2.imencode(".jpg", small, [cv2.IMWRITE_JPEG_QUALITY, 85])[1].tobytes()
+    return [
+        (x / scale, y / scale)
+        for x, y in find_glass_tops(model, picture, small.shape[1], small.shape[0])
+    ]
+
+
+def read_video(
+    video: Path,
+    config: GlassVideoConfig,
+    model_points: list[tuple[float, float]] | None = None,
+) -> tuple[TriangleDemo, bool]:
+    """Return what the video shows, and whether it shows a flipped fourth glass.
+
+    `model_points` are glass tops a vision model found early in the video. Any the reader
+    missed are added as starting spots.
+    """
     rough = rough_corners(video)
     capture = cv2.VideoCapture(str(video))
     if not capture.isOpened():
@@ -122,15 +167,32 @@ def read_video(video: Path, config: GlassVideoConfig) -> tuple[TriangleDemo, boo
     table, search = search_masks(size, corners, config.room_above_table)
     tops = []
     ending = []
+    points = model_points or []
+    rescue = yaml.safe_load(CONFIG_PATH.read_text())["vlm_rescue"] if points else {}
+    references: list = []
+    changes: list[list[float]] = [[] for _ in points]
     while True:
         ok, frame = capture.read()
         if not ok:
             break
         tops.append(find_tops(frame, table, search, config))
+        if points:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            half = rescue["patch_half_pixels"]
+            if len(tops) == rescue["reference_frame"] + 1:
+                references = [
+                    gray[int(y) - half : int(y) + half, int(x) - half : int(x) + half].astype(float)
+                    for x, y in points
+                ]
+            for index, point in enumerate(points):
+                if references:
+                    changes[index].append(patch_change(gray, point, half, references[index]))
         if len(tops) > count - LAST_FRAMES:
             ending.append(frame)
     capture.release()
     spots = rest_spots(tops, fps, view, config)
+    if points:
+        spots = _add_rescued(spots, points, changes, fps, rescue)
     if len(spots) != SPOTS_IN_FLIP:
         return read_triangle(spots, view, fps, config), False
     demo = read_flip(spots, view, fps, config)
@@ -189,6 +251,59 @@ def copied_carries(
     return CopiedCarries(tuple(profiles), limits), details
 
 
+def follow_instruction(
+    video: Path, demo: TriangleDemo, is_flip: bool, instruction: str
+) -> tuple[TriangleDemo, bool, np.ndarray | None, dict]:
+    """Let a vision language model choose the task and order. Positions stay as measured.
+
+    Returns the reordered demonstration, whether to flip, any glass left out of a triangle,
+    and what to report.
+    """
+    raw = yaml.safe_load(CONFIG_PATH.read_text())["vlm"]
+    vlm = VlmConfig(**raw)
+    model = AnthropicVision(vlm, load_api_key(ROOT / ".env"))
+    images = video_frames(video, vlm.frames, vlm.image_width)
+    plan = plan_from_instruction(model, instruction, images, len(demo.starts), is_flip)
+    order, flip = choose_glasses(demo.starts, plan, is_flip)
+    left_out = demo.starts[3] if is_flip and not flip else None
+    chosen = dataclasses.replace(
+        demo,
+        starts=tuple(demo.starts[i] for i in order),
+        moved_at=tuple(demo.moved_at[i] for i in order),
+    )
+    report = {
+        "instruction": instruction,
+        "model": vlm.model,
+        "plan": plan.model_dump(mode="json"),
+        "glasses_in_video_order_used": [i + 1 for i in order],
+        "glass_left_out": left_out is not None,
+    }
+    return chosen, flip, left_out, report
+
+
+def _add_rescued(spots, points, changes, fps, rescue) -> tuple:
+    """Add a starting spot for each glass the model found and the reader missed."""
+    spots = seen_from_start(
+        points, spots, fps, rescue["early_seconds"], rescue["near_pixels"]
+    )
+    missing = missing_points(
+        points, spots, fps, rescue["early_seconds"], rescue["near_pixels"]
+    )
+    added = []
+    for point in missing:
+        index = points.index(point)
+        series = np.array(changes[index])
+        left = departure_frame(
+            series, rescue["change_threshold"], fps, rescue["settle_seconds"]
+        )
+        if left is None:
+            logger.warning("A glass the model found at %s never seemed to leave", point)
+            continue
+        added.append(rescued_spot(point, left + rescue["reference_frame"]))
+    logger.warning("Added %d starting glass(es) the reader missed", len(added))
+    return tuple(sorted((*spots, *added), key=lambda spot: spot.first))
+
+
 def _to_robot(place: np.ndarray, scene: SceneConfig, table_width: float) -> np.ndarray:
     """Table positions to simulator positions, with the robot at the middle of the edge."""
     return np.array(
@@ -228,9 +343,16 @@ def run_robot(
     config: GlassVideoConfig,
     two_arms: bool = False,
     hand_path: bool = False,
+    left_out: np.ndarray | None = None,
+    suffix_extra: str = "",
+    notes: dict | None = None,
 ) -> dict:
-    """Place the glasses as the video shows, run the robot, and report the outcome."""
-    path = FLIP_CONFIG_PATH if is_flip else CONFIG_PATH
+    """Place the glasses as the video shows, run the robot, and report the outcome.
+
+    `left_out` is a glass that stays on the table untouched, as when an instruction asks
+    for a triangle from a video with four glasses.
+    """
+    path = FLIP_CONFIG_PATH if is_flip or left_out is not None else CONFIG_PATH
     scene = load_scene_config(path)
     motion = load_motion_config(path)
     table_width = config.table_width
@@ -247,6 +369,7 @@ def run_robot(
         "top_glass_offset_in_video_cm": (
             round(demo.top_offset * 100, 1) if demo.top_seen else None
         ),
+        **(notes or {}),
     }
     if fit:
         fitted = _fit(starts, tower)
@@ -283,6 +406,8 @@ def run_robot(
         }
     names = (*GLASS_NAMES, FLIPPED_NAME) if is_flip else GLASS_NAMES
     layout = {name: tuple(start) for name, start in zip(names, starts, strict=True)}
+    if left_out is not None:
+        layout[FLIPPED_NAME] = tuple(_to_robot(left_out, scene, table_width))
     triangle = dataclasses.replace(
         load_triangle_config(path),
         center=tuple(tower),
@@ -291,6 +416,7 @@ def run_robot(
     model = build_model(scene, layout)
     suffix = "_fitted" if fit else "_middle" if stay_in_middle else "_two_arms" if two_arms else ""
     suffix = f"{suffix}_hand_path" if hand_path else suffix
+    suffix = f"{suffix}{suffix_extra}"
     carries = None
     if hand_path:
         if is_flip:
@@ -349,14 +475,40 @@ def main() -> None:
         action="store_true",
         help="for a triangle, carry each glass along the path of the hand in the video",
     )
+    parser.add_argument(
+        "--instruction",
+        help='a typed instruction, read by a vision language model, e.g. "nearest at the bottom"',
+    )
+    parser.add_argument(
+        "--name", default="", help="added to output file names, to keep runs apart"
+    )
+    parser.add_argument(
+        "--find-glasses",
+        action="store_true",
+        help="ask a vision language model for glasses the reader may have missed",
+    )
     args = parser.parse_args()
     raw = yaml.safe_load(CONFIG_PATH.read_text())["real_video"]
     config = GlassVideoConfig(**raw)
     try:
-        demo, is_flip = read_video(args.video, config)
+        points = glasses_from_model(args.video) if args.find_glasses else None
+        demo, is_flip = read_video(args.video, config, points)
     except VideoReadError as error:
         logger.error("Couldn't read %s: %s", args.video.name, error)
         raise SystemExit(1) from error
+    left_out = None
+    instruction_report = None
+    if args.instruction:
+        if args.hand_path:
+            raise SystemExit("--instruction can't be combined with --hand-path yet")
+        try:
+            demo, is_flip, left_out, instruction_report = follow_instruction(
+                args.video, demo, is_flip, args.instruction
+            )
+        except InstructionError as error:
+            logger.error("Couldn't follow the instruction: %s", error)
+            raise SystemExit(1) from error
+    suffix_extra = f"_{args.name}" if args.name else ("_instruction" if args.instruction else "")
     report = run_robot(
         args.video,
         demo,
@@ -366,6 +518,9 @@ def main() -> None:
         config,
         args.two_arms,
         args.hand_path,
+        left_out,
+        suffix_extra,
+        {"instruction": instruction_report} if instruction_report else None,
     )
     print(json.dumps(report, indent=2))
 

@@ -1,0 +1,150 @@
+[
+ {
+  "video": "task2_triangle_right_take1",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.2
+ },
+ {
+  "video": "task2_triangle_take2",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.4
+ },
+ {
+  "video": "task2_triangle_take3",
+  "extra": [],
+  "added": "1",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.4
+ },
+ {
+  "video": "task2_triangle_take4",
+  "extra": [
+   "--two-arms"
+  ],
+  "added": "1",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.5
+ },
+ {
+  "video": "task2_triangle_take5",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.5
+ },
+ {
+  "video": "task2_triangle_take6",
+  "extra": [
+   "--two-arms"
+  ],
+  "added": "0",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.2
+ },
+ {
+  "video": "task2_triangle_take7",
+  "extra": [],
+  "added": "1",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.4
+ },
+ {
+  "video": "task2_triangle_take8",
+  "extra": [],
+  "added": "1",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.0
+ },
+ {
+  "video": "task2_triangle_check",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": false,
+  "error_cm": 22.1
+ },
+ {
+  "video": "task3_flip_right_take1",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.5
+ },
+ {
+  "video": "task3_flip_take2",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": false,
+  "error_cm": 0.5
+ },
+ {
+  "video": "task3_flip_take3",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": false,
+  "error_cm": 0.5
+ },
+ {
+  "video": "task3_flip_take4",
+  "extra": [],
+  "added": "0",
+  "refused": "Expected 6 resting spots for a triangle, found 8",
+  "success": null,
+  "error_cm": null
+ },
+ {
+  "video": "task3_flip_take5",
+  "extra": [],
+  "added": "1",
+  "refused": "Expected 6 resting spots for a triangle, found 8",
+  "success": null,
+  "error_cm": null
+ },
+ {
+  "video": "task3_flip_take6",
+  "extra": [],
+  "added": "1",
+  "refused": null,
+  "success": false,
+  "error_cm": 16.3
+ },
+ {
+  "video": "task3_flip_take7",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": false,
+  "error_cm": 45.3
+ },
+ {
+  "video": "task3_flip_take8",
+  "extra": [],
+  "added": "0",
+  "refused": "A glass seems to arrive before any glass left its spot",
+  "success": null,
+  "error_cm": null
+ },
+ {
+  "video": "task3_flip_take9",
+  "extra": [],
+  "added": "0",
+  "refused": null,
+  "success": true,
+  "error_cm": 0.4
+ }
+]

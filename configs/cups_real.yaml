@@ -59,6 +59,24 @@ colors:
   cup_b: { hue: [45, 80], min_saturation: 100, min_value: 30 }
   cup_c: { hue: [170, 8], min_saturation: 100, min_value: 30 }
 
+# Reading a typed instruction with a vision language model. The key goes in .env.
+vlm:
+  model: claude-sonnet-5-5
+  max_tokens: 300
+  timeout_seconds: 60
+  frames: 2
+  image_width: 800
+
+# Adding starting glasses the reader missed, from glass tops a vision model points to.
+vlm_rescue:
+  frame_seconds: 0.3
+  reference_frame: 5
+  early_seconds: 1.0
+  near_pixels: 30
+  patch_half_pixels: 12
+  change_threshold: 45
+  settle_seconds: 1.0
+
 # Copying the person's hand path from a video, within what's safe for the robot.
 hand_path:
   min_height: 0.20

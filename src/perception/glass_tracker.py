@@ -252,6 +252,10 @@ def _read_with_top_unseen(
         return None
     middle = (ends[0] + ends[1]) / 2
     for spot in starts:
+        # A top glass is placed after the lower two, so a spot seen before them is a start,
+        # even if, from the camera, it lines up with where a top glass would be.
+        if spot.first < min(end.first for end in lower):
+            continue
         raised = view.position((spot.x, spot.y), 2 * height)
         if np.linalg.norm(raised - middle) <= config.max_top_offset:
             return None

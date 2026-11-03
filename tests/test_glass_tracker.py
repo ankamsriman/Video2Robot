@@ -293,6 +293,19 @@ def test_a_lost_start_is_refused_when_the_top_glass_was_seen() -> None:
         read_triangle(spots, view, 30.0, CONFIG)
 
 
+def test_a_start_seen_from_the_beginning_is_never_taken_for_the_top_glass() -> None:
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    h = CONFIG.glass_height
+    spots = _triangle_spots()[:5]
+    # This start sits where a top glass would appear from the camera, but was there first.
+    raised = view.pixel(np.array((0.27, 0.44)), 2 * h)
+    spots[1] = Spot(float(raised[0]), float(raised[1]), 0, 380, 381)
+
+    demo = read_triangle(spots, view, 30.0, CONFIG)
+
+    assert not demo.top_seen
+
+
 def test_lower_glasses_too_far_apart_with_no_top_seen_are_refused() -> None:
     view = table_view(_corners(), WIDTH, DEPTH, SIZE)
     spots = _triangle_spots()[:5]
