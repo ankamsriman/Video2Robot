@@ -37,6 +37,8 @@ CONFIG = TeleopConfig(
     open_width=0.10,
     closed_width=0.02,
     calibration_frames=15,
+    calibration_still=0.04,
+    reset_after_lost=30,
 )
 HOME = np.array([0.30, -0.10, 0.98])
 

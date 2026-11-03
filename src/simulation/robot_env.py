@@ -370,9 +370,12 @@ class RobotEnv:
         """For live control: aim the arm at a hand pose without stepping physics.
 
         Each joint's target moves at most `max_step` radians, so a jump in the tracker
-        can't swing the arm. Returns whether the pose is within reach.
+        can't swing the arm. The waist stays put, so the body doesn't spin as the hand
+        moves. Returns whether the pose is within reach.
         """
-        result = self._ik.solve(self._commanded_qpos(), position, rotation)
+        result = self._ik.solve(
+            self._commanded_qpos(), position, rotation, keep_waist=True
+        )
         targets = self._arm_targets(result.qpos)
         current = {name: self._command[name] for name in targets}
         steps = {

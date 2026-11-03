@@ -133,7 +133,9 @@ teleop:
   thumb_reach_closed: 0.6      # the same, thumb tucked in
   open_width: 0.10             # robot thumb-to-fingers gap when your hand is open
   closed_width: 0.02           # and when it is closed
-  calibration_frames: 15       # frames your hand must be seen before control starts
+  calibration_frames: 15       # frames your hand must be held still before control starts
+  calibration_still: 0.04      # how far the wrist may drift then, as a share of the picture
+  reset_after_lost: 30         # frames without a hand before starting over from home
 
 teleop_view:
   width: 640

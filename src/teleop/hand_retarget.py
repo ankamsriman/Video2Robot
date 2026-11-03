@@ -51,6 +51,8 @@ class TeleopConfig:
     open_width: float
     closed_width: float
     calibration_frames: int
+    calibration_still: float
+    reset_after_lost: int
 
 
 @dataclass(frozen=True)

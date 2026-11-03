@@ -109,30 +109,62 @@ def read_hand(
 
 
 class HandFollower:
-    """Turns hand readings into steady robot targets, calibrating on the first still hand."""
+    """Turns hand readings into steady robot targets.
+
+    Control starts once a hand is held still, so a hand walking into the picture can't
+    set a bad starting pose. If the hand is gone for a while, it starts over from home.
+    """
 
     def __init__(
         self, config: TeleopConfig, home: np.ndarray, neutral: np.ndarray
     ) -> None:
         self._config = config
+        self._home = home
         self._neutral = neutral
         self.calibration: Calibration | None = None
-        self._seen_frames = 0
+        self._still_frames = 0
+        self._anchor: np.ndarray | None = None
+        self._lost_frames = 0
         self.position = home
         self.rotation = Rotation.from_matrix(neutral)
         self.curls = np.zeros(3)
 
     def recalibrate(self) -> None:
         self.calibration = None
-        self._seen_frames = 0
+        self._still_frames = 0
+        self._anchor = None
+
+    def _start_over(self) -> None:
+        self.recalibrate()
+        self.position = self._home
+        self.rotation = Rotation.from_matrix(self._neutral)
+        self.curls = np.zeros(3)
+        logger.info("Hand gone: back to the starting pose")
+
+    def _held_still(self, reading: HandReading) -> bool:
+        """Count frames with the wrist staying near where it was first seen."""
+        drift = (
+            np.inf
+            if self._anchor is None
+            else float(np.max(np.abs(reading.wrist - self._anchor)))
+        )
+        if drift > self._config.calibration_still:
+            self._anchor = reading.wrist
+            self._still_frames = 0
+        self._still_frames += 1
+        return self._still_frames >= self._config.calibration_frames
 
     def update(self, reading: HandReading | None) -> None:
         if reading is None:
-            self._seen_frames = 0 if self.calibration is None else self._seen_frames
+            self._lost_frames += 1
+            if self._lost_frames == self._config.reset_after_lost:
+                self._start_over()
+            elif self.calibration is None:
+                self._anchor = None
             return
+        self._lost_frames = 0
         if self.calibration is None:
-            self._seen_frames += 1
-            if self._seen_frames < self._config.calibration_frames:
+            if not self._held_still(reading):
                 return
             self.calibration = Calibration(
                 reading.wrist, reading.scale, reading.frame, self.position
@@ -183,7 +215,7 @@ def _draw_hand(image: np.ndarray, reading: HandReading | None) -> np.ndarray:
 
 def _status(follower: HandFollower, seen: bool, reachable: bool) -> tuple[str, tuple]:
     if follower.calibration is None:
-        return "Hold your hand up, facing the camera...", YELLOW
+        return "Hold your hand up and still, facing the camera...", YELLOW
     if not seen:
         return "Hand lost: the robot holds still", RED
     if not reachable:
@@ -196,7 +228,9 @@ def _compose(
 ) -> np.ndarray:
     height = robot_image.shape[0]
     scale = height / camera_image.shape[0]
-    left = cv2.resize(camera_image, (int(camera_image.shape[1] * scale), height))
+    # Video files need an even width, and webcams often give an odd one once scaled.
+    width = 2 * round(camera_image.shape[1] * scale / 2)
+    left = cv2.resize(camera_image, (width, height))
     right = cv2.cvtColor(robot_image, cv2.COLOR_RGB2BGR)
     out = np.hstack([left, right])
     cv2.rectangle(
@@ -293,15 +327,17 @@ def run(args: argparse.Namespace) -> dict:
             follower.update(reading)
             counts["frames"] += 1
             counts["hand_seen"] += reading is not None
-            if follower.calibration is not None and reading is not None:
+            # Follow a tracked hand; with no starting pose, go home; else hold still.
+            if follower.calibration is None or reading is not None:
                 reachable = env.command_hand(
                     follower.position,
                     follower.rotation.as_matrix(),
                     config.max_joint_speed * step,
                 )
                 env.command_fingers(finger_pose(tuple(follower.curls), config))
-                counts["following"] += 1
-                counts["out_of_reach"] += not reachable
+                following = follower.calibration is not None
+                counts["following"] += following
+                counts["out_of_reach"] += following and not reachable
             env.advance(step)
             renderer.update_scene(env.data, camera)
             text, colour = _status(follower, reading is not None, reachable)
