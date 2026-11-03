@@ -1,7 +1,7 @@
 # Video2Robot plan
 
 **Deadline: Wed 4 Nov 2026, 23:59 IST.** `task.md` holds the official challenge text.
-**Hard rule:** the data recorded by the user must play a real role. This is not met until Phase 4.
+**Hard rule:** the data recorded by the user must play a real role. The real-video pipeline meets it. The phases below are the original plan, and the status table shows what really happened: the vision AI model in Phase 4 was replaced by measured positions and rules.
 **Submit:** public GitHub repo, README or deck (how to run, example videos, design choices, what worked and what didn't), a sample of recorded data, and a note on how it was collected.
 **Judged on:** creativity, results, and clarity ("No AI slop").
 

@@ -22,7 +22,7 @@ A simulated Unitree G1 humanoid watches a video of a person stacking steel glass
 - Compute: Mac for simulation and logic; hackathon or cloud GPU for SAM 2, with results cached to disk.
 - Deadline: Wed 4 Nov 2026, 23:59 IST (official).
 - Order: A (video to plan to scripted robot), then B (retarget hand path), then C (train a policy), each only if time permits. See `PLAN.md`.
-- Vision AI model: **deferred by the user.** Raise it at the start of Phase 4, not before.
+- Vision AI model: planned at first, and not used. Measured positions and rules replaced it. The user may still add a small VLM helper.
 
 ## Novelty to protect
 1. Measured positions decide what moved and where. A geometric planner works with no AI model, so the hard rule can be met without an API key.
