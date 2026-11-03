@@ -77,6 +77,10 @@ vlm_rescue:
   change_threshold: 45
   settle_seconds: 1.0
 
+# The outcome model, a small learned predictor, trained on saved runs in docs/results.
+outcome_model:
+  training_seeds: [8500, 8800, 8900]
+
 # Copying the person's hand path from a video, within what's safe for the robot.
 hand_path:
   min_height: 0.20

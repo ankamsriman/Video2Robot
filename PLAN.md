@@ -29,6 +29,7 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | Real video to positions, without a marker | Done on 2 right-side videos; 2 old left-side videos are refused |
 | Task 2, video to robot | 3 videos succeed (takes 1, 2, 5); of 8 later takes, 4 read and 2 succeed, not a fair test of the top-glass rule |
 | Task 3, video to robot | Done with no glass moved: the layout picks the arm and standing spot. One video, one run |
+| Outcome model (optional) | Chooses one or two arms; 26 of 30 fresh layouts, hand rule 25 |
 | VLM helper (optional) | Instructions and missed-glass finding work; Task 2 real videos 8 of 9; clutter 10 of 10 found |
 | Task 2 hand path (optional) | Copies height and timing; takes 1, 2, 5 and 6 succeed, not a fair test |
 | Task 2 two arms (optional) | Tie on random layouts; real take 6 succeeds |

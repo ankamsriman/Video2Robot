@@ -65,6 +65,7 @@ from src.reasoning.fit_layout import (
     plan_stand,
 )
 from src.reasoning.instruction import InstructionError, choose_glasses
+from src.reasoning.outcome_model import MODES, features, table_cm, train
 from src.reasoning.vlm_client import (
     AnthropicVision,
     VlmConfig,
@@ -304,6 +305,23 @@ def _add_rescued(spots, points, changes, fps, rescue) -> tuple:
     return tuple(sorted((*spots, *added), key=lambda spot: spot.first))
 
 
+def _model_prefers_two_arms(starts, tower, scene: SceneConfig, report: dict) -> bool:
+    """Train the outcome model on saved runs, and ask which way it expects to work."""
+    seeds = yaml.safe_load(CONFIG_PATH.read_text())["outcome_model"]["training_seeds"]
+    rows = []
+    for seed in seeds:
+        for mode in MODES:
+            runs = json.loads((ROOT / f"docs/results/triangle_{mode}_whole_seed_{seed}.json").read_text())
+            rows += [(features(r["starts"], r["tower"], mode), r["success"]) for r in runs]
+    model = train(rows)
+    edge = scene.table.near_edge_x
+    cm_starts = [table_cm(start, edge) for start in starts]
+    cm_tower = table_cm(tower, edge)
+    chances = {mode: round(model.chance(cm_starts, cm_tower, mode), 2) for mode in MODES}
+    report["outcome_model"] = {"predicted_chance": chances, "chose": max(chances, key=chances.get)}
+    return chances["two"] > chances["nearest"]
+
+
 def _to_robot(place: np.ndarray, scene: SceneConfig, table_width: float) -> np.ndarray:
     """Table positions to simulator positions, with the robot at the middle of the edge."""
     return np.array(
@@ -346,6 +364,7 @@ def run_robot(
     left_out: np.ndarray | None = None,
     suffix_extra: str = "",
     notes: dict | None = None,
+    choose_arms: bool = False,
 ) -> dict:
     """Place the glasses as the video shows, run the robot, and report the outcome.
 
@@ -386,6 +405,8 @@ def run_robot(
     if not is_flip:
         arm = nearest_arm(starts, tower)
         report["arm"] = arm
+        if choose_arms:
+            two_arms = _model_prefers_two_arms(starts, tower, scene, report)
         if two_arms:
             arms = arm_for_each_glass(starts)
             arm = arms[0]
@@ -487,11 +508,20 @@ def main() -> None:
         action="store_true",
         help="ask a vision language model for glasses the reader may have missed",
     )
+    parser.add_argument(
+        "--choose-arms",
+        action="store_true",
+        help="for a triangle, let the outcome model choose one arm or two",
+    )
     args = parser.parse_args()
     raw = yaml.safe_load(CONFIG_PATH.read_text())["real_video"]
     config = GlassVideoConfig(**raw)
     try:
         points = glasses_from_model(args.video) if args.find_glasses else None
+    except InstructionError as error:
+        logger.error("Couldn't ask the vision model for glasses: %s", error)
+        raise SystemExit(1) from error
+    try:
         demo, is_flip = read_video(args.video, config, points)
     except VideoReadError as error:
         logger.error("Couldn't read %s: %s", args.video.name, error)
@@ -521,6 +551,7 @@ def main() -> None:
         left_out,
         suffix_extra,
         {"instruction": instruction_report} if instruction_report else None,
+        args.choose_arms,
     )
     print(json.dumps(report, indent=2))
 

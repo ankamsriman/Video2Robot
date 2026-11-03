@@ -134,6 +134,27 @@ def test_the_instruction_and_pictures_are_sent_and_the_reply_checked() -> None:
     assert model.image_counts == [2]
 
 
+def test_a_refused_request_is_a_clear_error_that_hides_the_key(monkeypatch) -> None:
+    import io
+    import urllib.error
+    import urllib.request
+
+    from src.reasoning.vlm_client import AnthropicVision, VlmConfig
+
+    def refuse(*args, **kwargs):
+        body = io.BytesIO(b'{"error": "credit balance is too low for key sk-ant-secret"}')
+        raise urllib.error.HTTPError("url", 400, "Bad Request", {}, body)
+
+    monkeypatch.setattr(urllib.request, "urlopen", refuse)
+    client = AnthropicVision(VlmConfig("model", 10, 5.0, 1, 100), "sk-ant-secret")
+
+    with pytest.raises(InstructionError) as caught:
+        client.ask("hello", [])
+
+    assert "credit balance is too low" in str(caught.value)
+    assert "sk-ant-secret" not in str(caught.value)
+
+
 def test_the_key_is_read_from_an_env_file(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     env = tmp_path / ".env"

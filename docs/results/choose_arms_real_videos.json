@@ -1,0 +1,53 @@
+[
+ {
+  "video": "task2_triangle_right_take1",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.71, \"two\": 0.8 }",
+  "success": true,
+  "error_cm": 0.2,
+  "refused": null,
+  "with_find_glasses": true
+ },
+ {
+  "video": "task2_triangle_take2",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.68, \"two\": 0.77 }",
+  "success": true,
+  "error_cm": 0.6,
+  "refused": null,
+  "with_find_glasses": true
+ },
+ {
+  "video": "task2_triangle_take3",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.74, \"two\": 0.85 }",
+  "success": true,
+  "error_cm": 0.4,
+  "refused": null,
+  "with_find_glasses": true
+ },
+ {
+  "video": "task2_triangle_take5",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.71, \"two\": 0.8 }",
+  "success": true,
+  "error_cm": 0.5,
+  "with_find_glasses": false
+ },
+ {
+  "video": "task2_triangle_take6",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.79, \"two\": 0.9 }",
+  "success": true,
+  "error_cm": 0.2,
+  "with_find_glasses": false
+ },
+ {
+  "video": "task2_triangle_check",
+  "chose": "two",
+  "chances": "{ \"nearest\": 0.71, \"two\": 0.82 }",
+  "success": false,
+  "error_cm": 22.1,
+  "with_find_glasses": false
+ }
+]

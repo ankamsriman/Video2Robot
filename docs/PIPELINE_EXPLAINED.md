@@ -342,6 +342,8 @@ That's positive, so most of the work is on the robot's left, and it uses its **l
 
 **Optional two arms.** With `--two-arms`, each glass uses the arm on its own side, and the arms take turns. See the README for how it compares.
 
+**Optional: let a small learned model choose.** With `--choose-arms`, the outcome model (`src/reasoning/outcome_model.py`) is trained on saved runs, predicts the chance of success for one arm and for two, and picks the higher. It's the one trained model in the project, and it only predicts success.
+
 **Target positions** (`triangle_targets`) are then worked out from the tower's middle:
 
 | Glass | x | y | Height above the floor |

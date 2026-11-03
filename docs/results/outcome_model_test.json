@@ -1,0 +1,10 @@
+{
+  "training_layouts": 90,
+  "test_layouts": 60,
+  "rule_limit_cm_chosen_on_training": 14,
+  "always one arm (nearest)": 43,
+  "always two arms": 44,
+  "hand rule: two arms if the tower is within 14 cm of the middle": 49,
+  "outcome model": 50,
+  "best possible (knowing the answers)": 51
+}

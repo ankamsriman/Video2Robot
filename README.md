@@ -15,9 +15,10 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 | **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](docs/videos/task2_two_arms_video_to_robot.mp4)) |
 | **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](docs/videos/task2_hand_path_video_to_robot.mp4)) |
 | **Vision language model (Claude),** optional | Turns a typed instruction such as "nearest at the bottom" into a checked plan, and finds glasses my reader missed. On cluttered simulated tables it found exactly the three glasses in 10 of 10 scenes, within 1.5 cm |
+| **A small learned model,** optional | Predicts from 180 saved runs whether one arm or two will work for a layout, and picks before the robot moves. On 30 fresh layouts its choices built 26, against 22 for always the same choice |
 | **What the robot can do** | 28 of 30 random layouts for each task, within tested areas, in simulation |
 
-**What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Nothing is trained.** By default no AI model reads the video. Optional parts use a hand tracker (MediaPipe) and a vision language model (Claude). Everything runs in simulation, with the robot's pelvis pinned.
+**What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Only one small model is trained here,** the optional outcome model below. By default no AI model reads the video. Optional parts use a hand tracker (MediaPipe) and a vision language model (Claude). Everything runs in simulation, with the robot's pelvis pinned.
 
 A full walkthrough of one video through every step is in [`docs/PIPELINE_EXPLAINED.md`](docs/PIPELINE_EXPLAINED.md).
 
@@ -127,6 +128,20 @@ I built and adjusted this on these same failed videos, including fixing a versio
 
 With Claude's positions and with the true ones, the robot passed and failed on exactly the same scenes, so the remaining failures are the robot's. These are rendered pictures, not real video. See `docs/results/clutter/`.
 
+*Which Claude model.* On the same 10 pictures, 5 real frames and 5 cluttered scenes, Haiku, Sonnet and Opus each found exactly the glasses in 9 of 10. The tenth, my first Task 3 video, may well be a correct glass my reader only saw later. Mean errors were 0.65, 0.33 and 0.37 cm, so I use Sonnet. See `docs/results/vlm_model_comparison.json`.
+
+**A small learned outcome model, Task 2.** This is the simplest kind of world model: it predicts whether a run will succeed, not how the scene changes step by step. It's a logistic regression in NumPy, on numbers describing the layout. I ran 150 random layouts both ways, one arm and two arms, so each layout's true outcome is known for both choices.
+
+| Choosing per layout, on layouts never trained on | 60 test layouts | 30 fresh layouts (seed 9000) |
+|---|---|---|
+| Always one arm | 43 | 22 |
+| Always two arms | 44 | 22 |
+| Hand rule: two arms if the tower is within 14 cm of the middle | 49 | 25 |
+| **Outcome model** | **50** | **26** |
+| Best possible, knowing the answers | 51 | 27 |
+
+It learned the pattern I'd only spotted by eye, and it does slightly better than the hand rule. The samples are small, so the gap between them isn't proven. I first noticed the pattern in seed 8700, one of the test sets, so seed 9000 is the fair column. With `--choose-arms`, the model picks before the robot moves. On my real Task 2 videos it chose two arms every time, which fits, because my towers were all near the middle. That built 5 of the 6 it ran on (takes 1, 2, 3, 5 and 6, not the check video). Three more needed the vision model, which my account's API limit then blocked. Run `scripts/outcome_test.py` to repeat the test above.
+
 **What goes wrong when the tower is far to one side, Task 2.** In 60 random layouts with two arms, towers within 12 cm of the table's middle passed 34 of 35, and those further out passed 8 of 25 (one arm: 27 of 35, and 14 of 25). I chose the 12 cm line after seeing results. Replaying the 25 far towers showed why: when an arm reached across the body to the far side, its hand stopped short in 25 of 46 placements, against 1 of 25 for the arm on the tower's side. My own towers were all within about 7 cm of the middle. Task 3 doesn't show this, because the robot stands somewhere different for each layout.
 
 **Six later Task 3 takes, the fair test.** I recorded these in deliberately different layouts, and ran them with nothing changed. **None of the 6 succeeded:**
@@ -217,7 +232,7 @@ Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results a
 - **The standing spot is set, not walked to,** and the glass to flip must start 23 cm or more from the table's near edge. Closer in, most runs failed to grip it.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
 - **Hand-picked corners:** someone picks four rough table corners once per camera position, in `data/labels/`. A fit to each video's table edges then sharpens them.
-- **Vision model:** needs an API key and an internet connection, and sends frames to an outside service. Its answers can vary, so the code checks them and refuses anything outside the allowed options.
+- **Vision model:** needs an API key and an internet connection, and sends frames to an outside service. My account hit its spending limit during testing, so some planned VLM runs didn't happen. Its answers can vary, so the code checks them and refuses anything outside the allowed options.
 - **Narrow conditions:** a fixed camera, a dark table, bright closed tops and fairly bright light. The settings suit my setup and would probably need changing elsewhere.
 - **Flip check:** tested only on my two right-side videos.
 
@@ -242,6 +257,10 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sampl
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --find-glasses
 PYTHONPATH=. .venv/bin/python scripts/clutter_test.py --trials 5 --seed 4100 --two-arms
 
+# Optional: let the small outcome model choose one arm or two, and test it on unseen layouts
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --choose-arms
+PYTHONPATH=. .venv/bin/python scripts/outcome_test.py
+
 # Optional for a triangle: carry each glass along the hand's path in the video
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
 
@@ -261,7 +280,7 @@ Samples are in `data/raw/sample/`, with the collection note in [`docs/DATA_COLLE
 
 ## What I'd do next
 
-- **Learn from these runs.** Each successful simulator run can become a demonstration. An ACT policy, a world model or reinforcement learning could start from that data. I didn't try this before the deadline.
+- **Learn more from these runs.** The outcome model is a first step. Each successful simulator run can also become a demonstration for an ACT policy, a fuller world model that predicts each step, or reinforcement learning.
 - **Fix far-off towers** by passing a glass between hands through the middle of the table, instead of one arm reaching across the body.
 - **A better video reader.** A vision language model already rescues most refused Task 2 videos. A trained tracker such as SAM 2 could follow glasses through the whole video.
 - **A closer, first-person camera,** so that finger poses can be seen and retargeted to the robot's hand.

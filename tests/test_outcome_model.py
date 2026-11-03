@@ -1,8 +1,9 @@
 """The outcome model learns from runs which way of doing a layout tends to work."""
 
 import numpy as np
+import pytest
 
-from src.reasoning.outcome_model import features, train
+from src.reasoning.outcome_model import features, table_cm, train
 
 STARTS = [(18.0, 10.0), (30.0, -12.0), (22.0, 20.0)]
 
@@ -27,6 +28,10 @@ def test_the_model_learns_which_mode_suits_which_layout() -> None:
 
     assert model.best_mode(STARTS, (30.0, 2.0)) == "two"
     assert model.best_mode(STARTS, (30.0, 22.0)) == "nearest"
+
+
+def test_robot_positions_become_table_centimetres() -> None:
+    assert table_cm((0.46, -0.12), 0.16) == pytest.approx((30.0, -12.0))
 
 
 def test_chances_are_between_zero_and_one() -> None:

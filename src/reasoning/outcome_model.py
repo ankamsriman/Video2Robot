@@ -52,6 +52,11 @@ class OutcomeModel:
         return max(MODES, key=lambda mode: self.chance(starts, tower, mode))
 
 
+def table_cm(robot_point, near_edge: float) -> tuple[float, float]:
+    """A robot-frame position in metres, as (forward from the edge, sideways) in centimetres."""
+    return ((float(robot_point[0]) - near_edge) * 100, float(robot_point[1]) * 100)
+
+
 def train(
     rows: Sequence[tuple[np.ndarray, bool]],
     rounds: int = 4000,
