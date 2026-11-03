@@ -24,6 +24,15 @@ from src.simulation.mirror import (
 )
 from src.simulation.robot_env import RobotEnv
 from src.simulation.scene import SceneConfig
+from src.verification.steps import (
+    StepCheck,
+    glass_at,
+    glass_held,
+    glass_lifted,
+    glass_upright,
+    hand_reached,
+    others_still,
+)
 from src.verification.triangle import (
     CupPose,
     TriangleConfig,
@@ -39,7 +48,6 @@ LEVEL_SECONDS = 2.5
 LEVEL_SPEED = 0.3
 AXIS_EPSILON = 1e-6
 SETTLE_AFTER_BUILD = 2.0
-MIN_LIFT = 0.05
 MAX_HOLD_DISTANCE = 0.06
 AIM_ROUNDS = 3
 AIM_TOLERANCE = 0.001
@@ -76,6 +84,7 @@ class FlipResult:
     triangle: TriangleResult
     gripped: bool
     failures: tuple[str, ...]
+    steps: tuple[StepCheck, ...] = ()
 
     @property
     def success(self) -> bool:
@@ -152,6 +161,14 @@ def grip_from_side(
     env: RobotEnv, config: SceneConfig, flip: FlipConfig, name: str
 ) -> bool:
     """Grip a cup with the palm beside it, and lift it. Returns whether it's held."""
+    _, held, lifted = grip_from_side_steps(env, config, flip, name)
+    return held.passed and lifted.passed
+
+
+def grip_from_side_steps(
+    env: RobotEnv, config: SceneConfig, flip: FlipConfig, name: str
+) -> tuple[StepCheck, StepCheck, StepCheck]:
+    """Grip a cup with the palm beside it and lift it, checking reach, grip and lift."""
     table = config.table.top_height
     side = hand_rotation(flip.start_roll, flip.hand_yaw, env.motion.arm)
     x, y, start_z = env.object_position(name)
@@ -168,13 +185,16 @@ def grip_from_side(
     )
     env.move_hand(np.array([bx, by, grip]), speed=SLOW_SPEED)
     env.move_hand(np.array([x, y, grip]), speed=SLOW_SPEED)
+    reach = hand_reached(name, env.hand_position, np.array([x, y, grip]))
     env.set_fingers(flip.close_pose)
     env.advance(env.motion.settle_time)
     env.move_hand(np.array([x, y, hover]), speed=SLOW_SPEED)
     position = env.object_position(name)
-    lifted = position[2] - start_z >= MIN_LIFT
-    close = np.linalg.norm(position - env.hand_position) <= MAX_HOLD_DISTANCE
-    return bool(lifted and close)
+    return (
+        reach,
+        glass_held(name, "grip", position, env.hand_position),
+        glass_lifted(name, start_z, float(position[2])),
+    )
 
 
 def is_holding(env: RobotEnv, name: str) -> bool:
@@ -248,9 +268,7 @@ def horizontal_error(cup_position: np.ndarray, target: np.ndarray) -> np.ndarray
     return np.array([error[0], error[1], 0.0])
 
 
-def correct_aim(
-    env: RobotEnv, flip: FlipConfig, name: str, target: np.ndarray
-) -> None:
+def correct_aim(env: RobotEnv, flip: FlipConfig, name: str, target: np.ndarray) -> None:
     """Measure the cup just above the tower, and nudge the hand until it's on target."""
     for _ in range(AIM_ROUNDS):
         error = horizontal_error(env.object_position(name), target)
@@ -266,14 +284,18 @@ def correct_aim(
 
 def place_flipped(
     env: RobotEnv, flip: FlipConfig, name: str, target: np.ndarray
-) -> None:
-    """Lower the flipped cup onto the target, correct its aim, let go, and lift clear."""
+) -> StepCheck:
+    """Lower the flipped cup onto the target, correct its aim, let go, and lift clear.
+
+    Returns a check of where the cup was just before letting go.
+    """
     level_cup(env, name)
     offset = env.hand_position - env.object_position(name)
     final = target + offset + [0.0, 0.0, flip.place_clearance]
     env.move_hand(final, speed=flip.lower_speed, keep_waist=True)
     env.advance(env.motion.settle_time)
     correct_aim(env, flip, name, target)
+    placed = glass_at(name, "place", env.object_position(name), target)
     env.relax_fingers()
     env.set_fingers(flip.release_pose)
     env.advance(env.motion.settle_time)
@@ -295,6 +317,7 @@ def place_flipped(
     env.move_hand(
         np.array(flip.finish_position), speed=flip.lower_speed, keep_waist=True
     )
+    return placed
 
 
 def build_flipped_tower(
@@ -309,22 +332,37 @@ def build_flipped_tower(
     """Build the triangle, then flip the fourth cup and stand it on top."""
     table = config.table.top_height
     built = build_base(env, config, triangle, order)
+    steps = built.steps
     if not built.success:
-        return FlipResult(built, False, ("triangle failed",))
-    held = grip_from_side(env, config, flip, flipped_name)
-    if not held:
-        return FlipResult(built, False, ("couldn't grip the fourth cup",))
+        return FlipResult(built, False, ("triangle failed",), steps)
+    tower = {name: env.object_position(name).copy() for name in order}
+    gripping = grip_from_side_steps(env, config, flip, flipped_name)
+    steps = (*steps, *gripping)
+    if not (gripping[1].passed and gripping[2].passed):
+        return FlipResult(built, False, ("couldn't grip the fourth cup",), steps)
     twist_over(env, flip, flipped_name)
-    if not is_holding(env, flipped_name):
+    twisted = glass_held(
+        flipped_name, "twist", env.object_position(flipped_name), env.hand_position
+    )
+    steps = (*steps, twisted)
+    if not twisted.passed:
         logger.warning("Dropped '%s' during the twist", flipped_name)
-        return FlipResult(built, True, ("dropped the fourth cup in the twist",))
+        return FlipResult(built, True, ("dropped the fourth cup in the twist",), steps)
     top_position = tuple(env.object_position(order[2]))
     target = placement_target(top_position, triangle.cup_height, flip.release_drift)
-    place_flipped(env, flip, flipped_name, target)
+    placed = place_flipped(env, flip, flipped_name, target)
     env.advance(SETTLE_AFTER_BUILD)
     left, right, top_cup = (cup_pose(env, name) for name in order)
+    steps = (
+        *steps,
+        placed,
+        glass_upright(flipped_name, "release", cup_pose(env, flipped_name).up, True),
+        others_still(
+            flipped_name, tower, {name: env.object_position(name) for name in order}
+        ),
+    )
     problems = (
         *triangle_failures(left, right, top_cup, triangle, table),
         *flip_failures(cup_pose(env, flipped_name), top_cup, triangle),
     )
-    return FlipResult(built, True, problems)
+    return FlipResult(built, True, problems, steps)

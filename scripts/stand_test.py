@@ -25,6 +25,7 @@ from src.simulation.cup_flip import build_flipped_tower, flip_for_arm, load_flip
 from src.simulation.glass_task import build_glass_triangle
 from src.simulation.robot_env import RobotEnv, load_motion_config, motion_for_arm
 from src.simulation.scene import ROOT, build_model, load_scene_config
+from src.verification.steps import first_failure, step_summary, tally_lines
 from src.verification.triangle import load_triangle_config
 
 CONFIG = ROOT / "configs/flip_real.yaml"
@@ -118,6 +119,8 @@ def run_trial(starts: np.ndarray, tower: np.ndarray, tower_reach: float) -> dict
         "tower": [round(float(v), 3) for v in tower],
         "success": result.success,
         "failures": list(result.failures),
+        "failed_at": first_failure(result.steps),
+        "steps": step_summary(result.steps),
     }
 
 
@@ -138,11 +141,14 @@ def main() -> None:
         starts, tower = make_layout(rng)
         outcome = {"seed": args.seed + trial, **run_trial(starts, tower, tower_reach)}
         results.append(outcome)
-        print(json.dumps(outcome), flush=True)
+        print(
+            json.dumps({k: v for k, v in outcome.items() if k != "steps"}), flush=True
+        )
         if args.output:
             args.output.write_text(json.dumps(results, indent=1))
     passed = sum(item["success"] for item in results)
     print(f"Result: {passed} of {len(results)} passed")
+    print(*tally_lines(results), sep="\n")
 
 
 if __name__ == "__main__":

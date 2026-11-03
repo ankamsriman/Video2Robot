@@ -14,10 +14,14 @@ from src.verification.relations import (
     free_slot,
     placement_target,
 )
+from src.verification.steps import (
+    StepCheck,
+    glass_held,
+    glass_lifted,
+    hand_reached,
+)
 
 APPROACH_SPEED = 0.10
-MIN_LIFT = 0.05
-MAX_HOLD_DISTANCE = 0.06
 logger = logging.getLogger(__name__)
 
 
@@ -76,26 +80,35 @@ def _hover_position(x: float, y: float, env: RobotEnv, table: float) -> np.ndarr
     return np.array([x, y, table + env.motion.hover_height])
 
 
-def pick(env: RobotEnv, config: SceneConfig, name: str) -> bool:
-    """Grasp an object from above and lift it. Returns whether it is really held."""
+def pick_steps(
+    env: RobotEnv, config: SceneConfig, name: str
+) -> tuple[StepCheck, StepCheck, StepCheck]:
+    """Grasp an object from above and lift it, checking the reach, the grip and the lift."""
     table = config.table.top_height
     x, y, start_z = env.object_position(name)
     width = _item(config, name).size[0]
+    grip = np.array([x, y, table + env.motion.grip_height])
     env.set_fingers(hand_pose_for_width(env.motion.open_width))
-    reached = env.move_hand(_hover_position(x, y, env, table))
-    reached &= env.move_hand(
-        np.array([x, y, table + env.motion.grip_height]), APPROACH_SPEED
-    )
+    env.move_hand(_hover_position(x, y, env, table))
+    env.move_hand(grip, APPROACH_SPEED)
+    reach = hand_reached(name, env.hand_position, grip)
     env.set_fingers(hand_pose_for_width(width - env.motion.grip_squeeze))
     env.advance(env.motion.settle_time)
-    reached &= env.move_hand(_hover_position(x, y, env, table), APPROACH_SPEED)
-
+    env.move_hand(_hover_position(x, y, env, table), APPROACH_SPEED)
     position = env.object_position(name)
-    lifted = position[2] - start_z >= MIN_LIFT
-    close = np.linalg.norm(position - env.hand_position) <= MAX_HOLD_DISTANCE
-    if not reached:
+    if not reach.passed:
         logger.info("Hand fell short while picking '%s'", name)
-    return bool(lifted and close)
+    return (
+        reach,
+        glass_held(name, "grip", position, env.hand_position),
+        glass_lifted(name, start_z, float(position[2])),
+    )
+
+
+def pick(env: RobotEnv, config: SceneConfig, name: str) -> bool:
+    """Grasp an object from above and lift it. Returns whether it is really held."""
+    _, held, lifted = pick_steps(env, config, name)
+    return held.passed and lifted.passed
 
 
 def _target_xyz(

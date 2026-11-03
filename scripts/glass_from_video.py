@@ -79,6 +79,7 @@ from src.simulation.glass_task import CopiedCarries, build_glass_triangle
 from src.simulation.recorder import video_recorder
 from src.simulation.robot_env import RobotEnv, load_motion_config, motion_for_arm
 from src.simulation.scene import ROOT, SceneConfig, build_model, load_scene_config
+from src.verification.steps import first_failure, step_summary
 from src.verification.triangle import load_triangle_config
 
 LABELS = ROOT / "data/labels"
@@ -466,6 +467,8 @@ def run_robot(
     report.update(
         success=result.success,
         failures=list(result.failures),
+        failed_at=first_failure(result.steps),
+        steps=step_summary(result.steps),
         robot_tower_error_cm=round(float(np.linalg.norm(built - tower)) * 100, 1),
     )
     (output / f"report{suffix}.json").write_text(json.dumps(report, indent=2))

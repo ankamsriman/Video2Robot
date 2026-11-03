@@ -8,6 +8,7 @@ import numpy as np
 from src.simulation.primitives import pick
 from src.simulation.robot_env import RobotEnv, hand_pose_for_width
 from src.simulation.scene import SceneConfig
+from src.verification.steps import StepCheck
 from src.verification.triangle import (
     CupPose,
     TriangleConfig,
@@ -25,6 +26,7 @@ class TriangleResult:
     picked: tuple[bool, ...]
     failures: tuple[str, ...]
     carry_limited: tuple[float, ...] = ()
+    steps: tuple[StepCheck, ...] = ()
 
     @property
     def success(self) -> bool:

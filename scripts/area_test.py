@@ -24,6 +24,7 @@ from src.simulation.cup_flip import build_flipped_tower, load_flip_config
 from src.simulation.glass_task import build_glass_triangle
 from src.simulation.robot_env import RobotEnv, load_motion_config, motion_for_arm
 from src.simulation.scene import ROOT, build_model, load_scene_config
+from src.verification.steps import first_failure, step_summary, tally_lines
 from src.verification.triangle import load_triangle_config
 
 Spot = tuple[float, float]
@@ -136,6 +137,8 @@ def run_trial(job: tuple[tuple[Spot, ...], Spot, str]) -> dict:
         "arm": arm if arms is None else list(arms),
         "success": result.success,
         "failures": list(result.failures),
+        "failed_at": first_failure(result.steps),
+        "steps": step_summary(result.steps),
     }
 
 
@@ -162,14 +165,13 @@ def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     label = f"{args.task}_{args.arm}" if args.arm != "right" else args.task
     label = f"{label}_{args.spread}" if args.spread != "usual" else label
-    (OUTPUT / f"{label}_seed_{args.seed}.json").write_text(
-        json.dumps(report, indent=2)
-    )
+    (OUTPUT / f"{label}_seed_{args.seed}.json").write_text(json.dumps(report, indent=2))
     for trial in report:
         if not trial["success"]:
-            print("FAIL", trial)
+            print("FAIL", {k: v for k, v in trial.items() if k != "steps"})
     passed = sum(trial["success"] for trial in report)
     print(f"Result: {passed} of {len(report)} passed")
+    print(*tally_lines(report), sep="\n")
 
 
 if __name__ == "__main__":
