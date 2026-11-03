@@ -364,6 +364,34 @@ class RobotEnv:
         self._command = {**self._command, **actual}
         self.advance(self.motion.settle_time)
 
+    def command_hand(
+        self, position: np.ndarray, rotation: np.ndarray, max_step: float
+    ) -> bool:
+        """For live control: aim the arm at a hand pose without stepping physics.
+
+        Each joint's target moves at most `max_step` radians, so a jump in the tracker
+        can't swing the arm. Returns whether the pose is within reach.
+        """
+        result = self._ik.solve(self._commanded_qpos(), position, rotation)
+        targets = self._arm_targets(result.qpos)
+        current = {name: self._command[name] for name in targets}
+        steps = {
+            name: current[name]
+            + float(np.clip(value - current[name], -max_step, max_step))
+            for name, value in targets.items()
+        }
+        self._command = {**self._command, **steps}
+        return result.success
+
+    def command_fingers(self, pose: tuple[float, ...]) -> None:
+        """For live control: set the active hand's finger targets, written for the right hand."""
+        prefix = f"{self.motion.arm}_hand_"
+        names = [f"{prefix}{finger}_joint" for finger in FINGER_JOINTS]
+        self._command = {
+            **self._command,
+            **dict(zip(names, self._finger_angles(pose), strict=True)),
+        }
+
     def set_fingers(self, pose: tuple[float, ...]) -> None:
         """Move the active hand's fingers smoothly to a pose, written for the right hand."""
         angles = self._finger_angles(pose)

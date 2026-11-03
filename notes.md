@@ -474,6 +474,7 @@ It renders frames at 960x720 and 30 frames per second, writing directly to a vid
 | `check_video.py` | Checks a test video, and says what to fix |
 | `read_colors.py` | Suggests colour settings from points on a video frame |
 | `watch_live.py` | Runs the task live in the MuJoCo window |
+| `live_teleop.py` | Your webcam's view of your hand drives the robot live |
 
 ### `tests/`
 `pytest` runs about 120 tests. Some test functions run several cases.
@@ -1091,6 +1092,13 @@ Two older options remain. `--fit-to-robot` keeps the robot in the middle and mov
 **The vision language model, optional.** `src/reasoning/vlm_client.py` sends frames and a question to Claude, with the key read from `.env`. `src/reasoning/instruction.py` checks Claude's answer against a short list of allowed tasks and orders, and sorts the measured glasses to match. `src/perception/vlm_rescue.py` adds glasses the reader missed. Claude is used to decide and to find things, never to move the robot or give exact positions.
 
 **Hand path, optional.** With `--hand-path`, `follow_moving_hand` follows the moving hand, `profile_from_pixels` turns its pixels into height and progress along the carry, and `robot_carry_path` fits that between the robot's own positions, within safe heights and speed. A carry straight towards the camera can't be judged, so `is_believable` drops it, and the robot uses its normal carry. This copies your motion, but it doesn't train anything.
+
+**Live hand control, a separate demo.** `scripts/live_teleop.py` reads your webcam. MediaPipe gives 21 points on your hand twice: in the picture, and in metres around the hand's centre. `src/teleop/hand_retarget.py` turns them into robot targets:
+- **Position:** where your wrist is in the picture moves the robot's hand sideways and up/down. How big your hand looks (`image_scale`) moves it forward and back. Bigger means closer, and this is the roughest of the three, because one camera can't measure depth.
+- **Wrist:** `hand_frame` builds a direction for your hand from the wrist and knuckles, and `robot_rotation` turns the robot's wrist by however much your hand has turned since the start, capped so it can't twist too far.
+- **Fingers:** `finger_curls` measures how bent your thumb, index and middle finger are, and `finger_pose` closes each robot finger to match.
+
+Readings are smoothed, and each joint may move only so fast, so a jumpy reading can't swing the arm. The robot is shown from behind, so it moves the way you do. It copies you; nothing is learned.
 
 **Two arms, optional.** With `--two-arms`, `arm_for_each_glass` gives each glass the arm on its own side, and `RobotEnv.use_arm` swaps arms mid-task. The old hand rises, goes out beside the body and hangs back, and the new one comes in the same way. A direct move swept glasses off the table. It tied with one arm on random layouts, so it stays off by default.
 

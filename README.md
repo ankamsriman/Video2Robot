@@ -210,6 +210,24 @@ Letting Task 3 choose its arm and standing spot, with no glass moved:
 
 Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results and earlier area tests are in `docs/results/`. Pictures of the areas are in `docs/recording_views/`.
 
+### Live hand control, a separate demo
+
+`scripts/live_teleop.py` lets a webcam drive the robot. MediaPipe finds 21 points on my hand in each frame, and the simulated G1 copies it:
+- **Hand position:** where my wrist is in the picture sets the robot hand's sideways and up/down position. How big my hand looks sets forward and back.
+- **Wrist:** how my palm has turned since the start sets the robot's wrist.
+- **Fingers:** how bent my thumb, index and middle finger are sets the robot's three fingers.
+
+My pose when it starts becomes the robot's starting pose. The robot copies; nothing is learned. It's a different demo from the video-to-task pipeline above, and it doesn't change those results.
+
+So far it has been tested only with a recorded video standing in for the camera (my take 6):
+- **Speed:** about 12 frames a second, including drawing and saving.
+- **Following:** the robot followed in 476 of 561 frames. It held still while the hand was lost.
+- **Direction:** sideways and up/down moved the right way (correlation 0.97 between my hand and the robot's target).
+- **Accuracy:** the robot hand was a median 3 cm from its target.
+- **Depth:** forward/back is the weak part, estimated from how big the hand looks, and hit its limit in 29% of frames.
+
+**Not yet tried with a live camera.**
+
 ## What worked and what didn't
 
 **Worked:**
@@ -230,7 +248,7 @@ Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results a
 
 - **Pinned pelvis:** no balance, and reach is limited.
 - **Three-finger Dex3 hand,** not a five-finger hand.
-- **Programmed motion:** no learned policy. The optional hand path copies only my hand's height and timing, not my fingers or wrist.
+- **Programmed motion:** no learned policy. The optional hand path copies only my hand's height and timing, not my fingers or wrist. The separate live demo copies wrist and fingers, but only while a person drives it.
 - **The standing spot is set, not walked to,** and the glass to flip must start 23 cm or more from the table's near edge. Closer in, most runs failed to grip it.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
 - **Hand-picked corners:** someone picks four rough table corners once per camera position, in `data/labels/`. A fit to each video's table edges then sharpens them.
@@ -265,6 +283,10 @@ PYTHONPATH=. .venv/bin/python scripts/outcome_test.py
 
 # Optional for a triangle: carry each glass along the hand's path in the video
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
+
+# Live: your webcam's view of your hand drives the robot (c: new starting pose, q: quit)
+PYTHONPATH=. .venv/bin/python scripts/live_teleop.py
+PYTHONPATH=. .venv/bin/python scripts/live_teleop.py --source data/raw/sample/task2_triangle_take6.mp4 --save out.mp4
 
 # Test what the robot can do, with random setups
 PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123

@@ -125,5 +125,10 @@ A small outcome model now predicts whether one arm or two will work for a layout
 ### Not a world model
 You asked why I called the outcome model a "world model". That overclaimed. It's logistic regression with about 16 learned weights that predicts only success or failure. A world model predicts how the scene changes step by step. I renamed it in the README, the code's description and every image, and renamed `world_model_where_it_matters.png` to `arm_choice_where_it_matters.png`. Uses that mean real world models, in `task.md` and the glossary in `notes.md`, stay. The results didn't change.
 
+### Live hand control
+You asked whether the robot could copy your hand live from a webcam, wrist and fingers included. You chose to do this before discussing the SAM 2 and dex-retargeting plan from your screenshot.
+
+`scripts/live_teleop.py` does it with MediaPipe and the existing arm solver. The robot is seen from behind, so it moves the way you do. Depth comes from how big your hand looks, the weakest part. Tested only with take 6 standing in for the camera, at about 12 frames a second. It's a separate demo: it copies, it doesn't learn, and it doesn't change the task results.
+
 ### Still open
 Raising the API limit, new videos to test the VLM fairly, making the repo public, and submitting. The data collection note needs your details. You decide when the repo goes public.
