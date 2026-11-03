@@ -7,7 +7,7 @@ picture from about where the user's phone stood, and asks the model for the glas
 The simulator knows the true positions, so every answer can be checked. The model's points
 then become table positions, and the robot builds the triangle in the cluttered scene.
 
-This uses rendered pictures, not real video. It needs ANTHROPIC_API_KEY in .env, and makes
+This uses rendered pictures, not real video. It needs VIDEO2ROBOT_CLAUDE_KEY in .env, and makes
 two model requests per trial.
 
 PYTHONPATH=. .venv/bin/python scripts/clutter_test.py --trials 5 --seed 4100

@@ -272,7 +272,7 @@ PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/ta
 # Optional for a triangle: each arm serves its own side
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --two-arms
 
-# Optional, needs ANTHROPIC_API_KEY in .env: a typed instruction, or finding missed glasses
+# Optional, needs VIDEO2ROBOT_CLAUDE_KEY in .env: a typed instruction, or finding missed glasses
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --instruction "nearest glasses at the bottom, farthest on top"
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --find-glasses
 PYTHONPATH=. .venv/bin/python scripts/clutter_test.py --trials 5 --seed 4100 --two-arms

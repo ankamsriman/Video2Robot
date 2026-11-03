@@ -1,7 +1,9 @@
 """Ask a vision language model to turn an instruction and pictures into a plan.
 
 The key is read from the environment or the project's `.env` file, which git ignores. It is
-never logged or written anywhere else.
+never logged or written anywhere else. Its name is the project's own, not ANTHROPIC_API_KEY,
+so tools that load `.env` into a terminal can't hand it to Claude Code, which would then bill
+coding sessions to the key instead of a Claude subscription.
 """
 
 import base64
@@ -29,7 +31,7 @@ from src.reasoning.instruction import (
 
 API_URL = "https://api.anthropic.com/v1/messages"
 API_VERSION = "2023-06-01"
-KEY_NAME = "ANTHROPIC_API_KEY"
+KEY_NAME = "VIDEO2ROBOT_CLAUDE_KEY"
 logger = logging.getLogger(__name__)
 
 

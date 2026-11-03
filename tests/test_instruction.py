@@ -156,17 +156,17 @@ def test_a_refused_request_is_a_clear_error_that_hides_the_key(monkeypatch) -> N
 
 
 def test_the_key_is_read_from_an_env_file(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("VIDEO2ROBOT_CLAUDE_KEY", raising=False)
     env = tmp_path / ".env"
-    env.write_text("OTHER=1\nANTHROPIC_API_KEY= sk-ant-test \n")
+    env.write_text("OTHER=1\nVIDEO2ROBOT_CLAUDE_KEY= sk-ant-test \n")
 
     assert load_api_key(env) == "sk-ant-test"
 
 
 def test_a_missing_key_is_a_clear_error(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("VIDEO2ROBOT_CLAUDE_KEY", raising=False)
 
-    with pytest.raises(InstructionError, match="ANTHROPIC_API_KEY"):
+    with pytest.raises(InstructionError, match="VIDEO2ROBOT_CLAUDE_KEY"):
         load_api_key(tmp_path / ".env")
 
 
