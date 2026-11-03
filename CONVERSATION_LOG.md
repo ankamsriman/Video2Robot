@@ -116,5 +116,8 @@ Built as an optional mode, for Task 2 only. My first version scored 9 of 30, bec
 ### Copying your hand's path
 You pointed out that the video told the robot what to do, not how to move. So the hand tracker now follows your hand, and with `--hand-path` the robot carries each glass with your hand's height and timing. Takes 1, 2, 5 and 6 succeed. The grip and finger poses stay programmed, and nothing is trained.
 
+### A vision language model, overnight
+You added an API key and asked for a VLM. Claude now turns typed instructions into checked plans, chooses which glass to flip, and finds glasses the reader missed. Task 2 went from 4 to 8 of your 9 videos built, though I adjusted it on those same videos. On 10 cluttered simulated tables it found exactly the three glasses every time, within 1.5 cm. Grip timing was dropped: the tracker couldn't see the fingers around the glass.
+
 ### Still open
-Grip timing, and a better video reader, if time allows. The data collection note needs your details. You decide when the repo goes public.
+New videos to test the VLM fairly. Making the repo public, and submitting. The data collection note needs your details. You decide when the repo goes public.

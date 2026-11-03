@@ -10,13 +10,14 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 
 | What | Result |
 |---|---|
-| **Task 2:** three glasses into a triangle | Built from 4 of my 9 videos ([video](docs/videos/task2_video_to_robot.mp4)). The rest were refused while reading (4) or the robot failed (1) |
+| **Task 2:** three glasses into a triangle | Built from 4 of my 9 videos ([video](docs/videos/task2_video_to_robot.mp4)). With a vision language model finding glasses my reader missed, **8 of 9** |
 | **Task 3:** a fourth glass flipped and stood on top, opening up | Built from 2 of my 9 videos ([video](docs/videos/task3_new_video_to_robot.mp4)). One of the two, take 9, was new and untuned, in a layout I chose to suit the robot. 0 of 6 deliberately varied layouts worked |
 | **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](docs/videos/task2_two_arms_video_to_robot.mp4)) |
 | **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](docs/videos/task2_hand_path_video_to_robot.mp4)) |
+| **Vision language model (Claude),** optional | Turns a typed instruction such as "nearest at the bottom" into a checked plan, and finds glasses my reader missed. On cluttered simulated tables it found exactly the three glasses in 10 of 10 scenes, within 1.5 cm |
 | **What the robot can do** | 28 of 30 random layouts for each task, within tested areas, in simulation |
 
-**What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Nothing is trained,** and no AI model reads the video except the optional hand tracker. Everything runs in simulation, with the robot's pelvis pinned.
+**What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Nothing is trained.** By default no AI model reads the video. Optional parts use a hand tracker (MediaPipe) and a vision language model (Claude). Everything runs in simulation, with the robot's pelvis pinned.
 
 A full walkthrough of one video through every step is in [`docs/PIPELINE_EXPLAINED.md`](docs/PIPELINE_EXPLAINED.md).
 
@@ -92,6 +93,39 @@ One camera can't judge depth, so I assume the hand moves in the upright plane be
 | `task2_triangle_take6`, with `--two-arms` | **Built the triangle** | 0.6 cm |
 
 **An indirect check, with no tuning.** My hand holds a glass near its middle. The estimate says about 5-8 cm when holding a glass on the table (its middle is 5.75 cm up), and about 14-19 cm when placing the top glass (its middle is 17 cm up). I have no ruler measurements of the hand itself. These four videos were also used to write the method, so they aren't a fair test. See `docs/videos/task2_hand_path_video_to_robot.mp4`.
+
+**A vision language model, optional.** It needs an Anthropic API key in `.env`, and sends a couple of frames per video to Claude (`claude-sonnet-5-5`). It decides what to do and what's there. Positions stay measured, and the robot's motion stays programmed.
+
+*Typed instructions* (`--instruction`). Claude must answer with one of a few allowed tasks and orders, and the code refuses anything else. For a flipped tower, the order covers all four glasses, and the last one is flipped.
+
+| Instruction | Video | Result |
+|---|---|---|
+| "Put the glasses nearest to me at the bottom and the farthest one on top" | `task2_triangle_take5` | Nearest first, **built**, 0.5 cm off |
+| "Put the farthest glasses at the bottom and the nearest one on top" | `task2_triangle_take5` | Order reversed, **built**, 0.7 cm off |
+| "Just build the triangle with three glasses. Don't flip anything." | `task3_flip_take9` | Triangle, fourth glass left alone, **built**, 0.7 cm off |
+| "Build the triangle and then flip the last glass on top, like in my video." | `task3_flip_take9` | **Built and flipped**, 0.4 cm off |
+| "Build the triangle, then flip the glass nearest to me and put it on top." | `task3_flip_take9` | Understood: farthest first, nearest flipped. **Robot failed** the triangle |
+| "Make me a cup of tea and wash the dishes." | `task2_triangle_take5` | **Refused**, with the reason |
+
+*Finding glasses the reader missed* (`--find-glasses`). Claude points to every glass early in the video. Where my bright-top reader saw nothing, the glass is added, and when it left is measured from the picture, not by the model. Where the reader saw a glass only late, its start moves to the beginning.
+
+| My real videos | Without | With `--find-glasses` |
+|---|---|---|
+| Task 2, 9 videos | 4 built (with `--two-arms` for take 6) | **8 built** (takes 3, 7, 8 rescued, and take 4 with `--two-arms`). None refused |
+| Task 3, 9 videos | 2 built | 2 built. Take 6 is now read, but the robot fails it. 3 still refused |
+
+I built and adjusted this on these same failed videos, including fixing a version that broke two working videos, so these aren't a fair test. Pointing at glasses in my real frames agreed with my reader within 0.1-1.0 cm. Raw results: `docs/results/find_glasses_all_videos.json`.
+
+*Clutter* (`scripts/clutter_test.py`). Random simulated tables with three steel glasses and four other objects, including a white box. A brightness rule saw 18-20 bright patches in each picture. Claude was asked for the glasses only:
+
+| 10 random cluttered scenes | Claude's positions, one arm | True positions, one arm | Claude's positions, two arms |
+|---|---|---|---|
+| Found exactly the three glasses | 10 of 10 | 10 of 10 | 10 of 10 |
+| Position error | mean 0.44 cm, max 1.2 cm | (same request) | mean 0.41 cm, max 1.0 cm |
+| Robot built the triangle | 6 of 10 | 6 of 10 | **9 of 10** |
+| Another object nudged | 1 scene | 1 scene | 2 scenes |
+
+With Claude's positions and with the true ones, the robot passed and failed on exactly the same scenes, so the remaining failures are the robot's. These are rendered pictures, not real video. See `docs/results/clutter/`.
 
 **What goes wrong when the tower is far to one side, Task 2.** In 60 random layouts with two arms, towers within 12 cm of the table's middle passed 34 of 35, and those further out passed 8 of 25 (one arm: 27 of 35, and 14 of 25). I chose the 12 cm line after seeing results. Replaying the 25 far towers showed why: when an arm reached across the body to the far side, its hand stopped short in 25 of 46 placements, against 1 of 25 for the arm on the tower's side. My own towers were all within about 7 cm of the middle. Task 3 doesn't show this, because the robot stands somewhere different for each layout.
 
@@ -183,6 +217,7 @@ Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results a
 - **The standing spot is set, not walked to,** and the glass to flip must start 23 cm or more from the table's near edge. Closer in, most runs failed to grip it.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
 - **Hand-picked corners:** someone picks four rough table corners once per camera position, in `data/labels/`. A fit to each video's table edges then sharpens them.
+- **Vision model:** needs an API key and an internet connection, and sends frames to an outside service. Its answers can vary, so the code checks them and refuses anything outside the allowed options.
 - **Narrow conditions:** a fixed camera, a dark table, bright closed tops and fairly bright light. The settings suit my setup and would probably need changing elsewhere.
 - **Flip check:** tested only on my two right-side videos.
 
@@ -201,6 +236,11 @@ PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/ta
 
 # Optional for a triangle: each arm serves its own side
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --two-arms
+
+# Optional, needs ANTHROPIC_API_KEY in .env: a typed instruction, or finding missed glasses
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --instruction "nearest glasses at the bottom, farthest on top"
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --find-glasses
+PYTHONPATH=. .venv/bin/python scripts/clutter_test.py --trials 5 --seed 4100 --two-arms
 
 # Optional for a triangle: carry each glass along the hand's path in the video
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
@@ -223,7 +263,7 @@ Samples are in `data/raw/sample/`, with the collection note in [`docs/DATA_COLLE
 
 - **Learn from these runs.** Each successful simulator run can become a demonstration. An ACT policy, a world model or reinforcement learning could start from that data. I didn't try this before the deadline.
 - **Fix far-off towers** by passing a glass between hands through the middle of the table, instead of one arm reaching across the body.
-- **A better video reader.** Most failed videos were refused while reading, not by the robot. A trained tracker such as SAM 2 should help.
+- **A better video reader.** A vision language model already rescues most refused Task 2 videos. A trained tracker such as SAM 2 could follow glasses through the whole video.
 - **A closer, first-person camera,** so that finger poses can be seen and retargeted to the robot's hand.
 
 ## Earlier work in this repo

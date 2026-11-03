@@ -55,7 +55,7 @@ You guessed: video, frames, a VLM that extracts features, a planner, then 3D coo
 | What you guessed | What's really built |
 |---|---|
 | Extract frames from the video | Yes, but **every frame** is read. It doesn't choose a few key frames |
-| Feed the video to a VLM | **No VLM or other AI model runs anywhere in this pipeline.** It uses classic image processing, with hand-written rules and measurements |
+| Feed the video to a VLM | **By default, no VLM or other AI model runs in this pipeline.** It uses classic image processing, with hand-written rules and measurements. An optional VLM (Claude) can read a typed instruction and find glasses the reader missed: see the end of section 2 |
 | The VLM extracts features | The one "feature" is a **bright, round, colourless patch**, which is the closed top of a steel glass |
 | A planner decides what to do | **A few rules, not a model.** They read the order from the times glasses left their spots, and choose an arm from an average |
 | Estimate 3D coordinates | **Yes, partly.** It finds the camera's position in 3D, and uses the glass's known height to place each glass on the table. It only works out positions on the table, not full 3D shapes |
@@ -470,6 +470,17 @@ The final report for this video:
 | `data/processed/task2_triangle_take5/robot.mp4` | The robot's run, 86 seconds |
 | `docs/videos/task2_left_arm_video_to_robot.mp4` | You and the robot side by side, with the robot sped up 4.3 times |
 
+### Optional: the vision language model
+
+Two options use Claude (`src/reasoning/vlm_client.py`). Neither replaces the measuring, and neither moves the robot:
+
+| Option | What Claude does | What the code does with it |
+|---|---|---|
+| `--instruction "..."` | Turns your words into one of a few allowed tasks and orders, using a couple of frames | Checks the answer (`parse_plan`), then reorders the measured glasses (`choose_glasses`). Anything else is refused |
+| `--find-glasses` | Points to every glass top in an early frame | Adds any glass the reader missed as a starting spot, and finds when it left by watching that patch of the picture (`src/perception/vlm_rescue.py`) |
+
+For take 5, "nearest at the bottom, farthest on top" gives `{"task": "triangle", "order": "nearest_first"}`. The measured starts are then sorted by distance from your edge: 18.2, 28.8 and 35.0 cm. That happens to be your own order. "Farthest at the bottom" reverses it, and the robot builds that instead.
+
 ---
 
 ## 3. What changes for Task 3
@@ -558,7 +569,7 @@ The project has earlier code for sorting coloured blocks, which has never been r
 **Where AI could fit later.** None of this is built:
 
 - **A vision model such as SAM 2** could follow glasses better than bright tops, which would fix the main weakness in Step 5.
-- **A VLM** could say what task a video shows, instead of counting spots.
+- **A VLM** could also check the finished tower, or say what task a video shows. It already reads typed instructions and finds missed glasses, as an option.
 - **Learning the movement,** from your hand or from simulation, would be a big step up, and is the optional last stage in `PLAN.md`.
 
 ---
@@ -604,7 +615,7 @@ PYTHONPATH=. .venv/bin/mjpython scripts/watch_live.py
 |---|---|
 | **Pixel** | One dot of a picture |
 | **Frame** | One picture in a video |
-| **VLM** | Vision language model, an AI that takes pictures and answers in words. Not used here |
+| **VLM** | Vision language model, an AI that takes pictures and answers in words. Here it's optional: Claude reads instructions and finds glasses |
 | **Homography** | A 3 x 3 grid of numbers that maps a flat surface to how it looks in a picture |
 | **Focal length** | How zoomed-in a lens is, measured here in pixels |
 | **solvePnP** | An OpenCV function that finds the camera's position from known points and where they appear in the picture |
