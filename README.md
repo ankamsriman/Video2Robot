@@ -15,12 +15,28 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 | **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](docs/videos/task2_two_arms_video_to_robot.mp4)) |
 | **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](docs/videos/task2_hand_path_video_to_robot.mp4)) |
 | **Vision language model (Claude),** optional | Turns a typed instruction such as "nearest at the bottom" into a checked plan, and finds glasses my reader missed. On cluttered simulated tables it found exactly the three glasses in 10 of 10 scenes, within 1.5 cm |
-| **A small learned model,** optional | Predicts from 180 saved runs whether one arm or two will work for a layout, and picks before the robot moves. On 30 fresh layouts its choices built 26, against 22 for always the same choice |
+| **A small learned model,** optional | A logistic regression model (16 weights) learns from 180 saved runs whether one arm or two will work for a layout, and picks before the robot moves. On 60 new layouts its choices built 50, against 49 for a hand rule and 43–44 for always the same choice |
 | **What the robot can do** | 28 of 30 random layouts for each task, within tested areas, in simulation |
 
 **What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Only one small model is trained here,** the optional outcome model below. By default no AI model reads the video. Optional parts use a hand tracker (MediaPipe) and a vision language model (Claude). Everything runs in simulation, with the robot's pelvis pinned.
 
 A full walkthrough of one video through every step is in [`docs/PIPELINE_EXPLAINED.md`](docs/PIPELINE_EXPLAINED.md).
+
+## How it got here, one idea at a time
+
+Each idea came from counting the failures of the one before. The full record is in [`docs/JOURNEY.md`](docs/JOURNEY.md): about 40 ideas, each with its test, its numbers, and whether it was kept.
+
+| Stage | Problem found in the failures | Idea that fixed it | Before → after |
+|---|---|---|---|
+| Robot skills (blocks) | Silent "reached" when the hand was 21 cm short; checks judged the hand, not the object | Measure the real hand; judge where the object lands | 0 of 10 → **20 of 20** |
+| Flip (simulator) | Thrown, slipping and off-centre cups | Wrist-only twist, deeper grip, aim at the measured cup | 1 of 9 → **50 of 50** |
+| Real glasses | Steel glasses have no colour; no marker recorded | Bright closed tops; the table's corners as the ruler | Unusable → moves read in order |
+| Real glasses, robot body | Taller glasses broke the motion | Grip higher, level, aim from measurements | 0 of 6 → **28 of 30** |
+| Task 3 layout | The right arm can't flip across its own chest | Choose the arm and where to stand | Take 1 builds; 25 of 30 random layouts |
+| Arms | Left-side layouts failed with the right arm | Nearest arm, then an arm per glass, then a logistic regression model to choose | 10 → **24 of 30**; model 50 of 60 |
+| Reading | A missed starting glass refused 4 of 9 Task 2 videos | Claude points to every glass; measurements stay in charge | 4 → **8 of 9** (not a fair test) |
+| Copying motion | The robot copied *what*, not *how* | Copy the hand's carry height and timing; live control matched to the video | 4 of 4 carries; palm within about 1 cm of each glass |
+| Task 3 failures | Takes 2, 3, 7 failed: why? | Step checks: all three fail at **reach** | Stand 10 cm closer: take 2 builds (one run) |
 
 ## How my recording drives the robot
 

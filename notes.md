@@ -34,7 +34,8 @@ Throughout, **[Built]** means the code exists and has been tested. **[Planned]**
 19. [Live hand control, and matching a recorded video](#19-live-hand-control-and-matching-a-recorded-video)
 20. [Step checks: finding where a run fails](#20-step-checks-finding-where-a-run-fails)
 21. [All results on your real videos, and how to read them](#21-all-results-on-your-real-videos-and-how-to-read-them)
-22. [Glossary](#22-glossary)
+22. [How the project got here: one idea at a time](#22-how-the-project-got-here-one-idea-at-a-time)
+23. [Glossary](#23-glossary)
 
 ---
 
@@ -52,7 +53,7 @@ Doing this on a real humanoid would be expensive and risky, so we use a **simula
 
 **Where we are (4 Nov):** the robot now learns from **your real phone videos** of steel glasses. For Task 2, the triangle, it builds 8 of your 9 videos with Claude's help, and 3 of 9 without it. For Task 3, the flip, it builds 2 of 9; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
 
-Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 21) covers your real videos**, and chapter 21 has the numbers to quote.
+Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 21 has the numbers to quote.
 
 ---
 
@@ -1396,7 +1397,34 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 
 ---
 
-## 22. Glossary
+## 22. How the project got here: one idea at a time
+
+Real projects don't go in a straight line. This one went in a loop, again and again:
+
+```
+try the simplest thing ──► test it on real data ──► count the failures
+        ▲                                                  │
+        │                                                  ▼
+ keep it only if it helped ◄── retest ◄── one idea aimed at the cause
+```
+
+**A worked example of one loop (Task 3, the flip):**
+1. **Try:** grip the cup beside it and turn the wrist. **Test:** 9 new setups. **Result:** 1 of 9.
+2. **Look at the failures:** cups were thrown, slipped out of the fingertips, or ended off-centre.
+3. **One idea at a time:** turn only the wrist; hold the cup deeper; back out sideways; slide in beside the cup.
+4. **Retest each time on new setups:** 1 of 12, then 5 of 12, then 9 of 15, then 21 of 24.
+5. **Look again:** the last 3 failures were flipped but more than 2 cm off-centre.
+6. **Final idea:** aim at the top cup's measured position. **Result:** 50 of 50 on new setups.
+
+**Why "new setups" each time?** If you test on the same setups you tuned on, the score flatters you, like a student who has seen the exam. Where that wasn't possible, as with my 9 real videos, the result is marked "not a fair test".
+
+**Ideas that failed are part of the story.** Copying my grip, finding key moments from hand speed, retrying a missed grip on glasses, and moving glasses to fit the robot were all tried and dropped. Each one taught something.
+
+**The whole journey,** about 40 ideas in seven stages, each with its problem, test and before-and-after numbers, is in `docs/JOURNEY.md`. Every new experiment gets added there in the same format.
+
+---
+
+## 23. Glossary
 
 | Term | Meaning |
 |---|---|

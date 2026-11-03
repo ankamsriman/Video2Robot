@@ -7,11 +7,13 @@ A simulated Unitree G1 humanoid watches a video of a person stacking steel glass
 - `CONVERSATION_LOG.md`: why decisions were made.
 - `task.md`: the official challenge text. Never edit it.
 - `notes.md`: full from-scratch explanation of the project for the user. Keep it accurate as things change.
+- `docs/JOURNEY.md`: every idea in order, as problem found, idea, test, before and after, kept or dropped. Add a row for every experiment as soon as it finishes.
 
 ## How to work with this user
 - The user is new to Python and robotics. Explain results and robotics ideas in plain language.
 - Finish each phase by passing its gate, then explain the result and update `PLAN.md`, `CONVERSATION_LOG.md` and the status below.
 - Report misses honestly. Anything simplified in simulation must be labelled in results.
+- Present work as a journey: from a baseline, count the failures, take one idea aimed at their cause, retest on new data, and keep it only if it helped. Log it in `docs/JOURNEY.md`, and explain it in `notes.md` as a beginner's book with worked examples.
 - Commit locally after each phase. Do not push unless asked.
 
 ## Decisions
