@@ -1470,7 +1470,7 @@ The same story, row by row, is in `docs/JOURNEY.md`.
 | Failure seen | Idea | Result |
 |---|---|---|
 | No colour to track | Follow the **bright closed tops** of the upside-down glasses | Every move in take 1 found, in order |
-| No marker to measure with | Use the **table's corners** and its measured size (80 × 50 cm) as the ruler | Tower position from the video matched within 0.2 cm |
+| No marker to measure with | Use the **table's corners** and its measured size (80 × 50 cm) as the ruler | Check: the top glass measured within 0.2 cm of the midpoint of the two below it, where it must be |
 | Taller real glasses broke the robot's motion: **0 of 6** | Grip higher, level the glass, aim from measurements, lift clear after letting go | **19 of 20**, then **28 of 30** for each task once its working area was found |
 | Task 3 take 1: the right arm can't flip across its own chest | Move the glasses to fit the robot | Worked, but moved glasses up to 33 cm, a poor copy. **Dropped** |
 | Same problem | Choose the **arm and where to stand** from the layout, moving nothing | Take 1 builds; 25 of 30 random layouts |
