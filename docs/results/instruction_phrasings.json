@@ -1,0 +1,113 @@
+{
+ "video": "task3_flip_take9 (four glasses, one flipped)",
+ "model": "claude-sonnet-5-5",
+ "order_correct": 8,
+ "cases": 8,
+ "note": "Four instructions didn't say whether to flip. I expected a plain triangle, but Claude chose the flipped tower the video shows. That is a fair reading of an unclear instruction, so 'correct' here judges the order, and the refusal of 'biggest on top', since all glasses are identical.",
+ "results": [
+  {
+   "instruction": "Start with the glass nearest to the right edge of the table",
+   "expected": [
+    "triangle",
+    "right_first"
+   ],
+   "got": [
+    "flipped_tower",
+    "right_first"
+   ],
+   "correct": false,
+   "order_correct": true
+  },
+  {
+   "instruction": "Begin with whichever glass is closest to my left side",
+   "expected": [
+    "triangle",
+    "left_first"
+   ],
+   "got": [
+    "flipped_tower",
+    "left_first"
+   ],
+   "correct": false,
+   "order_correct": true
+  },
+  {
+   "instruction": "Use the ones nearest me for the base and the far one on top",
+   "expected": [
+    "triangle",
+    "nearest_first"
+   ],
+   "got": [
+    "flipped_tower",
+    "nearest_first"
+   ],
+   "correct": false,
+   "order_correct": true
+  },
+  {
+   "instruction": "Build it starting from the back of the table",
+   "expected": [
+    "triangle",
+    "farthest_first"
+   ],
+   "got": [
+    "flipped_tower",
+    "farthest_first"
+   ],
+   "correct": false,
+   "order_correct": true
+  },
+  {
+   "instruction": "Copy exactly what I did",
+   "expected": [
+    "flipped_tower",
+    "as_in_video"
+   ],
+   "got": [
+    "flipped_tower",
+    "as_in_video"
+   ],
+   "correct": true,
+   "order_correct": true
+  },
+  {
+   "instruction": "Make the pyramid but leave the fourth glass alone",
+   "expected": [
+    "triangle",
+    "as_in_video"
+   ],
+   "got": [
+    "triangle",
+    "as_in_video"
+   ],
+   "correct": true,
+   "order_correct": true
+  },
+  {
+   "instruction": "Stack them and turn the farthest glass over on top",
+   "expected": [
+    "flipped_tower",
+    "nearest_first"
+   ],
+   "got": [
+    "flipped_tower",
+    "nearest_first"
+   ],
+   "correct": true,
+   "order_correct": true
+  },
+  {
+   "instruction": "Put the biggest glass on top",
+   "expected": [
+    "refuse",
+    null
+   ],
+   "got": [
+    "refuse",
+    null
+   ],
+   "correct": true,
+   "order_correct": true
+  }
+ ]
+}

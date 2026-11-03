@@ -108,6 +108,8 @@ One camera can't judge depth, so I assume the hand moves in the upright plane be
 | "Build the triangle, then flip the glass nearest to me and put it on top." | `task3_flip_take9` | Understood: farthest first, nearest flipped. **Robot failed** the triangle |
 | "Make me a cup of tea and wash the dishes." | `task2_triangle_take5` | **Refused**, with the reason |
 
+Other wordings, on a four-glass video, all gave the right order, 7 of 7: "start with the glass nearest to the right edge", "closest to my left side", "starting from the back of the table" and others. "Put the biggest glass on top" was refused, since my glasses are identical. Where an instruction didn't say whether to flip, Claude followed the video and flipped. See `docs/results/instruction_phrasings.json`.
+
 *Finding glasses the reader missed* (`--find-glasses`). Claude points to every glass early in the video. Where my bright-top reader saw nothing, the glass is added, and when it left is measured from the picture, not by the model. Where the reader saw a glass only late, its start moves to the beginning.
 
 | My real videos | Without | With `--find-glasses` |
