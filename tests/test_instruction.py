@@ -168,3 +168,83 @@ def test_a_missing_key_is_a_clear_error(tmp_path: Path, monkeypatch) -> None:
 
     with pytest.raises(InstructionError, match="ANTHROPIC_API_KEY"):
         load_api_key(tmp_path / ".env")
+
+
+def test_a_successful_reply_returns_the_models_text(monkeypatch) -> None:
+    import io
+    import json
+    import urllib.request
+
+    from src.reasoning.vlm_client import AnthropicVision, VlmConfig
+
+    sent = {}
+
+    class Reply(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    def answer(request, timeout):
+        sent["body"] = json.loads(request.data)
+        sent["key"] = request.headers["X-api-key"]
+        return Reply(json.dumps({"content": [{"type": "text", "text": "ok"}]}).encode())
+
+    monkeypatch.setattr(urllib.request, "urlopen", answer)
+    client = AnthropicVision(VlmConfig("model-x", 10, 5.0, 1, 100), "sk-ant-test")
+
+    assert client.ask("hello", [b"jpeg-bytes"]) == "ok"
+    content = sent["body"]["messages"][0]["content"]
+    assert content[0]["type"] == "image"
+    assert content[-1]["text"] == "hello"
+    assert sent["key"] == "sk-ant-test"
+
+
+def test_no_connection_is_a_clear_error(monkeypatch) -> None:
+    import urllib.error
+    import urllib.request
+
+    from src.reasoning.vlm_client import AnthropicVision, VlmConfig
+
+    def offline(*args, **kwargs):
+        raise urllib.error.URLError("no network")
+
+    monkeypatch.setattr(urllib.request, "urlopen", offline)
+    client = AnthropicVision(VlmConfig("model", 10, 5.0, 1, 100), "sk-ant-test")
+
+    with pytest.raises(InstructionError, match="Couldn't reach"):
+        client.ask("hello", [])
+
+
+def test_glass_tops_are_read_and_points_outside_the_picture_dropped() -> None:
+    from src.reasoning.vlm_client import find_glass_tops
+
+    model = FakeModel('{"glasses": [{"x": 10, "y": 20}, {"x": 900, "y": 5}]}')
+
+    assert find_glass_tops(model, b"jpeg", 800, 450) == [(10.0, 20.0)]
+    assert "800 pixels wide" in model.prompts[0]
+
+
+def test_a_reply_without_glass_positions_is_refused() -> None:
+    from src.reasoning.vlm_client import find_glass_tops
+
+    with pytest.raises(InstructionError, match="positions"):
+        find_glass_tops(FakeModel("I see three glasses."), b"jpeg", 800, 450)
+
+
+def test_frames_come_from_the_first_half_of_a_video_as_small_pictures(tmp_path: Path) -> None:
+    import cv2
+
+    from src.reasoning.vlm_client import video_frames
+
+    path = tmp_path / "clip.mp4"
+    writer = cv2.VideoWriter(str(path), cv2.VideoWriter.fourcc(*"mp4v"), 10, (320, 240))
+    for value in range(20):
+        writer.write(np.full((240, 320, 3), value * 10, np.uint8))
+    writer.release()
+
+    pictures = video_frames(path, 2, 160)
+
+    assert len(pictures) == 2
+    assert cv2.imdecode(np.frombuffer(pictures[0], np.uint8), cv2.IMREAD_COLOR).shape[1] == 160
