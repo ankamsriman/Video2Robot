@@ -10,6 +10,12 @@ Without a camera, a recorded video can stand in for it:
     PYTHONPATH=. .venv/bin/python scripts/live_teleop.py \
         --source data/raw/task2_triangle_take6.mov --no-window --save out.mp4
 
+With --match-video, a recorded video's glasses are placed where they stood, and the hand is
+placed on the table itself (from the table's corners and the hand's size), so the robot's
+hand goes where the person's hand really was:
+    PYTHONPATH=. .venv/bin/python scripts/live_teleop.py \
+        --source data/raw/task2_triangle_right_take1.mov --match-video --save out.mp4
+
 Simulated G1 with a pinned pelvis. The robot copies your hand: nothing is learned.
 """
 
@@ -17,7 +23,9 @@ import argparse
 import json
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 import cv2
 import imageio
@@ -29,6 +37,7 @@ from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision
 from scipy.spatial.transform import Rotation, Slerp
 
+from scripts.match_video import MatchedVideo, match_video
 from src.simulation.ik import palm_down_rotation
 from src.simulation.mirror import mirror_point
 from src.simulation.robot_env import RobotEnv, load_motion_config, motion_for_arm
@@ -70,6 +79,7 @@ class HandReading:
     """One frame's hand, reduced to what the robot needs."""
 
     pixels: np.ndarray
+    world: np.ndarray
     wrist: np.ndarray
     scale: float
     frame: np.ndarray
@@ -81,8 +91,12 @@ def read_hand(
     image: np.ndarray,
     stamp_ms: int,
     config: TeleopConfig,
+    choose: Callable[[list], tuple] | None = None,
 ) -> HandReading | None:
-    """The biggest hand in a BGR image, or None if no hand is seen."""
+    """One hand in a BGR image, or None if no hand is seen.
+
+    `choose` picks among the (pixels, metres) hands; by default the biggest is taken.
+    """
     height, width = image.shape[:2]
     rgb = mp.Image(
         image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -99,9 +113,14 @@ def read_hand(
             found.hand_landmarks, found.hand_world_landmarks, strict=True
         )
     ]
-    pixels, world = max(hands, key=lambda hand: float(np.ptp(hand[0], axis=0).sum()))
+    pixels, world = (
+        choose(hands)
+        if choose is not None
+        else max(hands, key=lambda hand: float(np.ptp(hand[0], axis=0).sum()))
+    )
     return HandReading(
         pixels=pixels,
+        world=world,
         wrist=pixels[0] / (width, height),
         scale=image_scale(pixels, world),
         frame=hand_frame(world),
@@ -117,9 +136,14 @@ class HandFollower:
     """
 
     def __init__(
-        self, config: TeleopConfig, home: np.ndarray, neutral: np.ndarray
+        self,
+        config: TeleopConfig,
+        home: np.ndarray,
+        neutral: np.ndarray,
+        copy_wrist: bool = True,
     ) -> None:
         self._config = config
+        self._copy_wrist = copy_wrist
         self._home = home
         self._neutral = neutral
         self.calibration: Calibration | None = None
@@ -155,7 +179,10 @@ class HandFollower:
         self._still_frames += 1
         return self._still_frames >= self._config.calibration_frames
 
-    def update(self, reading: HandReading | None) -> None:
+    def update(
+        self, reading: HandReading | None, spot: np.ndarray | None = None
+    ) -> None:
+        """Take a new reading. `spot`, if given, is where the hand is on the table itself."""
         if reading is None:
             self._lost_frames += 1
             if self._lost_frames == self._config.reset_after_lost:
@@ -172,10 +199,15 @@ class HandFollower:
             )
             logger.info("Calibrated: this hand pose is the robot's starting pose")
         weight = self._config.smoothing
-        target = wrist_target(
-            reading.wrist, reading.scale, self.calibration, self._config
+        target = (
+            wrist_target(reading.wrist, reading.scale, self.calibration, self._config)
+            if spot is None
+            else np.clip(spot, self._config.workspace_min, self._config.workspace_max)
         )
         self.position = smooth(self.position, target, weight)
+        self.curls = smooth(self.curls, np.array(reading.curls), weight)
+        if not self._copy_wrist:
+            return
         turned = Rotation.from_matrix(
             robot_rotation(
                 self.calibration.frame, reading.frame, self._neutral, self._config
@@ -183,7 +215,6 @@ class HandFollower:
         )
         between = Rotation.concatenate([self.rotation, turned])
         self.rotation = _blend(between, weight)
-        self.curls = smooth(self.curls, np.array(reading.curls), weight)
 
 
 def _blend(pair: Rotation, weight: float) -> Rotation:
@@ -282,14 +313,53 @@ def _robot(arm: str) -> tuple[RobotEnv, dict]:
     return RobotEnv(model, motion_for_arm(load_motion_config(CONFIG_PATH), arm)), view
 
 
+def _nearest_hand(matched: MatchedVideo, follower: "HandFollower") -> Callable:
+    """Follow the hand whose table spot is nearest where the robot's hand is going."""
+
+    def choose(hands: list) -> tuple:
+        return min(
+            hands,
+            key=lambda hand: float(
+                np.linalg.norm(matched.robot_spot(*hand) - follower.position)
+            ),
+        )
+
+    return choose
+
+
+def _grab_check(env: RobotEnv, matched: MatchedVideo, name: str) -> dict:
+    """At the moment the person took a glass, how far the robot's hand was from it."""
+    gap = env.hand_position - env.object_position(name)
+    return {
+        "glass": name,
+        "across_table_cm": round(float(np.linalg.norm(gap[:2])) * 100, 1),
+        "height_above_glass_base_cm": round(float(gap[2]) * 100, 1),
+    }
+
+
 def run(args: argparse.Namespace) -> dict:
     config = load_teleop_config(CONFIG_PATH)
-    env, view = _robot(args.arm)
+    view = yaml.safe_load(CONFIG_PATH.read_text())["teleop_view"]
+    matched = (
+        match_video(Path(args.source), HAND_MODEL, (view["width"], view["height"]))
+        if args.match_video
+        else None
+    )
+    if matched is None:
+        env, view = _robot(args.arm)
+        arm = args.arm
+        starts = {name: np.array(xy) for name, xy in _glass_layout(arm).items()}
+    else:
+        env, arm, starts = matched.env, matched.arm, matched.starts
     follower = HandFollower(
         config,
         np.array(env.motion.home_position),
-        palm_down_rotation(args.arm, env.motion.hand_pitch),
+        palm_down_rotation(arm, env.motion.hand_pitch),
+        # Matching a video, where the hand is matters most: a palm-down hand reaches it.
+        copy_wrist=matched is None,
     )
+    choose = None if matched is None else _nearest_hand(matched, follower)
+    grabs: list[dict] = []
     capture, is_camera = _open_source(args.source)
     fps = capture.get(cv2.CAP_PROP_FPS) or 30.0
     options = vision.HandLandmarkerOptions(
@@ -328,8 +398,17 @@ def run(args: argparse.Namespace) -> dict:
                 if is_camera
                 else int(counts["frames"] * 1000 / fps)
             )
-            reading = read_hand(landmarker, image, stamp, config)
-            follower.update(reading)
+            reading = read_hand(landmarker, image, stamp, config, choose)
+            spot = (
+                None
+                if matched is None or reading is None
+                else matched.robot_spot(reading.pixels, reading.world)
+            )
+            follower.update(reading, spot)
+            if matched is not None and counts["frames"] in matched.grab_frames:
+                grabs.append(
+                    _grab_check(env, matched, matched.grab_frames[counts["frames"]])
+                )
             counts["frames"] += 1
             counts["hand_seen"] += reading is not None
             # Follow a tracked hand; with no starting pose, go home; else hold still.
@@ -369,15 +448,24 @@ def run(args: argparse.Namespace) -> dict:
         writer.close()
     cv2.destroyAllWindows()
     seconds = time.monotonic() - started
-    return {
+    summary = {
         **counts,
         "loop_fps": round(counts["frames"] / seconds, 1),
         "glasses_moved_cm": {
             name: round(
                 float(np.linalg.norm(env.object_position(name)[:2] - start)) * 100, 1
             )
-            for name, start in _glass_layout(args.arm).items()
+            for name, start in starts.items()
         },
+    }
+    if matched is None:
+        return summary
+    return {
+        **summary,
+        "arm": arm,
+        "hand_distance_factor": matched.factor,
+        "video_palm_to_glass_cm": list(matched.fit_misses_cm),
+        "robot_hand_at_each_grab": grabs,
     }
 
 
@@ -391,7 +479,15 @@ def main() -> None:
     parser.add_argument(
         "--seconds", type=float, default=0.0, help="stop after this long"
     )
-    summary = run(parser.parse_args())
+    parser.add_argument(
+        "--match-video",
+        action="store_true",
+        help="for a recorded video: place its glasses, and the hand on the table itself",
+    )
+    args = parser.parse_args()
+    if args.match_video and args.source.isdigit():
+        parser.error("--match-video needs a recorded video as --source")
+    summary = run(args)
     logger.info("%s", json.dumps(summary))
 
 
