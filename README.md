@@ -226,7 +226,22 @@ So far it has been tested only with a recorded video standing in for the camera 
 - **Accuracy:** the robot hand was a median 3 cm from its target.
 - **Depth:** forward/back is the weak part, estimated from how big the hand looks, and hit its limit in 29% of frames.
 
-**Not yet tried with a live camera.**
+**With a live webcam (a Logitech Brio across the table):**
+- **The first try failed.** Control started on my hand as I walked into view, which flung the arm out of reach. The waist turned with every move. An odd frame width also broke saving.
+- **Fixes:** control now starts only on a hand held still, and starts over after 2 seconds without a hand. Only the arm moves; the waist stays locked.
+- **Second try:** the robot followed my hand in 941 of 1460 frames, at 8 frames a second, now faster with a 720p picture.
+
+**Matching a recorded video (`--match-video`).** Copying a video only means something if the robot's glasses stand where mine did. This mode reads the video's glasses and places them in the simulator. It then places my palm on the table in 3D, from the table's corners and how big my hand looks. One distance factor per video corrects for my hand's size. It's fitted on where the glasses stood when I took them, so it uses only the video.
+
+On Task 2 take 1 (one run):
+- My palm landed 0.9, 1.3 and 0.6 cm from each glass as I took it.
+- The robot's hand was 2.6, 15.3 and 5.9 cm from each glass at those moments. Glass 2 had already been nudged 13 cm by the robot's arm.
+- The robot keeps its palm down in this mode. Copying my wrist as well often asked for poses its arm can't reach.
+- On other takes the palm's position is less reliable (1 to 30 cm). How big the hand looks changes as it turns.
+
+```bash
+PYTHONPATH=. .venv/bin/python scripts/live_teleop.py --source data/raw/task2_triangle_right_take1.mov --match-video --save out.mp4
+```
 
 ## What worked and what didn't
 

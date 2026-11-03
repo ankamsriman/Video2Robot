@@ -130,5 +130,17 @@ You asked whether the robot could copy your hand live from a webcam, wrist and f
 
 `scripts/live_teleop.py` does it with MediaPipe and the existing arm solver. The robot is seen from behind, so it moves the way you do. Depth comes from how big your hand looks, the weakest part. Tested only with take 6 standing in for the camera, at about 12 frames a second. It's a separate demo: it copies, it doesn't learn, and it doesn't change the task results.
 
+### Live control on a real webcam, step checks, and matching a video (4 Nov)
+The first live webcam try failed, so three fixes went in:
+- Control starts only once a hand is held still. It had calibrated on my hand walking into view.
+- Only the arm moves. The waist had turned and leaned with every move.
+- The window saves even when the camera gives an odd width.
+
+I asked which features from a list would raise the success rate. Honestly, none of finger pre-shape, grip timing or wrist copying would. So step checks came first: every pick and place now reports which step first failed. They changed no result (the same 28 of 30 flips, failing in the same runs).
+
+I pointed out that testing live control on a recorded video means little if the simulated glasses stand somewhere else. `--match-video` now places the video's glasses, and puts the hand on the table in 3D, from the table's corners and the hand's apparent size. On Task 2 take 1, the palm landed within about 1 cm of each glass as I took it.
+
+My API balance was draining: VS Code loads `.env` into terminals, and Claude Code used the key under its standard name. The project's key is now `VIDEO2ROBOT_CLAUDE_KEY`.
+
 ### Still open
 Raising the API limit, new videos to test the VLM fairly, making the repo public, and submitting. The data collection note needs your details. You decide when the repo goes public.

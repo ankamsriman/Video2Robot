@@ -38,7 +38,8 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | What the robot can do, in chosen areas | 28 of 30 for each task, pinned pelvis |
 | Test on new takes kept apart from tuning | Task 3: **0 of 6** in varied layouts. In a chosen layout, 1 of 2 (take 9; 3 of 6 when nudged) |
 | README, data sample, example videos | Done, data note needs the user's details |
-| Live hand control (separate demo) | Built; follows a recorded video at about 12 frames a second; not yet tried with a live camera |
+| Live hand control (separate demo) | Works with a live webcam after fixes (followed 941 of 1460 frames). `--match-video` places a video's glasses and the hand on the table: robot hand 2.6, 15.3 and 5.9 cm from each glass as it was taken (Task 2 take 1, one run) |
+| Step checks | Every pick and place reports its first failed step (reach, grip, lift, carry, twist, place, release, others still). They only measure: same 28 of 30 flips, same failures |
 | Repo public and submission | **The user decides** |
 
 Options B and C (retargeting the hand, training a policy) were not started. A works, but it isn't yet proven on new takes.

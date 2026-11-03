@@ -1100,6 +1100,13 @@ Two older options remain. `--fit-to-robot` keeps the robot in the middle and mov
 
 Readings are smoothed, and each joint may move only so fast, so a jumpy reading can't swing the arm. The robot is shown from behind, so it moves the way you do. It copies you; nothing is learned.
 
+**Matching a video, for live control.** `scripts/live_teleop.py --match-video` makes the copy fair. It reads a recorded video's glasses and places them in the simulator where they stood. It then puts the hand on the table in 3D (`src/teleop/hand_on_table.py`):
+- The table's corners give the camera's position and lens, so a pixel fixes a line from the camera through the palm.
+- How big the hand looks (pixels) compared with its size in metres (from MediaPipe) says how far along that line it is.
+- MediaPipe assumes a usual hand size, so one factor per video corrects the distance. It's fitted on where the glasses stood when the hand took them.
+
+**Step checks.** `src/verification/steps.py` checks each step of every pick and place: reach, grip, lift, carry, the flip's twist, place, release, and whether the other glasses stayed still. Reports give `failed_at`, the first step that went wrong. The checks only measure, so results stay the same, but a failure now says where it happened.
+
 **Two arms, optional.** With `--two-arms`, `arm_for_each_glass` gives each glass the arm on its own side, and `RobotEnv.use_arm` swaps arms mid-task. The old hand rises, goes out beside the body and hangs back, and the new one comes in the same way. A direct move swept glasses off the table. It tied with one arm on random layouts, so it stays off by default.
 
 **Which arm Task 2 uses.** `nearest_arm` in `src/reasoning/fit_layout.py` averages how far the glasses and tower are to the robot's side. If the average is on its left, it uses the left arm for the whole task. Tested on identical layouts, this gave 24 of 30 against 10 of 30 for the right arm alone when everything was on the left. It made no real difference, 20 against 21 of 30, when the layout was spread across both sides. The failures there are mostly knocked or tilted glasses, not glasses out of reach, so swapping arms wouldn't obviously fix them.
