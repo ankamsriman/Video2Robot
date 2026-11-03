@@ -23,7 +23,18 @@ Throughout, **[Built]** means the code exists and has been tested. **[Planned]**
 11. [Results and how to read them](#11-results-and-how-to-read-them)
 12. [What comes next](#12-what-comes-next)
 13. [How the project is run](#13-how-the-project-is-run)
-14. [Glossary](#14-glossary)
+
+**Part Two: your real videos and real glasses**
+
+14. [Reading your videos: steel glasses, no marker](#14-reading-your-videos-steel-glasses-no-marker)
+15. [Task 3: choosing the arm and where to stand](#15-task-3-choosing-the-arm-and-where-to-stand)
+16. [Choosing arms for Task 2, and the logistic regression model](#16-choosing-arms-for-task-2-and-the-logistic-regression-model)
+17. [The vision language model (Claude) helper](#17-the-vision-language-model-claude-helper)
+18. [Copying your hand's carry](#18-copying-your-hands-carry---hand-path)
+19. [Live hand control, and matching a recorded video](#19-live-hand-control-and-matching-a-recorded-video)
+20. [Step checks: finding where a run fails](#20-step-checks-finding-where-a-run-fails)
+21. [All results on your real videos, and how to read them](#21-all-results-on-your-real-videos-and-how-to-read-them)
+22. [Glossary](#22-glossary)
 
 ---
 
@@ -39,7 +50,9 @@ Imagine you sit at a table and film yourself putting an apple in a box. You hand
 
 Doing this on a real humanoid would be expensive and risky, so we use a **simulator**: a program that acts like a video game with accurate physics. If the robot's fingers don't squeeze hard enough in the simulator, the object really does slip.
 
-**Where we are:** code for all five steps now exists and works together on a rendered test video. **It hasn't yet seen a real video.** So the challenge's hard rule still isn't met, and your recordings are the next step.
+**Where we are (4 Nov):** the robot now learns from **your real phone videos** of steel glasses. For Task 2, the triangle, it builds 8 of your 9 videos with Claude's help, and 3 of 9 without it. For Task 3, the flip, it builds 2 of 9; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
+
+Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 21) covers your real videos**, and chapter 21 has the numbers to quote.
 
 ---
 
@@ -765,6 +778,8 @@ The first full test scored **0 out of 10**. Here's how that became 80%.
 
 ## 11. Results and how to read them
 
+*This chapter covers the first version, with coloured blocks. For your real glasses, see chapter 21.*
+
 | Test | Setups | Passed | Notes |
 |---|---|---|---|
 | Used for tuning, old check | 10 | 9 | Flattering, because I adjusted the layout using these |
@@ -789,8 +804,8 @@ The old check required the hand to arrive within 2 cm. In all 4 failures of the 
 
 That judged the wrong thing, because the goal is the object's position, not the hand's. So I changed it, and retested on new setups in case the fix merely flattered the score. A score rising because a check changed should always make you suspicious, so asking why it changed is the right habit.
 
-### Current limitations
-**The biggest one comes first: nothing has been tried on real video yet.**
+### Limitations of the block version
+*Since then, item 4 is solved for the glasses (the plan comes from your video), and item 5 too (two arms are optional). See chapter 21 for today's limits.*
 
 1. **Pelvis pinned**, so there's no real balance.
 2. **Three-finger hand**, where the challenge suggests five.
@@ -836,6 +851,17 @@ A test that passes can be measuring nothing. So when a result looks good, it's w
 ---
 
 ## 12. What comes next
+
+*This was the plan at the start, kept to show how the project grew. Where things stand now:*
+
+| Phase | Status |
+|---|---|
+| 2. Key moments from the hand | Built. For your glasses, rest spots of the glasses decide the timing instead, because the hand gave too many moments |
+| 3. Objects and real positions | Done for your glasses, without SAM 2 or a marker: bright tops and the table's corners (chapter 14) |
+| 4. Writing the plan | Done without AI; Claude is optional (chapter 17) |
+| 5. Closed loop | The robot's result is checked against your video; step checks say where a run failed (chapter 20) |
+| 6. Scoring | Done; results in chapter 21 |
+| 7. Submission | In progress |
 
 ### Phase 2: finding key moments [Code built, not yet tried on real video]
 **You:** record about 10 videos using `docs/RECORDING_GUIDE.md`, with rough labels.
@@ -948,7 +974,7 @@ Scripted robot runs many times in simulation -> saves camera images and motions 
 
 `.gitignore` lists files git must ignore, such as secrets and downloads.
 
-**Current state:** Phases 0 and 1 are committed on your Mac, but not on GitHub yet.
+**Current state:** all work is committed on your Mac, on the `overnight` branch. Nothing is pushed until you say so, and the GitHub repo stays private until you decide.
 
 ### Commands to try
 Run these from the project folder. Lines starting with `#` are comments.
@@ -974,6 +1000,18 @@ PYTHONPATH=. .venv/bin/python scripts/phase1_gate.py --trials 1 --first-seed 900
 
 # Watch a passing run
 open data/processed/phase1/pinned_trial_500.mp4
+
+# Your real video to the robot (Task 2 take 1)
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_right_take1.mov
+
+# The same, with Claude finding the glasses and the model choosing arms (uses the API key)
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_take3.mov --find-glasses --choose-arms
+
+# Live control with your webcam (c resets, q quits)
+PYTHONPATH=. .venv/bin/python scripts/live_teleop.py
+
+# Live control matched to a recorded video's glasses
+PYTHONPATH=. .venv/bin/python scripts/live_teleop.py --source data/raw/task2_triangle_right_take1.mov --match-video
 ```
 
 `--first-seed` chooses which random setups to use. The same seed always gives the same setup.
@@ -983,45 +1021,429 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 
 ---
 
-## 14. Glossary
+---
+
+# Part Two: your real videos and real glasses
+
+Chapters 1 to 13 told the story of the first version, which sorted coloured blocks into trays using a printed marker. Then you recorded the real tasks with steel glasses and no marker, and the project changed a lot. Part Two explains everything built for your videos, from zero, in the order a video flows through the system.
+
+```
+your video ──► read the table ──► find the glasses ──► work out the moves ──► choose arm(s)
+                                                                                  │
+   check each step ◄── robot builds it in MuJoCo ◄── place glasses where they stood ◄┘
+```
+
+---
+
+## 14. Reading your videos: steel glasses, no marker
+
+### The problem
+The first version found objects by colour and measured positions with a printed marker. Your glasses are steel, so they have almost no colour, and you recorded without a marker. Both old tools were useless.
+
+### Finding glasses with no colour
+Each glass stands upside down, so its closed end faces up. Seen from above, that closed end is a **bright circle** against the dark table. So the reader (`src/perception/glass_tracker.py`) looks, in every frame, for round patches much brighter than that frame's table. It compares within one frame, so when the phone changes its brightness by itself, nothing breaks.
+
+**Example.** In `task2_triangle_right_take1`, three bright circles sit still for the first 3 seconds. At 3.0 s one of them disappears from its spot, and a new one appears beside the others a few seconds later. That's one move.
+
+### Rest spots and moves
+- A **rest spot** is a bright circle seen in the same place for a while: a glass standing still.
+- Reflections are thrown out, because they land off the table or flicker.
+- A glass being carried doesn't stay anywhere long enough to count.
+- A **move** is one rest spot ending, and a new one starting soon after.
+
+In take 1 the moves happen at **3.0 s, 12.6 s and 20.8 s**, and they come out in the right order.
+
+### Using the table instead of a marker
+A rectangle photographed from an angle looks like a squashed shape. Because we know your table is **80 × 50 cm**, the way it's squashed reveals two things: the camera's lens, and where the camera stands (`src/perception/table_view.py`). After that, any pixel can be turned into a real position on the table.
+
+**How the corners are found:**
+1. You clicked four rough corners once (`data/labels/`).
+2. The code fits a straight line along each table edge.
+3. The real corners are where those lines cross. This matters because a real table's corners are rounded.
+
+Moving your rough clicks by up to 20 pixels changed glass positions by only about 0.1 cm.
+
+### Correcting for height
+A glass's top is 11.5 cm above the table, or 23 cm for the glass on top of the tower. Seen at an angle, a raised point appears farther away than the glass's base really is. Since we know the camera's position, we can correct for this.
+
+**Example check:** after the correction, the top glass in take 1 lands within **0.2 cm** of the midpoint of the two lower glasses, which is exactly where it should be.
+
+### Recognising the flip (Task 3)
+A flipped glass shows its **open end**, which is dark, not bright. So Task 3 shows four starting spots but only three bright new spots. To confirm the flip, the code looks where the tower's top should be. At hand-picked spots, closed tops measured 80–88% bright pixels and the opening measured 0%.
+
+### When the top glass isn't seen
+Against the bright floor, the top glass can go unnoticed. If the reader sees three glasses leave and two end side by side with nothing above them, it concludes the third must be on top. The report then says `top_glass_seen_in_video: false`.
+
+### What this doesn't show
+The reader's settings were chosen by looking at your first videos, so later takes are the fairer test. Of the eight later Task 2 takes, four were refused because a starting glass was missed. That's the reader's main weakness, and chapter 17 shows how Claude fixes it.
+
+---
+
+## 15. Task 3: choosing the arm and where to stand
+
+### The problem
+The flip only works if the robot holds its forearm level and turns its wrist. It can only do that towards the working arm's **own side**: reaching across its chest, the right arm hits the robot's own body. In your first Task 3 video, the tower is on the robot's left of the glasses, so the right arm can't do it from the middle of the table.
+
+### The fix: choose the arm, then where to stand
+`plan_stand` in `src/reasoning/fit_layout.py`:
+1. **Choose the arm.** If the tower is on the robot's left of the glasses, use the left arm.
+2. **Choose where to stand.** Stand so the tower is 28.5 cm to the working arm's side, the middle of the area where the flip was tested.
+
+**Example.** For `task3_flip_right_take1`, this means the left arm, standing 23.4 cm to the right of the table's middle. The robot can't walk, so the simulation simply starts it there.
+
+### Why the left arm needed no new tuning
+The G1's arms are mirror images. `src/simulation/mirror.py` imagines a mirror along the robot's centre line:
+- a point 10 cm to the right becomes 10 cm to the left;
+- a joint that swings forward and back keeps its angle;
+- a joint that turns sideways changes sign.
+
+So settings are written once, for the right arm, and the left arm gets their mirror image.
+
+### What later testing showed (4 Nov)
+The step checks (chapter 20) showed that on later takes, **Task 3 fails because a glass is out of reach**:
+- In takes 2, 3 and 7, you put the glasses 36–55 cm into the table. The flip was only tested on glasses 29–35 cm in.
+- The robot's hand stopped **11, 31 and 41 cm** short of a glass.
+
+**Experiment: stand closer.** The robot normally stands 16 cm back from the table's edge. Moving it closer, with the glasses unchanged:
+
+| Take | Normal | 6 cm closer | 10 cm closer |
+|---|---|---|---|
+| 2 | missed a glass by 11 cm | missed by 8 cm | **built and flipped** |
+| 7 | missed by 41 cm | missed by 4 cm | reached that glass, then missed the fourth by 5 cm |
+| 3 | missed by 31 cm | missed by 45 cm | not tried: its glass is 47 cm to the side, not too deep |
+
+So standing closer rescued one take (one run). It isn't part of the system yet: it would need a rule for how close to stand, and a check that takes 1 and 9, which work now, still work.
+
+**Lesson:** a robot that can't walk, standing in one spot, can't reach glasses spread that widely. A real robot would step between glasses. This is a real limit of our setup, and the results say so.
+
+---
+
+## 16. Choosing arms for Task 2, and the logistic regression model
+
+### Three ways to use the arms
+1. **One arm for everything (the nearest arm).** `nearest_arm` averages how far the glasses and tower are to the robot's side and picks that side's arm. On layouts toward the robot's left, this built 24 of 30, against 10 of 30 for the right arm alone.
+2. **An arm per glass (`--two-arms`).** `arm_for_each_glass` gives each glass the arm on its own side. When arms swap, the old hand rises, moves out beside the body and hangs back, and the new one comes in the same way. A direct swap swept glasses off the table.
+3. **Let a small learned model choose (`--choose-arms`).** This is the logistic regression model.
+
+### What a logistic regression model is, from zero
+Imagine scoring a layout like a judge with a checklist:
+- start with a base score;
+- add or subtract points for each thing you notice, such as "the tower is far to the side";
+- a big positive total means "likely to succeed", a big negative total means "likely to fail".
+
+The points for each item are the **weights**. Logistic regression learns those weights from examples, then squeezes the total into a chance between 0% and 100% using the **sigmoid**, an S-shaped curve:
+
+```
+chance
+100% |                 ______
+     |               /
+ 50% |-------------/----------
+     |           /
+  0% |______ /
+     +-------------------------- total score
+        negative   0   positive
+```
+
+**Ours** has about 16 weights and is written in plain NumPy. It looks at 7 numbers describing the layout (in centimetres), for example:
+- how far forward the tower is;
+- how far to the side the tower is;
+- how far the glasses are from the tower.
+
+It asks: "with one arm, what's the chance? With an arm per glass, what's the chance?" Then it picks the higher one.
+
+### How it learned
+It was **trained on 90 simulator layouts, each run both ways (180 runs)**. Training means adjusting the weights, step by step, until its chances match what really happened. This method is called gradient descent.
+
+**What it learned, as weights** (bigger number = stronger pull):
+
+| As this grows... | Weight | Pulls toward |
+|---|---|---|
+| Tower farther to the side | −1.24 | one arm |
+| Glasses farther from the tower | −0.77 | one arm |
+| Glasses farther to the side | +0.42 | an arm per glass |
+| Tower farther forward | +0.39 | an arm per glass |
+| More glasses on the far side of the tower | +0.01 | (hardly matters) |
+
+**In plain words:** an arm per glass works when the tower is near the middle. One arm works better when the tower is far to one side, because otherwise the second arm must reach across the body.
+
+### Worked example
+Say the tower is 23 cm to the robot's right and the glasses are close to it. "Tower far to the side" gets a big negative weight, so the "arm per glass" score drops below the "one arm" score. The model picks one arm. In the real test this exact kind of layout built with one arm and failed with an arm per glass.
+
+### How well it works
+Tested on **60 new layouts it never saw**:
+
+| Choice | Triangles built |
+|---|---|
+| Always one arm | 43 of 60 |
+| Always an arm per glass | 44 of 60 |
+| Hand-written rule (arm per glass if the tower is within 14 cm of the middle) | 49 of 60 |
+| **The logistic regression model** | **50 of 60** |
+| Best possible, if you knew every answer in advance | 51 of 60 |
+
+It beats always choosing the same way, but only by one layout over a simple rule.
+
+**Are its chances honest?** Roughly, and a little cautious. Runs it gave about a 77% chance really succeeded 87% of the time, and runs it gave about 88% all succeeded (14 of 14).
+
+The picture `docs/results/logistic_regression_explained.png` shows all of this: maps of the table coloured by its choice, the weights, and these results.
+
+### What this doesn't show
+- All of it is simulator layouts with the robot's pelvis pinned.
+- On your 9 real Task 2 videos it chose an arm per glass every time, so on real videos it never had to make a hard choice.
+- **It isn't a world model.** It predicts only "will this succeed?", not how the scene changes step by step.
+
+---
+
+## 17. The vision language model (Claude) helper
+
+### What it is
+A **vision language model (VLM)** reads pictures and text and answers in text. We use **Claude Sonnet 5.5** through Anthropic's API (`src/reasoning/vlm_client.py`). Claude never moves the robot and never gives the final positions. It **finds and decides**, and measured positions stay in charge.
+
+It does three jobs, each switched on by an option:
+
+| Option | Job | Example |
+|---|---|---|
+| `--find-glasses` | Points to every glass top in an early frame. Glasses the reader missed are added (`src/perception/vlm_rescue.py`) | Take 3: the reader saw only two starting glasses; Claude pointed to the third, and the triangle was built |
+| `--instruction "..."` | Turns a typed instruction into an allowed task and order (`src/reasoning/instruction.py`) | "Start with the glass nearest the right edge" gives order: right glass first |
+| (clutter test) | Tells glasses apart from other bright things | In simulated scenes with other bright objects on the table, it found exactly the three glasses |
+
+### Why it's safe
+Claude's answer is checked against a short list of allowed tasks and orders. If the answer doesn't fit, the run stops with a clear message instead of guessing.
+
+### Results
+| Test | Without Claude | With Claude |
+|---|---|---|
+| Task 2, your 9 real videos | 3 of 9 | **8 of 9** (tower within 0.0–0.5 cm of yours) |
+| Task 3, your 9 real videos | 2 of 9 | 2 of 9 (no change: Task 3's problem is reach, chapter 15) |
+| 10 cluttered simulator scenes | a brightness rule saw 20 bright patches | **10 of 10** found exactly the glasses, about 1 cm off |
+| 8 typed instructions (Task 3 take 9) | — | 8 of 8 put the glasses in the right order |
+
+**Not a fair test:** the reader was tuned on these same videos.
+
+### Which Claude model
+Haiku, Sonnet and Opus were compared on 10 cases. All three got 9 of 10 fully right. Sonnet was the most accurate (0.33 cm average error) and far cheaper than Opus, so the project uses Sonnet.
+
+### The API key, and an expensive lesson
+The key lives only in `.env`, a file git ignores, under the name **`VIDEO2ROBOT_CLAUDE_KEY`**.
+
+It used to be called `ANTHROPIC_API_KEY`. VS Code quietly loads `.env` into new terminals, and Claude Code (the assistant writing this project) also looks for `ANTHROPIC_API_KEY`. So for a few hours, the assistant's own coding work was billed to your API balance instead of your Claude Pro subscription: $15 in three hours. Renaming the key fixed it.
+
+**Lesson:** a secret's name can matter as much as where it's stored.
+
+---
+
+## 18. Copying your hand's carry (`--hand-path`)
+
+### What it does
+By default the robot carries each glass along its own smooth path. With `--hand-path`, it copies **how high you lifted the glass, and how fast you moved, during the carry**.
+
+### How
+1. MediaPipe finds your hand in each frame. `follow_moving_hand` follows the hand that's moving.
+2. `carry_window` finds when the carry starts and ends.
+3. `profile_from_pixels` turns the hand's pixels into height above the table and progress along the carry. It assumes your hand moves in the upright plane between the glass's start and end.
+4. `robot_carry_path` fits that profile between the robot's own start and end points:
+   - heights are kept between 20 and 38 cm;
+   - the speed is slowed down if it's too fast for the robot.
+
+**Example.** One copied carry from take 2 came out 60 cm high, which isn't believable for a glass carried across a table. So `is_believable` dropped it, and the robot used its normal carry for that glass.
+
+### What it doesn't copy
+- The sideways route: the robot still carries in a straight line.
+- The reach toward the glass.
+- Your fingers.
+
+Takes 1, 2, 5 and 6 succeed with it. That's not a fair test, because these takes were used while building it.
+
+---
+
+## 19. Live hand control, and matching a recorded video
+
+### What it is
+`scripts/live_teleop.py` lets a webcam (or a recorded video) drive the robot directly: you move, it moves. This is called **teleoperation**. Nothing is learned; the robot copies you frame by frame. It's a separate demo from the video-to-task pipeline, and it doesn't change those results.
+
+### The 21 hand points
+MediaPipe gives **21 points** (landmarks) on your hand in every frame: the wrist, four points on each finger, and the thumb. It gives them twice:
+- **in the picture**, in pixels;
+- **in metres**, around the hand's centre, as if measured with a ruler.
+
+### What the robot copies
+- **Fingers.** For your index and middle finger, the code adds up how much each finger bends at its knuckles. Straight is about 0.6 radians, fully curled about 3.2. That becomes "0% to 100% closed", and the robot closes its matching finger the same amount.
+  - **Example:** holding a glass, your index read **74% closed**.
+  - **Known problem:** the thumb is measured by how close its tip comes to your palm. Wrapped around a wide glass, the thumb stays far from the palm, so it reads 0% even while gripping.
+- **Wrist.** `hand_frame` builds a direction from your wrist and knuckles, and the robot's wrist turns by however much yours has turned since the start, capped at about 69°.
+- **Position.** In plain live mode, moving your hand moves the robot's hand by a set amount, relative to where you started.
+
+### Safety, and lessons from the first live try
+The first try with your Logitech webcam failed:
+
+| What went wrong | Why | Fix |
+|---|---|---|
+| The arm shot up and stayed "out of reach" | Control started on your hand while you walked into view | It now starts only once your hand is **held still** for 15 frames, and starts over after 2 s without a hand |
+| The robot's body spun and leaned | The arm solver also moved the waist | Only the arm moves; the waist is **locked** |
+| The window closed at once | The video saver needs an even width, and the camera gave 1493 pixels | The width is rounded to an even number |
+| Only 8 frames a second | Full-HD pictures are slow to process | The camera now uses 1280 × 720 |
+
+After the fixes, the robot followed your hand in **941 of 1460 frames**.
+
+### Matching a recorded video (`--match-video`)
+**Your point:** copying a recorded video means nothing if the simulated glasses stand somewhere else. So this mode does two things.
+
+**1. Place the glasses where they stood.** It reads the video's glasses (chapter 14) and puts the simulated glasses there.
+
+**2. Place your hand on the real table, in 3D.** One camera can't see depth directly, but similar triangles help:
+
+> A thing looks **half as big** when it's **twice as far away**.
+> distance = lens focal length × real size ÷ size in pixels
+
+**Worked example.** Your camera's focal length is about 1900 pixels. Suppose your palm is 8 cm across and looks 120 pixels wide:
+distance = 1900 × 0.08 ÷ 120 ≈ **1.27 m** from the camera.
+
+The pixel tells us the *direction* from the camera, and the size tells us *how far*. Together they give a point in 3D. The table's corners say where the camera is, so that point becomes a position on the table, the same way glasses are placed.
+
+**The correction factor.** MediaPipe assumes an average hand size. If yours is bigger, your hand looks closer than it is. So one factor per video corrects the distance. It's chosen so that, at the moment you took each glass, your palm lands on that glass. This uses only the video.
+
+**Results, Task 2 take 1 (one run):**
+- Factor 0.91. Your palm landed **0.9, 1.3 and 0.6 cm** from each glass as you took it.
+- The robot's hand was **2.6, 15.3 and 5.9 cm** from each glass at those moments. Glass 2 had already been nudged 13 cm by the robot's arm before you reached it.
+- The robot keeps its palm facing down in this mode. Also copying your wrist asked for poses its arm couldn't reach, and the arm pointed straight up.
+
+### What this doesn't show
+- On other takes, the hand's distance is less reliable: 1 to 30 cm off. A hand turned sideways looks smaller, so it seems farther away.
+- The robot's hand is bigger than yours, so passing near a glass can knock it where your hand cleared it.
+- "Out of reach" in the window means the arm couldn't match the exact pose within 5 mm while chasing a moving target. That's stricter than it sounds.
+
+---
+
+## 20. Step checks: finding where a run fails
+
+### Why
+The final check only says "the tower is right" or "the tower is wrong". When a run fails, that doesn't tell you **where** it went wrong, so you can't fix the right thing.
+
+### What is checked
+After every step, `src/verification/steps.py` measures exact simulator positions:
+
+| Step | Passes if | Tolerance |
+|---|---|---|
+| **reach** | the hand got to the gripping point | within 2 cm |
+| **grip** | the glass is in the hand | within 6 cm of the hand |
+| **lift** | the glass rose with the hand | at least 5 cm |
+| **carry** | the glass is still in the hand over the target | within 6 cm |
+| **twist** (flip only) | the glass is still in the hand after turning over | within 6 cm |
+| **place** | the glass is over its target just before letting go | within 1 cm |
+| **release** | the glass stands straight after letting go (upside down for the flip) | leaning 10° or less |
+| **others still** | the other glasses weren't knocked | each moved 1 cm or less |
+
+The report's **`failed_at`** names the first step that went wrong.
+
+### Worked example
+A failed flip from the simulator test reports:
+```
+failed_at: cup_d: release
+  leaning 86 degrees
+  cup_a moved 11.2 cm, cup_b moved 10.7 cm, cup_c moved 19.1 cm
+```
+In plain words: everything went fine until the robot let go of the flipped glass. Then it fell over, and the whole tower got knocked.
+
+### Proof that checking changes nothing
+The checks only measure. On the 30-layout flip test:
+- same result, **28 of 30**;
+- the same two runs failed;
+- no step was ever flagged in a run that succeeded.
+
+### What it found
+**Task 3 fails mostly at reach** (chapter 15):
+- your real takes 2, 3 and 7: all at reach;
+- the simulator's random layouts: 19 of 22 passed, with 2 failures at reach and 1 at grip.
+
+---
+
+## 21. All results on your real videos, and how to read them
+
+These are the numbers to quote. "Real video" means the robot's plan and glass positions came from your recording. The robot itself is always simulated, with its pelvis pinned.
+
+### Task 2: the triangle (9 real videos)
+| Setup | Built |
+|---|---|
+| No AI, nearest arm | 3 of 9 |
+| With Claude finding glasses | **8 of 9** |
+| With Claude and the logistic regression model choosing arms | 8 of 9 |
+| Copying your hand's carry (`--hand-path`) | takes 1, 2, 5, 6 |
+
+### Task 3: the flip (9 real videos)
+| | Result |
+|---|---|
+| Built and flipped | **2 of 9** (takes 1 and 9) |
+| Refused while reading the video | 4 (takes 4, 5, 6, 8). With Claude, take 6 is read but then fails |
+| Failed at reach (a glass too far for a robot that can't walk) | takes 2, 3, 7. Standing 10 cm closer, take 2 succeeded (one run, not yet part of the system) |
+
+### What the robot can do, with exact simulator positions
+| Test | Result |
+|---|---|
+| Task 2, 30 random layouts in its working area | 28 of 30 |
+| Task 3, 30 random layouts in its working area | 28 of 30 |
+| Task 3, choosing where to stand, random layouts | 25 of 30 |
+
+### How to read these honestly
+- **"Not a fair test"** means the code was adjusted while looking at those same videos, so new videos would probably score lower.
+- **Simulator layouts** test the robot's body, not the video reading.
+- **9 videos is small.** 8 of 9 could be anywhere from about 55% to 98% in the long run.
+- **The pelvis is pinned:** the robot can't fall, and it can't walk.
+
+### Where to see it
+- `data/processed/showcase/`:
+  - your recordings with the tracked hand drawn on, beside the robot, for both tasks;
+  - the live-control replay.
+- `docs/results/`: every saved test and picture.
+
+---
+
+## 22. Glossary
 
 | Term | Meaning |
 |---|---|
 | **ACT** | A popular imitation-learning model that predicts short bursts of motion |
 | **Actuator** | A motor |
-| **Branch** | A separate line of a project's history in git |
 | **API key** | Private password that lets a program use an online service |
 | **ArUco marker** | A printed black-and-white square that software can detect precisely |
+| **Branch** | A separate line of a project's history in git |
+| **Calibration (live control)** | The moment your still hand is matched to the robot's starting pose |
 | **Closed loop** | Measuring results and correcting; the opposite of open loop |
 | **Collision / contact** | Two bodies touching in the simulator |
 | **Config** | File of settings |
 | **Damping** | Force that resists speed and reduces wobble |
+| **Depth factor** | One number per video that corrects how far away the hand seems, because MediaPipe assumes an average hand size |
 | **Digital twin** | A simulated copy of a real setup |
 | **DOF** | Degree of freedom: one independent way of moving |
 | **Egocentric** | Filmed from your own point of view |
 | **Elliptic cone** | A more accurate friction model in MuJoCo |
+| **`.env`** | A private file of settings, such as the API key, that git ignores |
+| **Environment variable** | A named setting a program can read from the terminal it runs in |
 | **Episode** | One complete recorded attempt at a task |
+| **`failed_at`** | In a report, the first step that went wrong, such as `cup_d: reach` |
 | **FK** | Forward kinematics: joint angles to hand position |
+| **Focal length** | How strongly a camera's lens magnifies, in pixels; it links real size, distance and size in the picture |
 | **Free joint** | Lets a body move freely in space |
 | **Friction** | Resistance to sliding, which is what makes gripping possible |
 | **FSR** | Final-state success rate |
 | **Gate** | A measurable test a phase must pass |
 | **GPU** | Graphics chip that speeds up AI work |
+| **Gradient descent** | Learning by nudging the weights a little at a time in the direction that reduces mistakes |
 | **Grasp site** | Our invisible point at the middle of the robot's grip |
 | **Gravity compensation** | Extra motor effort that cancels the arm's weight |
 | **Grounding DINO** | AI that finds objects from text descriptions |
 | **Homography** | Mapping between a flat surface and its image |
 | **HSV** | A colour format separating hue from brightness |
-| **Longest common subsequence** | The longest run of matching items kept in order |
 | **IK** | Inverse kinematics: hand position to joint angles |
+| **Impratio** | A MuJoCo setting; higher values stop objects slowly creeping in a grip |
 | **Keyframe** | An important frame chosen from a video |
+| **Landmark** | One of the 21 points MediaPipe finds on a hand |
+| **Logistic regression** | A small model that adds weighted numbers and turns the total into a chance from 0% to 100% |
+| **Longest common subsequence** | The longest run of matching items kept in order |
 | **MediaPipe** | Library that finds hand positions in images |
 | **Menagerie** | Free collection of MuJoCo robot models |
 | **Minimum jerk** | A smooth motion curve that starts and stops gently |
 | **mink** | The IK library we use |
 | **MuJoCo** | The physics simulator we use |
 | **Open loop** | Acting without checking the result |
-| **Impratio** | A MuJoCo setting; higher values stop objects slowly creeping in a grip |
 | **Pinned** | Fixed in place so it can't fall |
 | **Pitch, roll, yaw** | Nodding, tilting sideways, and turning |
 | **Policy** | A trained model that decides robot motions |
@@ -1029,90 +1451,27 @@ Open `configs/default.yaml`, change `hover_height` from `0.17` to `0.25`, and ru
 | **Post-training** | Specialising a pre-trained model using your own data |
 | **PPO** | A common reinforcement-learning method |
 | **Primitive** | A basic reusable action, such as `pick` |
-| **Pydantic** | Library that checks data matches a format |
 | **Prominence** | How much a dip stands out from its surroundings |
+| **Pydantic** | Library that checks data matches a format |
 | **Radian** | Unit of angle; 1 rad is about 57 degrees |
 | **Real-to-sim** | Copying real-world data and scenes into simulation |
+| **Rest spot** | A place where a glass's bright top stays still for a while |
 | **Retargeting** | Mapping human motion onto a robot's different body |
 | **RL** | Reinforcement learning: learning through trial and reward |
 | **SAM 2** | AI that outlines and follows objects through video |
-| **Seed** | Number that makes "random" results repeatable |
 | **Savitzky-Golay filter** | Smooths a curve while keeping its dips in place |
-| **Singularity** | An arm pose where tiny hand motions demand huge joint motions |
+| **Seed** | Number that makes "random" results repeatable |
+| **Sigmoid** | The S-shaped curve that turns any score into a chance between 0% and 100% |
 | **Sim-to-real gap** | Difference between simulated and real behaviour |
+| **Singularity** | An arm pose where tiny hand motions demand huge joint motions |
 | **SSR** | Step success rate |
+| **Step check** | A measurement after one step of a task, such as "is the glass still in the hand after the carry?" |
 | **Stiffness** | How hard a motor pushes per unit of error |
-| **TSR** | Task success rate |
+| **Teleoperation** | Driving a robot directly with your own movements |
 | **Torque** | Turning force, measured in N·m |
+| **TSR** | Task success rate |
 | **VLA** | Vision-language-action model: images and text to robot motion |
 | **VLM** | Vision language model: images and text to text |
 | **Waypoint** | An intermediate target along a path |
+| **Weight** | In a model, how many points one feature adds or subtracts |
 | **World model** | A model that predicts what happens next |
-
-## Your real videos and real glasses
-
-You recorded the triangle and the flip with steel glasses and no marker. Here's what those videos taught us.
-
-**Finding glasses with no colour.** Steel has almost no colour, so colour tracking can't work. But each glass's closed top is a bright circle against the dark table. A glass "rests" where a bright circle stays put, and a move is one rest ending and another starting nearby in time. In both videos this recovered every move a closed top showed, in the right order. These tests were exploratory: the settings were chosen by looking at the same two videos, so they still need trying on new takes.
-
-**Recognising a flip.** A flipped glass has no bright top. At the top of the tower, closed tops measured 80-88% bright pixels, and the opening measured 0%. This was measured at spots picked by hand, and the automatic check isn't built yet.
-
-**Using the table instead of a marker.** The table's four corners and its measured size (80 x 50 cm) can turn pixels on the table into centimetres. Glass tops sit above the table, so they need a height correction as well.
-
-**Robot test with your glass size.** The simulated glass is now 11.5 cm tall, 7.3 cm at the rim and 5.5 cm at the closed end, on an 80 x 50 cm table. The old motion failed, so the robot now grips higher, levels the glass, aims from measured positions, and lifts well clear after letting go. It built the triangle in 19 of 20 new random setups. The one failure was a glass it couldn't pick up. This test uses simulator positions and a hand-written plan, not your video. The pelvis is pinned, the glass is solid and rigid, and its weight is a guess. This work is on the `real-glasses` branch.
-
-**Video to robot, automatically.** `scripts/glass_from_video.py` reads a video and runs the robot. Here is what each step does, using `task2_triangle_right_take1` as the example.
-
-1. **Find the table.** You pick four rough corners once, in `data/labels/`. The code then fits a straight line along each table edge and finds where those lines cross, since the real corners are rounded. Moving the rough corners by up to 20 pixels changed positions by only about 0.1 cm.
-2. **Work out the camera.** A real rectangle looks like a squashed shape in a picture. Because we know the table is 80 x 50 cm, that squashing reveals the lens and where the camera stands. This is `src/perception/table_view.py`.
-3. **Find glass tops.** In each frame, it looks for round patches much brighter than that frame's table. Comparing within a frame is what copes with the camera changing its brightness.
-4. **Find rest spots.** A top seen steadily in one place is a glass resting. Reflections are thrown out because they land off the table or flicker, and a carried glass doesn't stay long enough. A glass half-covered by another seems to shift a little, so nearby spots count as one glass.
-5. **Read the moves.** The spot left first pairs with the first new spot, and so on. In this video, moves happen at 3.0 s, 12.6 s and 20.8 s.
-6. **Correct for height.** A top is 11.5 cm above the table, or 23 cm for the stacked glass. The camera position gives where the glass really stands. As a check, the stacked glass lands within 0.2 cm of the midpoint of the other two.
-7. **Recognise the flip.** A flipped glass has no bright top, so Task 3 shows four starts and only three new spots. To confirm it, the code looks where the tower's top should be. A dark patch means an opening. A bright patch means a closed top, or just the floor behind an empty spot.
-8. **Run the robot,** then check where the glasses really ended up.
-
-**How Task 3 works without moving any glass.** The flip needs a level forearm, and it only works towards the working arm's own side. Across its chest, the robot's right arm hits its own body. Your video has the tower on the robot's left of the glasses, so the right arm can't do it from the middle of the table.
-
-The fix has two parts, both in `plan_stand` in `src/reasoning/fit_layout.py`:
-
-1. **Choose the arm.** If the tower is on the robot's left of the glasses, use the left arm.
-2. **Choose where to stand.** Stand so that the tower sits 28.5 cm to the working arm's side, which is the middle of the area where the flip was tested.
-
-For your video, that means the left arm, standing 23.4 cm to the right of the table's middle. The simulation starts the robot there; it doesn't walk.
-
-**Why the left arm needed no new tuning.** The G1's arms are mirror images. So `src/simulation/mirror.py` turns right-arm settings into left-arm ones. Imagine a mirror along the robot's centre line: a joint that swings forward and back (pitch) keeps its angle, and one that turns sideways (roll, yaw) changes sign. A point at 10 cm right becomes 10 cm left. Settings are still written once, for the right arm.
-
-Two older options remain. `--fit-to-robot` keeps the robot in the middle and moves the glasses, by up to 33 cm for your video. `--stay-in-middle` moves nothing, and fails by dropping the glass in the twist.
-
-**When the top glass isn't seen.** A top seen against the bright floor can go unnoticed. If the reader finds five spots, three of them left behind and two glasses side by side at the end, with nothing over those two, it concludes the third glass is on top. The report then says `top_glass_seen_in_video: false`. This let takes 2 and 5 work, but those takes also inspired the rule, so they aren't a fair test of it. A Task 3 video that loses two spots could be misread as Task 2, so check the report's task.
-
-**The outcome model, optional.** `src/reasoning/outcome_model.py` is a logistic regression: it turns a layout into a few numbers, such as how far the tower is from the middle, and learns from saved runs the chance that one arm, or two, will succeed. With `--choose-arms` it picks the better one before the robot moves. On 30 fresh layouts its choices built 26, against 25 for a hand rule and 22 for always the same choice.
-
-**The vision language model, optional.** `src/reasoning/vlm_client.py` sends frames and a question to Claude, with the key read from `.env`. `src/reasoning/instruction.py` checks Claude's answer against a short list of allowed tasks and orders, and sorts the measured glasses to match. `src/perception/vlm_rescue.py` adds glasses the reader missed. Claude is used to decide and to find things, never to move the robot or give exact positions.
-
-**Hand path, optional.** With `--hand-path`, `follow_moving_hand` follows the moving hand, `profile_from_pixels` turns its pixels into height and progress along the carry, and `robot_carry_path` fits that between the robot's own positions, within safe heights and speed. A carry straight towards the camera can't be judged, so `is_believable` drops it, and the robot uses its normal carry. This copies your motion, but it doesn't train anything.
-
-**Live hand control, a separate demo.** `scripts/live_teleop.py` reads your webcam. MediaPipe gives 21 points on your hand twice: in the picture, and in metres around the hand's centre. `src/teleop/hand_retarget.py` turns them into robot targets:
-- **Position:** where your wrist is in the picture moves the robot's hand sideways and up/down. How big your hand looks (`image_scale`) moves it forward and back. Bigger means closer, and this is the roughest of the three, because one camera can't measure depth.
-- **Wrist:** `hand_frame` builds a direction for your hand from the wrist and knuckles, and `robot_rotation` turns the robot's wrist by however much your hand has turned since the start, capped so it can't twist too far.
-- **Fingers:** `finger_curls` measures how bent your thumb, index and middle finger are, and `finger_pose` closes each robot finger to match.
-
-Readings are smoothed, and each joint may move only so fast, so a jumpy reading can't swing the arm. The robot is shown from behind, so it moves the way you do. It copies you; nothing is learned.
-
-**Matching a video, for live control.** `scripts/live_teleop.py --match-video` makes the copy fair. It reads a recorded video's glasses and places them in the simulator where they stood. It then puts the hand on the table in 3D (`src/teleop/hand_on_table.py`):
-- The table's corners give the camera's position and lens, so a pixel fixes a line from the camera through the palm.
-- How big the hand looks (pixels) compared with its size in metres (from MediaPipe) says how far along that line it is.
-- MediaPipe assumes a usual hand size, so one factor per video corrects the distance. It's fitted on where the glasses stood when the hand took them.
-
-**Step checks.** `src/verification/steps.py` checks each step of every pick and place: reach, grip, lift, carry, the flip's twist, place, release, and whether the other glasses stayed still. Reports give `failed_at`, the first step that went wrong. The checks only measure, so results stay the same, but a failure now says where it happened.
-
-**Two arms, optional.** With `--two-arms`, `arm_for_each_glass` gives each glass the arm on its own side, and `RobotEnv.use_arm` swaps arms mid-task. The old hand rises, goes out beside the body and hangs back, and the new one comes in the same way. A direct move swept glasses off the table. It tied with one arm on random layouts, so it stays off by default.
-
-**Which arm Task 2 uses.** `nearest_arm` in `src/reasoning/fit_layout.py` averages how far the glasses and tower are to the robot's side. If the average is on its left, it uses the left arm for the whole task. Tested on identical layouts, this gave 24 of 30 against 10 of 30 for the right arm alone when everything was on the left. It made no real difference, 20 against 21 of 30, when the layout was spread across both sides. The failures there are mostly knocked or tilted glasses, not glasses out of reach, so swapping arms wouldn't obviously fix them.
-
-**How the working areas were found.** For each task, I tried wide areas, looked at which setups failed, narrowed the areas, and then tested fresh random setups, which gave 28 of 30 for each task. These runs use exact simulator positions, and that's important: they show what the arm can do, not how well a video is read. Your new takes haven't been tested yet, and until they are, each task's video result rests on a single video. See `docs/results/`.
-
-**How the standing spot was tested.** `scripts/stand_test.py` wobbled your Task 3 layout by up to 1.5 cm, and passed 19 of 21. Random layouts along the whole table first passed only 12 of 30. Most failures were grips on a fourth glass close to the near edge. Requiring it to start at least 23 cm back gave 25 of 30 on new random layouts.
-
-**Things that were tried and removed.** Retrying a missed grip rescued none of the failed setups, so it went. Flipping in open space and then carrying the glass across destroyed the tower, so that went too. The hand tracker works, finding your hand in 93-96% of frames, but it found 13 moments for 6 real ones, so rest spots decide the timing instead.
