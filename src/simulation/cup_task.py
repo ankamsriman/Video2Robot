@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 class TriangleResult:
     picked: tuple[bool, ...]
     failures: tuple[str, ...]
+    carry_limited: tuple[float, ...] = ()
 
     @property
     def success(self) -> bool:

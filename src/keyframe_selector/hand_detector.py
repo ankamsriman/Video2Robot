@@ -68,6 +68,42 @@ def track_hand(video: Path, model: Path) -> HandPath:
     return HandPath(np.stack(frames), fps)
 
 
+def track_both_hands(video: Path, model: Path) -> tuple[np.ndarray, float]:
+    """Each hand's centre in pixels, per frame, as (frames, 2, 2). NaN where it wasn't seen."""
+    capture = cv2.VideoCapture(str(video))
+    if not capture.isOpened():
+        raise ValueError(f"Could not open video: {video}")
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    options = vision.HandLandmarkerOptions(
+        base_options=mp_python.BaseOptions(model_asset_path=str(model)),
+        running_mode=vision.RunningMode.VIDEO,
+        num_hands=2,
+    )
+    frames = []
+    with vision.HandLandmarker.create_from_options(options) as landmarker:
+        while True:
+            ok, frame = capture.read()
+            if not ok:
+                break
+            height, width = frame.shape[:2]
+            image = mp.Image(
+                image_format=mp.ImageFormat.SRGB,
+                data=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
+            )
+            found = landmarker.detect_for_video(image, int(len(frames) * 1000 / fps))
+            hands = np.full((2, 2), np.nan)
+            for index, hand in enumerate(found.hand_landmarks[:2]):
+                hands[index] = (
+                    np.mean([point.x for point in hand]) * width,
+                    np.mean([point.y for point in hand]) * height,
+                )
+            frames.append(hands)
+    capture.release()
+    if not frames:
+        raise ValueError(f"Video has no readable frames: {video}")
+    return np.stack(frames), fps
+
+
 def save_hand_path(path: HandPath, output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(output, landmarks=path.landmarks, fps=path.fps)

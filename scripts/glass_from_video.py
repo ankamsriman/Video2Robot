@@ -27,6 +27,7 @@ import cv2
 import numpy as np
 import yaml
 
+from src.keyframe_selector.hand_detector import track_both_hands
 from src.perception.glass_tracker import (
     SPOTS_IN_FLIP,
     GlassVideoConfig,
@@ -39,7 +40,14 @@ from src.perception.glass_tracker import (
     rest_spots,
     search_masks,
 )
-from src.perception.table_view import refine_corners, table_view
+from src.perception.hand_trajectory import (
+    CarryLimits,
+    carry_window,
+    follow_moving_hand,
+    is_believable,
+    profile_from_pixels,
+)
+from src.perception.table_view import TableView, refine_corners, table_view
 from src.reasoning.fit_layout import (
     Area,
     FittedLayout,
@@ -50,7 +58,7 @@ from src.reasoning.fit_layout import (
     plan_stand,
 )
 from src.simulation.cup_flip import build_flipped_tower, flip_for_arm, load_flip_config
-from src.simulation.glass_task import build_glass_triangle
+from src.simulation.glass_task import CopiedCarries, build_glass_triangle
 from src.simulation.recorder import video_recorder
 from src.simulation.robot_env import RobotEnv, load_motion_config, motion_for_arm
 from src.simulation.scene import ROOT, SceneConfig, build_model, load_scene_config
@@ -59,6 +67,7 @@ from src.verification.triangle import load_triangle_config
 LABELS = ROOT / "data/labels"
 CURRENT_SETUP = "current_setup_table.json"
 CONFIG_PATH = ROOT / "configs/cups_real.yaml"
+HAND_MODEL = ROOT / "checkpoints/hand_landmarker.task"
 FLIP_CONFIG_PATH = ROOT / "configs/flip_real.yaml"
 BACKGROUND_SAMPLES = 40
 LAST_FRAMES = 30
@@ -133,6 +142,53 @@ def read_video(video: Path, config: GlassVideoConfig) -> tuple[TriangleDemo, boo
     return demo, True
 
 
+def _video_view(video: Path, config: GlassVideoConfig) -> TableView:
+    capture = cv2.VideoCapture(str(video))
+    size = (
+        int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
+        int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+    )
+    corners = refine_corners(_background(capture), rough_corners(video))
+    capture.release()
+    return table_view(corners, config.table_width, config.table_depth, size)
+
+
+def copied_carries(
+    video: Path, demo: TriangleDemo, config: GlassVideoConfig
+) -> tuple[CopiedCarries, list[dict]]:
+    """Read the hand's path for each of the three carries, from when its glass left."""
+    raw = yaml.safe_load(CONFIG_PATH.read_text())["hand_path"]
+    limits = CarryLimits(**{key: raw[key] for key in CarryLimits.__dataclass_fields__})
+    hands, fps = track_both_hands(video, HAND_MODEL)
+    view = _video_view(video, config)
+    height = config.glass_height
+    profiles = []
+    details = []
+    for index in range(3):
+        start, end = demo.starts[index], demo.ends[index]
+        lift = 1.5 * height if index == 2 else 0.5 * height
+        start_pixel = view.pixel(start, 0.5 * height)
+        end_pixel = view.pixel(end, lift)
+        begin = max(int((demo.moved_at[index] - raw["lead_seconds"]) * fps), 0)
+        stop = len(hands)
+        if index + 1 < len(demo.moved_at):
+            stop = int((demo.moved_at[index + 1] + 0.0) * fps)
+        path = follow_moving_hand(hands[begin:stop], start_pixel, raw["max_jump_pixels"])
+        first, last = carry_window(path, start_pixel, end_pixel, raw["settle_pixels"])
+        profile = profile_from_pixels(path[first : last + 1], fps, view, start, end)
+        believable = is_believable(profile, raw["believable_start"], raw["believable_top"])
+        profiles.append(profile if believable else None)
+        details.append(
+            {
+                "copied": believable,
+                "seconds": round(profile.seconds, 2),
+                "highest_cm": round(float(profile.height.max()) * 100, 1),
+                "from_second": round((begin + first) / fps, 2),
+            }
+        )
+    return CopiedCarries(tuple(profiles), limits), details
+
+
 def _to_robot(place: np.ndarray, scene: SceneConfig, table_width: float) -> np.ndarray:
     """Table positions to simulator positions, with the robot at the middle of the edge."""
     return np.array(
@@ -171,6 +227,7 @@ def run_robot(
     stay_in_middle: bool,
     config: GlassVideoConfig,
     two_arms: bool = False,
+    hand_path: bool = False,
 ) -> dict:
     """Place the glasses as the video shows, run the robot, and report the outcome."""
     path = FLIP_CONFIG_PATH if is_flip else CONFIG_PATH
@@ -233,6 +290,12 @@ def run_robot(
     )
     model = build_model(scene, layout)
     suffix = "_fitted" if fit else "_middle" if stay_in_middle else "_two_arms" if two_arms else ""
+    suffix = f"{suffix}_hand_path" if hand_path else suffix
+    carries = None
+    if hand_path:
+        if is_flip:
+            raise SystemExit("--hand-path only works for a triangle so far")
+        carries, report["hand_carries"] = copied_carries(video, demo, config)
     output = ROOT / "data/processed" / video.stem
     output.mkdir(parents=True, exist_ok=True)
     with video_recorder(model, output / f"robot{suffix}.mp4") as on_frame:
@@ -248,7 +311,9 @@ def run_robot(
                 build_glass_triangle,
             )
         else:
-            result = build_glass_triangle(env, scene, triangle, GLASS_NAMES, arms)
+            result = build_glass_triangle(env, scene, triangle, GLASS_NAMES, arms, carries)
+            if carries:
+                report["hand_height_limited"] = [round(v, 2) for v in result.carry_limited]
     lower = [env.object_position(name)[:2] for name in GLASS_NAMES[:2]]
     built = (lower[0] + lower[1]) / 2
     report.update(
@@ -279,6 +344,11 @@ def main() -> None:
         action="store_true",
         help="for a triangle, use each arm for the glasses on its own side",
     )
+    parser.add_argument(
+        "--hand-path",
+        action="store_true",
+        help="for a triangle, carry each glass along the path of the hand in the video",
+    )
     args = parser.parse_args()
     raw = yaml.safe_load(CONFIG_PATH.read_text())["real_video"]
     config = GlassVideoConfig(**raw)
@@ -288,7 +358,14 @@ def main() -> None:
         logger.error("Couldn't read %s: %s", args.video.name, error)
         raise SystemExit(1) from error
     report = run_robot(
-        args.video, demo, is_flip, args.fit_to_robot, args.stay_in_middle, config, args.two_arms
+        args.video,
+        demo,
+        is_flip,
+        args.fit_to_robot,
+        args.stay_in_middle,
+        config,
+        args.two_arms,
+        args.hand_path,
     )
     print(json.dumps(report, indent=2))
 

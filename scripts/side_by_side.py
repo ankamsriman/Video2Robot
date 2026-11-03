@@ -51,9 +51,15 @@ def main() -> None:
         action="store_true",
         help="use the robot run where each arm served its own side",
     )
+    parser.add_argument(
+        "--hand-path",
+        action="store_true",
+        help="use the robot run that copied the hand's path",
+    )
     args = parser.parse_args()
     output = ROOT / "data/processed" / args.video.stem
     suffix = "_fitted" if args.fitted else "_two_arms" if args.two_arms else ""
+    suffix = f"{suffix}_hand_path" if args.hand_path else suffix
     source = "order from this video, positions moved to fit" if args.fitted else "from this video"
     person, fps = _read_all(args.video)
     robot, robot_fps = _read_all(output / f"robot{suffix}.mp4")

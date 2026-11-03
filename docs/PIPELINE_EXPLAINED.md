@@ -411,6 +411,8 @@ For the top glass, the target comes from where the two lower glasses **actually 
 3. **Motor targets.** The joint angles are sent to the motors 25 times a second, with extra force added to cancel gravity.
 4. **Physics.** MuJoCo works out forces, contact and friction 500 times a second. That's what really moves the arm and glass.
 
+**Optional: copying your hand's path.** With `--hand-path`, the carrying step follows your hand's height and timing (`track_both_hands`, `profile_from_pixels`, `robot_carry_path`, `RobotEnv.follow_path`). Each carry's start and end are already known, so it assumes your hand moves in the upright plane between them, and finds where the camera's line through your hand's pixel meets that plane. Everything else stays programmed.
+
 **A key limitation: the robot has no camera.** When it "measures" a glass, it reads that glass's exact position directly from the simulator. Your video only sets where the glasses start.
 
 ---
@@ -511,7 +513,7 @@ This matters for the challenge's rule that your recorded data has to play a real
 | Whether a flip happened | How fingers open and lift away | |
 | So also: which arm, and in Task 3, where the robot stands | What counts as success | |
 
-The robot didn't learn its movements from watching your hand. In fact, the pipeline never looks at your hand. A different layout in your video produces a different robot run, but the way it grips is always the same.
+The robot didn't learn its movements from watching your hand. By default, the pipeline never looks at your hand. Only the optional `--hand-path` mode does, and it copies only the height and timing of your carry. A different layout in your video produces a different robot run, but the way it grips is always the same.
 
 ---
 

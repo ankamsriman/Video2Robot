@@ -293,6 +293,22 @@ class RobotEnv:
             return False
         return True
 
+    def follow_path(self, points: np.ndarray, seconds: float, keep_waist: bool = False) -> bool:
+        """Move the hand along a path over a time, without stopping at each point."""
+        control_dt = 1.0 / self.motion.control_rate_hz
+        waypoints = max(int(seconds / control_dt), 1)
+        places = np.linspace(0.0, len(points) - 1.0, waypoints + 1)[1:]
+        frames = np.arange(len(points))
+        for place in places:
+            waypoint = np.array([np.interp(place, frames, points[:, i]) for i in range(3)])
+            result = self._ik.solve(
+                self._commanded_qpos(), waypoint, self._rotation, keep_waist
+            )
+            self._command = {**self._command, **self._arm_targets(result.qpos)}
+            self.advance(control_dt)
+        self._correct_hand(points[-1], keep_waist)
+        return bool(np.linalg.norm(self.hand_position - points[-1]) < ARRIVAL_TOLERANCE)
+
     def move_joints(self, targets: Mapping[str, float], seconds: float) -> None:
         """Smoothly move named joints to set angles, with all the others held still.
 

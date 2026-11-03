@@ -60,7 +60,7 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 
 **Eight later Task 2 takes.** With the reader as it stood, 2 of the 8 could be read and the robot failed both, so **0 of 8 succeeded**. It missed dull glass tops, and tops against the bright floor. I then added one rule: if all three starts were left and two glasses end side by side, the third must be on top. That made 4 of 8 readable and **2 of 8 succeed**, shown in `docs/videos/task2_left_arm_video_to_robot.mp4`. I wrote that rule after seeing these videos, so they aren't a fair test of it. Gentler brightness limits made reading worse, so I dropped them.
 
-**Your idea of two arms, Task 2 only.** With `--two-arms`, each glass uses the arm on its own side, and the arms take turns, going around the glasses. It's optional and off by default.
+**Two arms, Task 2 only.** With `--two-arms`, each glass uses the arm on its own side, and the arms take turns, going around the glasses. It's optional and off by default.
 
 | Test | Two arms | One arm (nearest) |
 |---|---|---|
@@ -70,6 +70,21 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 | `task2_triangle_take4` layout, exact and nudged | 5 of 6 | 2 of 6 |
 
 **On random layouts it's a tie.** I picked those two real layouts because one arm struggled there, which flatters two arms, so this doesn't show it's better in general. Most remaining failures are tilted glasses, which swapping arms doesn't fix. From the real video, `task2_triangle_take6` **built the triangle** with two arms, tower 0.2 cm off, where one arm fails. See `docs/videos/task2_two_arms_video_to_robot.mp4`.
+
+**Copying my hand's path, Task 2 only.** With `--hand-path`, a hand tracker (MediaPipe) follows my hand, and the robot carries each glass with my hand's height and timing, at its own safe speed. This is a first step towards retargeting, and nothing is trained. The grip, levelling, aiming and release stay programmed, and finger poses aren't copied.
+
+One camera can't judge depth, so I assume the hand moves in the upright plane between each glass's start and end. So only height and progress along the way are copied, not any sideways curve. Heights are limited to 20-38 cm so the glass clears others.
+
+| Video | Result with `--hand-path` | Tower off |
+|---|---|---|
+| `task2_triangle_right_take1` | **Built the triangle** | 0.6 cm |
+| `task2_triangle_take2` | **Built the triangle.** One carry went straight towards the camera, so its depth wasn't believable and it used the programmed carry | 0.3 cm |
+| `task2_triangle_take5` | **Built the triangle** | 0.4 cm |
+| `task2_triangle_take6`, with `--two-arms` | **Built the triangle** | 0.6 cm |
+
+**An indirect check, with no tuning.** My hand holds a glass near its middle. The estimate says about 5-8 cm when holding a glass on the table (its middle is 5.75 cm up), and about 14-19 cm when placing the top glass (its middle is 17 cm up). I have no ruler measurements of the hand itself. These four videos were also used to write the method, so they aren't a fair test. See `docs/videos/task2_hand_path_video_to_robot.mp4`.
+
+**What goes wrong when the tower is far to one side, Task 2.** In 60 random layouts with two arms, towers within 12 cm of the table's middle passed 34 of 35, and those further out passed 8 of 25 (one arm: 27 of 35, and 14 of 25). I chose the 12 cm line after seeing results. Replaying the 25 far towers showed why: when an arm reached across the body to the far side, its hand stopped short in 25 of 46 placements, against 1 of 25 for the arm on the tower's side. My own towers were all within about 7 cm of the middle. Task 3 doesn't show this, because the robot stands somewhere different for each layout.
 
 **Six later Task 3 takes, the fair test.** I recorded these in deliberately different layouts, and ran them with nothing changed. **None of the 6 succeeded:**
 
@@ -176,6 +191,9 @@ PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/ta
 
 # Optional for a triangle: each arm serves its own side
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --two-arms
+
+# Optional for a triangle: carry each glass along the hand's path in the video
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
 
 # Test what the robot can do, with random setups
 PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123

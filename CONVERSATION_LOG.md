@@ -113,5 +113,8 @@ Take 8 was refused, and the glass to flip was too far for the robot. Take 9 succ
 ### Your two-arm idea
 Built as an optional mode, for Task 2 only. My first version scored 9 of 30, because the old arm knocked glasses during the swap. With the hands going around the glasses, it tied with one arm on random layouts (20 against 20, and 22 against 21 of 30). It clearly beat one arm on your take 4 and take 6 layouts, which were picked because one arm struggled, and it made the real take 6 video succeed. So it's off by default.
 
+### Copying your hand's path
+You pointed out that the video told the robot what to do, not how to move. So the hand tracker now follows your hand, and with `--hand-path` the robot carries each glass with your hand's height and timing. Takes 1, 2, 5 and 6 succeed. The grip and finger poses stay programmed, and nothing is trained.
+
 ### Still open
-A better video reader, if time allows. The data collection note needs your details. You decide when the repo goes public.
+Grip timing, and a better video reader, if time allows. The data collection note needs your details. You decide when the repo goes public.

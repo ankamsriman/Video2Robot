@@ -59,6 +59,18 @@ colors:
   cup_b: { hue: [45, 80], min_saturation: 100, min_value: 30 }
   cup_c: { hue: [170, 8], min_saturation: 100, min_value: 30 }
 
+# Copying the person's hand path from a video, within what's safe for the robot.
+hand_path:
+  min_height: 0.20
+  max_height: 0.38
+  max_speed: 0.20
+  blend: 0.15
+  max_jump_pixels: 120
+  lead_seconds: 1.5
+  settle_pixels: 40
+  believable_start: 0.15
+  believable_top: 0.45
+
 # Reading the real steel glasses from a video. The table is measured in place of a marker.
 real_video:
   table_width: 0.80
