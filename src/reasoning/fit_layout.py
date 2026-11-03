@@ -48,6 +48,20 @@ def nearest_arm(starts: Sequence[np.ndarray], tower: np.ndarray) -> str:
     return "left" if sideways > 0.0 else "right"
 
 
+def arm_for_each_glass(starts: Sequence[np.ndarray]) -> tuple[str, ...]:
+    """Each glass uses the arm on its own side of the robot. y is the robot's left."""
+    return tuple("left" if start[1] > 0.0 else "right" for start in starts)
+
+
+def first_goes_on_left(arms: Sequence[str]) -> bool:
+    """Which side of the tower the first glass takes, so no hand has to cross a placed glass.
+
+    With two arms, each lower glass takes its own arm's side. With one arm for both, the
+    arm's far side fills first.
+    """
+    return arms[0] == "left" if arms[0] != arms[1] else arms[0] == "right"
+
+
 def plan_stand(
     starts: Sequence[np.ndarray],
     tower: np.ndarray,

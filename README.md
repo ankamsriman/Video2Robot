@@ -53,12 +53,23 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 | `task2_triangle_take2`, glasses on both sides | 3 of 3 moves. **Top glass not seen, worked out from the others** | **Built the triangle** with the left arm, tower 0.4 cm off |
 | `task2_triangle_take5`, glasses on my left | As above | **Built the triangle** with the left arm, tower 0.5 cm off |
 | `task2_triangle_check`, glasses on my left | 3 of 3 moves | **Failed:** the hand knocked a glass while reaching for a far one, 37 cm from my edge |
-| `task2_triangle_take6`, glasses on both sides | 3 of 3 moves | **Failed:** glasses knocked or tilted. The same layout also failed all 12 simulator runs, including a changed order and one glass moved closer |
+| `task2_triangle_take6`, glasses on both sides | 3 of 3 moves | **Failed:** glasses knocked or tilted. The same layout also failed all 12 simulator runs, including a changed order and one glass moved closer. **With `--two-arms`, it built the triangle,** tower 0.2 cm off |
 | `task2_triangle_take3`, `take4`, `take7`, `take8` | **Refused:** a starting glass was missed | Not run |
 | `task2_triangle_left_take1`, my first video | **Refused:** 8 spots found, 6 expected | Not run. An earlier version read it, and the robot couldn't reach a glass on its far left |
 | `task3_flip_left_take1` | **Refused:** the order didn't make sense | Not run |
 
 **Eight later Task 2 takes.** With the reader as it stood, 2 of the 8 could be read and the robot failed both, so **0 of 8 succeeded**. It missed dull glass tops, and tops against the bright floor. I then added one rule: if all three starts were left and two glasses end side by side, the third must be on top. That made 4 of 8 readable and **2 of 8 succeed**, shown in `docs/videos/task2_left_arm_video_to_robot.mp4`. I wrote that rule after seeing these videos, so they aren't a fair test of it. Gentler brightness limits made reading worse, so I dropped them.
+
+**Your idea of two arms, Task 2 only.** With `--two-arms`, each glass uses the arm on its own side, and the arms take turns, going around the glasses. It's optional and off by default.
+
+| Test | Two arms | One arm (nearest) |
+|---|---|---|
+| 30 random layouts across both sides, the set I used to find a handover bug | 20 of 30 | 20 of 30 |
+| 30 new random layouts across both sides | 22 of 30 | 21 of 30 |
+| `task2_triangle_take6` layout, exact and nudged | 5 of 6 | 0 of 6 |
+| `task2_triangle_take4` layout, exact and nudged | 5 of 6 | 2 of 6 |
+
+**On random layouts it's a tie.** I picked those two real layouts because one arm struggled there, which flatters two arms, so this doesn't show it's better in general. Most remaining failures are tilted glasses, which swapping arms doesn't fix. From the real video, `task2_triangle_take6` **built the triangle** with two arms, tower 0.2 cm off, where one arm fails. See `docs/videos/task2_two_arms_video_to_robot.mp4`.
 
 **Six later Task 3 takes, the fair test.** I recorded these in deliberately different layouts, and ran them with nothing changed. **None of the 6 succeeded:**
 
@@ -162,6 +173,9 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sampl
 
 # Put the person and robot side by side, after running the matching line above
 PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/task2_triangle_right_take1.mp4
+
+# Optional for a triangle: each arm serves its own side
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --two-arms
 
 # Test what the robot can do, with random setups
 PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123

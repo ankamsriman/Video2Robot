@@ -110,5 +110,8 @@ You recorded six Task 3 takes in different layouts, and I ran them with nothing 
 ### Task 3 works on a new video
 Take 8 was refused, and the glass to flip was too far for the robot. Take 9 succeeded with nothing changed: left arm, tower 0.4 cm off. It's one run of a chosen layout, and that layout passed only 3 of 6 simulator runs when nudged.
 
+### Your two-arm idea
+Built as an optional mode, for Task 2 only. My first version scored 9 of 30, because the old arm knocked glasses during the swap. With the hands going around the glasses, it tied with one arm on random layouts (20 against 20, and 22 against 21 of 30). It clearly beat one arm on your take 4 and take 6 layouts, which were picked because one arm struggled, and it made the real take 6 video succeed. So it's off by default.
+
 ### Still open
-Improve Task 2 with the two-arm idea and a better reader. The data collection note needs your details. You decide when the repo goes public.
+A better video reader, if time allows. The data collection note needs your details. You decide when the repo goes public.

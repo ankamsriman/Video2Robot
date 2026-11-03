@@ -14,7 +14,7 @@
 | `old_left_side/task2_triangle_left_take1` | Triangle | 25 s | My left side |
 | `old_left_side/task3_flip_left_take1` | Flipped tower | 32 s | My left side |
 
-Samples of the first two, and of `task2_triangle_take5` and `task3_flip_take9`, are in `data/raw/sample/`. They are compressed `.mp4` copies of the originals, at full size.
+Samples of the first two, and of `task2_triangle_take5`, `task2_triangle_take6` and `task3_flip_take9`, are in `data/raw/sample/`. They are compressed `.mp4` copies of the originals, at full size.
 
 ## Setup
 

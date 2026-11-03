@@ -43,6 +43,8 @@ from src.perception.table_view import refine_corners, table_view
 from src.reasoning.fit_layout import (
     Area,
     FittedLayout,
+    arm_for_each_glass,
+    first_goes_on_left,
     fit_flip_layout,
     nearest_arm,
     plan_stand,
@@ -168,6 +170,7 @@ def run_robot(
     fit: bool,
     stay_in_middle: bool,
     config: GlassVideoConfig,
+    two_arms: bool = False,
 ) -> dict:
     """Place the glasses as the video shows, run the robot, and report the outcome."""
     path = FLIP_CONFIG_PATH if is_flip else CONFIG_PATH
@@ -198,9 +201,16 @@ def run_robot(
             "tower_used": _rounded(tower),
         }
     arm = motion.arm
+    arms = None
+    first_on_left = None
     if not is_flip:
         arm = nearest_arm(starts, tower)
         report["arm"] = arm
+        if two_arms:
+            arms = arm_for_each_glass(starts)
+            arm = arms[0]
+            first_on_left = first_goes_on_left(arms)
+            report["arm"] = list(arms)
     if is_flip and not (fit or stay_in_middle):
         stand = plan_stand(starts, tower, _flip_tower_reach(), table_width / 2)
         arm = stand.arm
@@ -217,10 +227,12 @@ def run_robot(
     names = (*GLASS_NAMES, FLIPPED_NAME) if is_flip else GLASS_NAMES
     layout = {name: tuple(start) for name, start in zip(names, starts, strict=True)}
     triangle = dataclasses.replace(
-        load_triangle_config(path), center=tuple(tower), first_on_left=arm == "right"
+        load_triangle_config(path),
+        center=tuple(tower),
+        first_on_left=arm == "right" if first_on_left is None else first_on_left,
     )
     model = build_model(scene, layout)
-    suffix = "_fitted" if fit else "_middle" if stay_in_middle else ""
+    suffix = "_fitted" if fit else "_middle" if stay_in_middle else "_two_arms" if two_arms else ""
     output = ROOT / "data/processed" / video.stem
     output.mkdir(parents=True, exist_ok=True)
     with video_recorder(model, output / f"robot{suffix}.mp4") as on_frame:
@@ -236,7 +248,7 @@ def run_robot(
                 build_glass_triangle,
             )
         else:
-            result = build_glass_triangle(env, scene, triangle, GLASS_NAMES)
+            result = build_glass_triangle(env, scene, triangle, GLASS_NAMES, arms)
     lower = [env.object_position(name)[:2] for name in GLASS_NAMES[:2]]
     built = (lower[0] + lower[1]) / 2
     report.update(
@@ -262,6 +274,11 @@ def main() -> None:
         action="store_true",
         help="for a flip, keep the robot mid-table with its right arm and move nothing",
     )
+    parser.add_argument(
+        "--two-arms",
+        action="store_true",
+        help="for a triangle, use each arm for the glasses on its own side",
+    )
     args = parser.parse_args()
     raw = yaml.safe_load(CONFIG_PATH.read_text())["real_video"]
     config = GlassVideoConfig(**raw)
@@ -271,7 +288,7 @@ def main() -> None:
         logger.error("Couldn't read %s: %s", args.video.name, error)
         raise SystemExit(1) from error
     report = run_robot(
-        args.video, demo, is_flip, args.fit_to_robot, args.stay_in_middle, config
+        args.video, demo, is_flip, args.fit_to_robot, args.stay_in_middle, config, args.two_arms
     )
     print(json.dumps(report, indent=2))
 

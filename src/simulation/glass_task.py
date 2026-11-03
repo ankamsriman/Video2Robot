@@ -90,12 +90,18 @@ def build_glass_triangle(
     config: SceneConfig,
     triangle: TriangleConfig,
     order: tuple[str, str, str],
+    arms: tuple[str, str, str] | None = None,
 ) -> TriangleResult:
-    """Place two glasses side by side, then the third across their measured tops."""
+    """Place two glasses side by side, then the third across their measured tops.
+
+    If `arms` is given, each glass uses its own arm. Otherwise one arm does them all.
+    """
     table = config.table.top_height
     targets = tuple(np.array(t) for t in triangle_targets(triangle, table))
     picked: tuple[bool, ...] = ()
     for index, (name, target) in enumerate(zip(order, targets, strict=True)):
+        if arms is not None:
+            env.use_arm(arms[index])
         held = pick(env, config, name)
         picked = (*picked, held)
         if not held:

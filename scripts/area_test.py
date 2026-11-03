@@ -19,7 +19,7 @@ from multiprocessing import Pool
 
 import numpy as np
 
-from src.reasoning.fit_layout import nearest_arm
+from src.reasoning.fit_layout import arm_for_each_glass, first_goes_on_left, nearest_arm
 from src.simulation.cup_flip import build_flipped_tower, load_flip_config
 from src.simulation.glass_task import build_glass_triangle
 from src.simulation.robot_env import RobotEnv, load_motion_config, motion_for_arm
@@ -100,15 +100,21 @@ def run_trial(job: tuple[tuple[Spot, ...], Spot, str]) -> dict:
         name: _in_simulator(spot) for name, spot in zip(names, starts, strict=True)
     }
     arm = "right"
+    arms = None
     if arm_choice == "nearest":
         arm = nearest_arm(
             [np.array(_in_simulator(spot)) for spot in starts],
             np.array(_in_simulator(tower)),
         )
+    first_on_left = arm == "right"
+    if arm_choice == "two":
+        arms = arm_for_each_glass([np.array(_in_simulator(spot)) for spot in starts])
+        arm = arms[0]
+        first_on_left = first_goes_on_left(arms)
     triangle = dataclasses.replace(
         load_triangle_config(path),
         center=_in_simulator(tower),
-        first_on_left=arm == "right",
+        first_on_left=first_on_left,
     )
     motion = motion_for_arm(load_motion_config(path), arm)
     env = RobotEnv(build_model(scene, layout), motion)
@@ -123,11 +129,11 @@ def run_trial(job: tuple[tuple[Spot, ...], Spot, str]) -> dict:
             build_glass_triangle,
         )
     else:
-        result = build_glass_triangle(env, scene, triangle, ORDER)
+        result = build_glass_triangle(env, scene, triangle, ORDER, arms)
     return {
         "starts": starts,
         "tower": tower,
-        "arm": arm,
+        "arm": arm if arms is None else list(arms),
         "success": result.success,
         "failures": list(result.failures),
     }
@@ -144,7 +150,7 @@ def main() -> None:
         default="usual",
         help="for a triangle, where the glasses and tower can be",
     )
-    parser.add_argument("--arm", choices=("right", "nearest"), default="right")
+    parser.add_argument("--arm", choices=("right", "nearest", "two"), default="right")
     args = parser.parse_args()
     rng = np.random.default_rng(args.seed)
     jobs = [

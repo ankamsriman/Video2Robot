@@ -46,6 +46,9 @@ ARRIVAL_TOLERANCE = 0.02
 CORRECTION_STEPS = 6
 CORRECTION_TOLERANCE = 0.003
 CORRECTION_GAIN = 0.7
+HANDOVER_SECONDS = 3.0
+# Off the table's near edge, out to the side, and above the tallest tower.
+HANDOVER_POINT = (0.14, 0.32, 1.02)
 logger = logging.getLogger(__name__)
 
 FrameCallback = Callable[[mujoco.MjData], None]
@@ -116,6 +119,7 @@ class RobotEnv:
         self._frame_interval = 1.0 / frame_rate_hz
         self._next_frame_time = 0.0
         self._ik = ArmIK(model, motion.arm)
+        self._iks = {motion.arm: self._ik}
         self._rotation = palm_down_rotation(motion.arm, motion.hand_pitch)
         self._actuators = {model.actuator(i).name: i for i in range(model.nu)}
         self._site = model.site(f"{motion.arm}_grasp").id
@@ -126,6 +130,42 @@ class RobotEnv:
         """Change how the robot moves, including how hard the fingers can squeeze."""
         self.motion = motion
         self._limit_finger_force()
+
+    def use_arm(self, arm: str) -> None:
+        """Hand the work to the other arm, with both hands going around the glasses.
+
+        Moving straight between poses sweeps a hand through anything in the way. So each
+        hand stays above the glasses and passes a point out beside the body and off the
+        table. Only the arm doing the work is controlled, so an idle arm must be out of the way.
+        """
+        if arm == self.motion.arm:
+            return
+        old_side = self.motion.arm
+        self.move_hand(self._beside_body(old_side))
+        hanging = dict(
+            zip(
+                (f"{old_side}_{name}_joint" for name in ARM_JOINTS),
+                ready_poses(arm)[old_side],
+                strict=True,
+            )
+        )
+        self.move_joints(hanging, HANDOVER_SECONDS)
+        self.motion = motion_for_arm(self.motion, arm)
+        self._ik = self._iks.setdefault(arm, ArmIK(self.model, arm))
+        self._site = self.model.site(f"{arm}_grasp").id
+        rotation = palm_down_rotation(arm, self.motion.hand_pitch)
+        beside = self._beside_body(arm)
+        solved = self._ik.solve(self._commanded_qpos(), beside, rotation)
+        if not solved.success:
+            raise ValueError(f"{beside} is out of the {arm} arm's reach")
+        self.move_joints(self._arm_targets(solved.qpos), HANDOVER_SECONDS)
+        self._rotation = rotation
+        self.move_hand(np.array(self.motion.home_position))
+
+    @staticmethod
+    def _beside_body(side: str) -> np.ndarray:
+        sideways = HANDOVER_POINT[1] if side == "left" else -HANDOVER_POINT[1]
+        return np.array((HANDOVER_POINT[0], sideways, HANDOVER_POINT[2]))
 
     def _limit_finger_force(self) -> None:
         """Cap finger torque, so grasps depend on realistic squeezing force."""
