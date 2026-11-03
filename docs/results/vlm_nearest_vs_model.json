@@ -1,0 +1,259 @@
+[
+ {
+  "row": 0,
+  "seed": 8700,
+  "layout": 22,
+  "tower_cm": [
+   33,
+   -23
+  ],
+  "vlm_points": 3,
+  "vlm_error_cm": [
+   0.1,
+   3.4,
+   0.3
+  ],
+  "nearest": {
+   "mode": "two",
+   "arms": [
+    "right",
+    "left",
+    "left"
+   ],
+   "success": false,
+   "failures": [
+    "right cup is tilted"
+   ]
+  },
+  "model": {
+   "mode": "nearest",
+   "arms": [
+    "left",
+    "left",
+    "left"
+   ],
+   "success": true,
+   "failures": []
+  }
+ },
+ {
+  "row": 1,
+  "seed": 8700,
+  "layout": 29,
+  "tower_cm": [
+   33,
+   -20
+  ],
+  "vlm_points": 3,
+  "vlm_error_cm": [
+   0.9,
+   0.1,
+   0.2
+  ],
+  "nearest": {
+   "mode": "two",
+   "arms": [
+    "left",
+    "right",
+    "left"
+   ],
+   "success": false,
+   "failures": [
+    "right cup is tilted"
+   ]
+  },
+  "model": {
+   "mode": "nearest",
+   "arms": [
+    "right",
+    "right",
+    "right"
+   ],
+   "success": true,
+   "failures": []
+  }
+ },
+ {
+  "row": 2,
+  "seed": 9000,
+  "layout": 1,
+  "tower_cm": [
+   32,
+   18
+  ],
+  "vlm_points": 3,
+  "vlm_error_cm": [
+   0.0,
+   0.2,
+   0.1
+  ],
+  "nearest": {
+   "mode": "two",
+   "arms": [
+    "right",
+    "left",
+    "right"
+   ],
+   "success": false,
+   "failures": [
+    "right cup is tilted"
+   ]
+  },
+  "model": {
+   "mode": "nearest",
+   "arms": [
+    "left",
+    "left",
+    "left"
+   ],
+   "success": true,
+   "failures": []
+  }
+ },
+ {
+  "row": 3,
+  "seed": 9000,
+  "layout": 9,
+  "tower_cm": [
+   35,
+   20
+  ],
+  "vlm_points": 3,
+  "vlm_error_cm": [
+   0.1,
+   0.3,
+   0.7
+  ],
+  "nearest": {
+   "mode": "two",
+   "arms": [
+    "right",
+    "left",
+    "right"
+   ],
+   "success": true,
+   "failures": []
+  },
+  "model": {
+   "mode": "nearest",
+   "arms": [
+    "right",
+    "right",
+    "right"
+   ],
+   "success": true,
+   "failures": []
+  }
+ },
+ {
+  "row": 4,
+  "seed": 9000,
+  "layout": 20,
+  "tower_cm": [
+   34,
+   -20
+  ],
+  "vlm_points": 3,
+  "vlm_error_cm": [
+   0.4,
+   0.3,
+   0.0
+  ],
+  "nearest": {
+   "mode": "two",
+   "arms": [
+    "right",
+    "left",
+    "left"
+   ],
+   "success": false,
+   "failures": [
+    "top cup is tilted"
+   ]
+  },
+  "model": {
+   "mode": "nearest",
+   "arms": [
+    "left",
+    "left",
+    "left"
+   ],
+   "success": true,
+   "failures": []
+  }
+ },
+ {
+  "row": 5,
+  "seed": 9000,
+  "layout": 21,
+  "tower_cm": [
+   34,
+   14
+  ],
+  "vlm_points": 3,
+  "vlm_error_cm": [
+   0.4,
+   0.2,
+   0.1
+  ],
+  "nearest": {
+   "mode": "two",
+   "arms": [
+    "left",
+    "right",
+    "right"
+   ],
+   "success": false,
+   "failures": [
+    "left cup is tilted"
+   ]
+  },
+  "model": {
+   "mode": "nearest",
+   "arms": [
+    "left",
+    "left",
+    "left"
+   ],
+   "success": true,
+   "failures": []
+  }
+ },
+ {
+  "row": 6,
+  "seed": 9000,
+  "layout": 25,
+  "tower_cm": [
+   36,
+   -19
+  ],
+  "vlm_points": 3,
+  "vlm_error_cm": [
+   0.2,
+   0.1,
+   0.7
+  ],
+  "nearest": {
+   "mode": "two",
+   "arms": [
+    "right",
+    "right",
+    "left"
+   ],
+   "success": false,
+   "failures": [
+    "top cup is tilted"
+   ]
+  },
+  "model": {
+   "mode": "nearest",
+   "arms": [
+    "right",
+    "right",
+    "right"
+   ],
+   "success": true,
+   "failures": []
+  }
+ }
+]
