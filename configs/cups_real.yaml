@@ -62,7 +62,7 @@ colors:
 # Reading a typed instruction with a vision language model. The key goes in .env.
 vlm:
   model: claude-sonnet-5-5
-  max_tokens: 300
+  max_tokens: 800
   timeout_seconds: 60
   frames: 2
   image_width: 800

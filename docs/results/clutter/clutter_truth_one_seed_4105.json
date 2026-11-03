@@ -1,0 +1,159 @@
+[
+  {
+    "seed": 4105,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.1,
+      0.1,
+      1.0
+    ],
+    "bright_patches_a_brightness_rule_sees": 20,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses are on the table, so a triangle is built with the two nearest as the base and the farthest on top, which is nearest_first."
+    },
+    "positions": "true",
+    "arm": "left",
+    "order": [
+      "cup_a",
+      "cup_c",
+      "cup_b"
+    ],
+    "success": true,
+    "failures": [],
+    "other_objects_disturbed": []
+  },
+  {
+    "seed": 4106,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      1.5,
+      0.3,
+      0.1
+    ],
+    "bright_patches_a_brightness_rule_sees": 20,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses form a triangle, with the two nearest as the base and the farthest on top, which matches nearest_first."
+    },
+    "positions": "true",
+    "arm": "left",
+    "order": [
+      "cup_a",
+      "cup_c",
+      "cup_b"
+    ],
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ],
+    "other_objects_disturbed": []
+  },
+  {
+    "seed": 4107,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.2,
+      0.3,
+      0.1
+    ],
+    "bright_patches_a_brightness_rule_sees": 20,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Only three glasses are present, so a triangle is built with the two nearest glasses as the base and the farthest glass on top."
+    },
+    "positions": "true",
+    "arm": "right",
+    "order": [
+      "cup_c",
+      "cup_b",
+      "cup_a"
+    ],
+    "success": false,
+    "failures": [
+      "left cup is tilted",
+      "left cup is not standing on the table",
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is tilted",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ],
+    "other_objects_disturbed": [
+      "white_box"
+    ]
+  },
+  {
+    "seed": 4108,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.5,
+      1.0,
+      0.2
+    ],
+    "bright_patches_a_brightness_rule_sees": 20,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses are stacked as a triangle, with the two nearest glasses as the base and the farthest on top, ignoring the non-glass blocks."
+    },
+    "positions": "true",
+    "arm": "left",
+    "order": [
+      "cup_c",
+      "cup_b",
+      "cup_a"
+    ],
+    "success": true,
+    "failures": [],
+    "other_objects_disturbed": []
+  },
+  {
+    "seed": 4109,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.0,
+      0.3,
+      0.0
+    ],
+    "bright_patches_a_brightness_rule_sees": 19,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses are on the table, so this is a triangle; the two nearest form the base and the farthest goes on top, which is nearest_first order."
+    },
+    "positions": "true",
+    "arm": "left",
+    "order": [
+      "cup_b",
+      "cup_c",
+      "cup_a"
+    ],
+    "success": true,
+    "failures": [],
+    "other_objects_disturbed": []
+  }
+]

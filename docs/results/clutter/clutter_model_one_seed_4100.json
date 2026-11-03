@@ -1,0 +1,154 @@
+[
+  {
+    "seed": 4100,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.7,
+      0.6,
+      1.0
+    ],
+    "bright_patches_a_brightness_rule_sees": 20,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses form a triangle, with the two nearest as the base and the farthest on top, which matches nearest_first ordering."
+    },
+    "positions": "from the model",
+    "arm": "right",
+    "order": [
+      "cup_b",
+      "cup_a",
+      "cup_c"
+    ],
+    "success": true,
+    "failures": [],
+    "other_objects_disturbed": []
+  },
+  {
+    "seed": 4101,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.2,
+      0.6,
+      0.4
+    ],
+    "bright_patches_a_brightness_rule_sees": 20,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses form a triangle: the two nearest glasses go on the bottom and the farthest goes on top, which matches nearest_first."
+    },
+    "positions": "from the model",
+    "arm": "right",
+    "order": [
+      "cup_b",
+      "cup_a",
+      "cup_c"
+    ],
+    "success": true,
+    "failures": [],
+    "other_objects_disturbed": []
+  },
+  {
+    "seed": 4102,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.4,
+      0.3,
+      0.9
+    ],
+    "bright_patches_a_brightness_rule_sees": 19,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses form a triangle; the two nearest go on the bottom and the farthest goes on top, which is nearest_first order."
+    },
+    "positions": "from the model",
+    "arm": "right",
+    "order": [
+      "cup_b",
+      "cup_c",
+      "cup_a"
+    ],
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ],
+    "other_objects_disturbed": []
+  },
+  {
+    "seed": 4103,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.3,
+      0.5,
+      0.1
+    ],
+    "bright_patches_a_brightness_rule_sees": 20,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Three glasses make a triangle: the two nearest the person form the base and the farthest goes on top, which matches nearest_first."
+    },
+    "positions": "from the model",
+    "arm": "right",
+    "order": [
+      "cup_a",
+      "cup_b",
+      "cup_c"
+    ],
+    "success": true,
+    "failures": [],
+    "other_objects_disturbed": []
+  },
+  {
+    "seed": 4104,
+    "glasses_found": 3,
+    "model_points": 3,
+    "points_not_on_a_glass": 0,
+    "position_errors_cm": [
+      0.8,
+      0.4,
+      0.1
+    ],
+    "bright_patches_a_brightness_rule_sees": 18,
+    "plan": {
+      "task": "triangle",
+      "order": "nearest_first",
+      "understood": true,
+      "reason": "Only three glasses are present, so a triangle is built with the two nearest glasses as the base and the farthest glass on top, which matches nearest_first."
+    },
+    "positions": "from the model",
+    "arm": "left",
+    "order": [
+      "cup_b",
+      "cup_a",
+      "cup_c"
+    ],
+    "success": false,
+    "failures": [
+      "right cup is tilted",
+      "right cup is not standing on the table",
+      "lower cups are not side by side",
+      "top cup is not resting on the lower cups",
+      "top cup is not centred over both"
+    ],
+    "other_objects_disturbed": []
+  }
+]
