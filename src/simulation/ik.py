@@ -116,6 +116,10 @@ class ArmIK:
         arm_dofs = set(_dof_indices(model, side))
         frozen = [dof for dof in range(model.nv) if dof not in arm_dofs]
         self._freeze = mink.DofFreezingTask(model, dof_indices=frozen)
+        lean_dof = int(model.joint(WAIST_LEAN_JOINT).dofadr[0])
+        self._freeze_waist = mink.DofFreezingTask(
+            model, dof_indices=sorted([*frozen, lean_dof])
+        )
         self._limits = [mink.ConfigurationLimit(model)]
         # Near a straight arm, tiny hand motions can demand huge joint motions. Gentle
         # motions cap joint speed and add damping, so that can't throw a held object.
@@ -131,12 +135,15 @@ class ArmIK:
         position: np.ndarray,
         rotation: np.ndarray,
         keep_waist: bool = False,
+        lock_waist: bool = False,
     ) -> IKResult:
         """Solve for a target hand pose, starting from the joint angles in `qpos`.
 
         Normally the torso turns to face the target, with a slight lean. `keep_waist` stays
-        near the current pose instead, for motions that must stay gentle.
+        near the current pose instead, for motions that must stay gentle. `lock_waist`
+        moves only the arm, for live control, where the waist would drift over many solves.
         """
+        keep_waist = keep_waist or lock_waist
         start = qpos.copy()
         if not keep_waist:
             start[self._twist_qpos] = waist_yaw_for_target(
@@ -169,7 +176,7 @@ class ArmIK:
                     SOLVER,
                     damping=GENTLE_DAMPING if keep_waist else 1e-3,
                     limits=self._gentle_limits if keep_waist else self._limits,
-                    constraints=[self._freeze],
+                    constraints=[self._freeze_waist if lock_waist else self._freeze],
                 )
             except mink.NoSolutionFound:
                 # Keep the closest pose so far. The error returned below reports the miss.

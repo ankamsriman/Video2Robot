@@ -2,7 +2,8 @@
 
 import numpy as np
 
-from scripts.live_teleop import HandFollower, HandReading
+from scripts.live_teleop import HandFollower, HandReading, _robot
+from src.simulation.ik import WAIST_LEAN_JOINT, WAIST_TWIST_JOINT, palm_down_rotation
 from tests.test_hand_retarget import CONFIG, HOME
 
 
@@ -75,3 +76,14 @@ def test_a_long_loss_starts_over_from_home() -> None:
 
     assert follower.calibration is None
     assert np.allclose(follower.position, HOME)
+
+
+def test_live_control_moves_only_the_arm_never_the_waist() -> None:
+    env, _ = _robot("right")
+    waist = {name: env._command[name] for name in (WAIST_LEAN_JOINT, WAIST_TWIST_JOINT)}
+    neutral = palm_down_rotation("right", env.motion.hand_pitch)
+
+    for target in ([0.55, 0.3, 0.8], [0.25, -0.4, 1.1], [0.6, 0.0, 0.78]) * 5:
+        env.command_hand(np.array(target), neutral, max_step=0.2)
+
+    assert {name: env._command[name] for name in waist} == waist

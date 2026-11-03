@@ -61,6 +61,7 @@ BONES = (
 GREEN = (60, 200, 60)
 YELLOW = (40, 200, 230)
 RED = (60, 60, 230)
+CAMERA_SIZE = (1280, 720)
 logger = logging.getLogger(__name__)
 
 
@@ -255,6 +256,10 @@ def _open_source(source: str) -> tuple[cv2.VideoCapture, bool]:
             else ""
         )
         raise SystemExit(f"Could not open {source}.{hint}")
+    if is_camera:
+        # A smaller picture tracks the hand just as well, and keeps the loop quicker.
+        capture.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_SIZE[0])
+        capture.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_SIZE[1])
     return capture, is_camera
 
 
