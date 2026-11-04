@@ -1445,6 +1445,12 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 | With Claude and the logistic regression model choosing arms | 8 of 9 |
 | Copying your hand's carry (`--hand-path`) | takes 1, 2, 5, 6 |
 
+### Task A: every video I kept (17), final system
+**16 of 17 build.** The one failure is the sunlight video: the triangle was built too close to the robot's chest. Three more videos were deleted because their glasses were beyond the robot's reach, and all three had failed. Counting them, it's **16 of 20**. Always quote both numbers.
+
+### Task B: the 3 new cluttered videos
+Takes 1 and 2 are now **read correctly**, but the robot fails both, because the glasses sit up to 41 cm in, where the flip was only tested to 19 cm. Take 3 is refused (one resting spot missing). So Task B stands at **2 of 12** videos.
+
 ### Task B: the flip (9 real videos)
 | | Result |
 |---|---|
@@ -1470,6 +1476,51 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
   - your recordings with the tracked hand drawn on, beside the robot, for both tasks;
   - the live-control replay.
 - `docs/results/`: every saved test and picture.
+
+---
+
+## 21b. A guard, a charger, and the decoys on the table
+
+This chapter explains the last night's work with one story.
+
+**The guard.** Think of the CV reader as a security guard watching a camera. It notices only one thing: bright, round tops sitting still. It writes down where each one sits and from when to when. It never gets tired and sees every frame, but it can't tell a glass top from a shiny plug.
+
+**The manager.** Claude looks at only two pictures, the first and the last frame, and says "these are the glasses". It knows what a glass is, but it doesn't watch the middle.
+
+**Rule 1: both must agree on *where*.**
+
+| The guard says | Claude says | Decision |
+|---|---|---|
+| Glass here | Glass here | Keep it, at the guard's more exact position |
+| Nothing | Glass here | Add it at Claude's point (a dull top the guard missed) |
+| Glass here | Nothing | Ignore it (a plug, a charger, a foot of the laptop stand) |
+| Something landed mid-video | No glass there at the end | Ignore it (an earbud case moved aside) |
+
+**Worked example: the charger trick (Task A clutter take 3).** The guard's notebook said:
+
+```
+glass 1 left at 3.4 s       -> something landed at A at 4.4 s
+glass 2 left at 18.8 s      -> something landed at B at 16.0 s   <- impossible
+glass 3 left at 24.7 s      -> something landed on top at 25.9 s
+```
+
+A glass can't land at 16.0 s if no glass has left since 3.4 s. The frames showed why: at 16 s I put a white charger down at B, right behind where glass 2 lands at 20 s. Rule 1 asks only *where*, and B really is where Claude sees a glass at the end, so it passed.
+
+**Rule 2: when the order is impossible, ask *when*.** Cut a small square from the last frame at Claude's glass B, then go back through the video and compare:
+
+| Time | What's in the square | Looks like the end? |
+|---|---|---|
+| 10 s | empty table | no |
+| 16 s | the charger | no |
+| 20 s onwards | glass 2 | **yes, and it stays that way** |
+
+So glass 2 landed at 20 s. The order is now possible and the robot built the triangle. The rule knows nothing about chargers: it only runs when the order is impossible.
+
+**The fair test.** Three new cluttered videos recorded after this rule: **all 3 read correctly**, and the robot built 2. The third failed because I built the triangle against my own edge of the table, so the robot had to place glasses against its chest. I later deleted it as out of reach (see chapter 21).
+
+**Lesson:** build the triangle near the middle of the table, about 20–27 cm from your edge.
+
+**Seeing it yourself.** `scripts/explain_reading.py --claude` draws all this on your video: yellow discs for the guard's bright tops, red for kept, teal for ignored, and blue and purple crosses for Claude's glasses at the start and end. `scripts/live_cv_reader.py` shows the guard live on your webcam.
 
 ---
 
