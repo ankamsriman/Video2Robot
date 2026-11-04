@@ -27,7 +27,7 @@ CAMERA_SIZE = (1920, 1080)
 CORNERS_FROM = Path("data/labels/live_webcam_table.json")
 TOP_FILL = (0, 150, 205)  # dark yellow (BGR)
 TOP_RIM = (0, 70, 110)
-TABLE_COLOUR = (60, 200, 60)
+TABLE_COLOUR = (0, 120, 0)  # dark green (BGR)
 SHOWN_WIDTH = 1280
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -77,16 +77,15 @@ def main() -> None:
             logger.warning("Lost the webcam picture")
             break
         tops = find_tops(frame, table, search, config)
-        cv2.polylines(frame, [corners.astype(np.int32)], True, TABLE_COLOUR, 3)
+        cv2.polylines(frame, [corners.astype(np.int32)], True, TABLE_COLOUR, 5)
         for x, y in tops:
             draw_top(frame, (x, y))
         small = cv2.resize(frame, shown_size)
-        cv2.rectangle(small, (0, 0), (SHOWN_WIDTH, 36), (25, 25, 25), -1)
+        cv2.rectangle(small, (0, 0), (SHOWN_WIDTH, 44), (20, 20, 20), -1)
         banner = (
-            f"CV reader, live: {len(tops)} bright top(s) taken for glasses (yellow)"
-            "   green: table searched   Q: quit"
+            f"CV reader, live: {len(tops)} glass top(s) (yellow)   green: table   Q: quit"
         )
-        cv2.putText(small, banner, (10, 25), FONT, 0.65, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(small, banner, (12, 30), FONT, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.imshow("Live CV reader", small)
         if cv2.waitKey(1) & 0xFF in (ord("q"), ord("Q")):
             break

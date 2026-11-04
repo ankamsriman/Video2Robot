@@ -16,6 +16,7 @@ from src.perception.finger_closure import finger_curls, load_finger_settings
 from src.simulation.scene import ROOT
 
 PANEL_HEIGHT = 540
+TITLE_HEIGHT = 44
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 HAND_MODEL = ROOT / "checkpoints/hand_landmarker.task"
 BONES = (
@@ -75,12 +76,13 @@ def _draw_hands(
     return shown
 
 
-def _labelled(frame: np.ndarray, text: str) -> np.ndarray:
-    width = int(frame.shape[1] * PANEL_HEIGHT / frame.shape[0])
-    panel = cv2.resize(frame, (width, PANEL_HEIGHT))
-    cv2.rectangle(panel, (0, 0), (width, 36), (25, 25, 25), -1)
-    cv2.putText(panel, text, (10, 25), FONT, 0.65, (255, 255, 255), 1, cv2.LINE_AA)
-    return panel
+def _labelled(frame: np.ndarray, text: str, height: int = PANEL_HEIGHT) -> np.ndarray:
+    """The frame at the given height, with its title in a bar above it, not over it."""
+    width = 2 * round(frame.shape[1] * height / frame.shape[0] / 2)
+    panel = cv2.resize(frame, (width, height))
+    bar = np.full((TITLE_HEIGHT, width, 3), 25, np.uint8)
+    cv2.putText(bar, text, (12, 30), FONT, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    return np.vstack((bar, panel))
 
 
 def _read_all(path: Path) -> tuple[list[np.ndarray], float]:
@@ -117,6 +119,8 @@ def main() -> None:
         help="use the robot run that copied the hand's path",
     )
     parser.add_argument("--robot", type=Path, help="a specific robot video to put beside it")
+    parser.add_argument("--height", type=int, default=PANEL_HEIGHT, help="each panel's height")
+    parser.add_argument("--label", help="the title over the person's video")
     parser.add_argument(
         "--show-hand",
         action="store_true",
@@ -124,6 +128,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     output = ROOT / "data/processed" / args.video.stem
+    output.mkdir(parents=True, exist_ok=True)
     suffix = "_fitted" if args.fitted else "_two_arms" if args.two_arms else ""
     suffix = f"{suffix}_hand_path" if args.hand_path else suffix
     source = "order from this video, positions moved to fit" if args.fitted else "from this video"
@@ -147,7 +152,8 @@ def main() -> None:
     for index, frame in enumerate(person):
         match = robot[min(int(index * len(robot) / len(person)), len(robot) - 1)]
         joined = np.hstack(
-            (_labelled(frame, person_label), _labelled(match, robot_label))
+            (_labelled(frame, args.label or person_label, args.height),
+             _labelled(match, robot_label, args.height))
         )
         if writer is None:
             writer = cv2.VideoWriter(

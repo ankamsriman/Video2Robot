@@ -33,11 +33,13 @@ from src.simulation.scene import ROOT
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 TOP_FILL = (0, 150, 205)  # dark yellow (BGR)
 TOP_RIM = (0, 70, 110)
-SPOT_COLOUR = (60, 60, 230)
-TABLE_COLOUR = (60, 200, 60)
-START_COLOUR = (255, 140, 0)
-END_COLOUR = (255, 0, 200)
-IGNORED_COLOUR = (150, 150, 150)
+SPOT_COLOUR = (0, 0, 175)  # dark red (BGR)
+TABLE_COLOUR = (0, 120, 0)  # dark green
+START_COLOUR = (160, 50, 0)  # dark blue
+END_COLOUR = (120, 0, 120)  # dark purple
+IGNORED_COLOUR = (140, 140, 0)  # dark teal: stands out on the dark table and the pale floor
+LABEL_SCALE = 1.25
+LABEL_THICKNESS = 3
 CLAUDE_POINTS = ROOT / "data/processed/task2_setups/claude_points.json"
 
 
@@ -53,10 +55,20 @@ def _agrees(spot, points: list, near: float) -> bool:
     return any(np.hypot(spot.x - x, spot.y - y) <= near for x, y in points)
 
 
+def _label(image: np.ndarray, text: str, origin, colour) -> None:
+    """Large text with a white outline, readable on the dark table and the pale floor."""
+    (width, _), _ = cv2.getTextSize(text, FONT, LABEL_SCALE, LABEL_THICKNESS)
+    origin = (int(min(max(origin[0], 4), image.shape[1] - width - 4)), int(max(origin[1], 40)))
+    cv2.putText(image, text, origin, FONT, LABEL_SCALE, (255, 255, 255), LABEL_THICKNESS + 5,
+                cv2.LINE_AA)
+    cv2.putText(image, text, origin, FONT, LABEL_SCALE, colour, LABEL_THICKNESS, cv2.LINE_AA)
+
+
 def _cross(image: np.ndarray, point, colour, text: str) -> None:
     x, y = int(point[0]), int(point[1])
-    cv2.drawMarker(image, (x, y), colour, cv2.MARKER_TILTED_CROSS, 46, 4, cv2.LINE_AA)
-    cv2.putText(image, text, (x + 26, y + 40), FONT, 0.8, colour, 2, cv2.LINE_AA)
+    cv2.drawMarker(image, (x, y), colour, cv2.MARKER_TILTED_CROSS, 56, 7, cv2.LINE_AA)
+    if text:
+        _label(image, text, (x + 30, y + 48), colour)
 OUTPUT_WIDTH = 1280
 
 
@@ -112,36 +124,36 @@ def main() -> None:
     ):
         for index, frame in enumerate(frames):
             shown = _draw_hands(frame, landmarker, int(index * 1000 / fps), fingers)
-            cv2.polylines(shown, [corners.astype(np.int32)], True, TABLE_COLOUR, 2)
+            cv2.polylines(shown, [corners.astype(np.int32)], True, TABLE_COLOUR, 4)
             for x, y in tops[index]:
                 draw_top(shown, (x, y))
             for point in starts:
-                _cross(shown, point, START_COLOUR, "Claude: glass at start")
+                _cross(shown, point, START_COLOUR, "")
             for point in finals:
-                _cross(shown, point, END_COLOUR, "Claude: glass at end")
+                _cross(shown, point, END_COLOUR, "")
             for number, spot in enumerate(spots, start=1):
                 if spot.first <= index <= spot.last:
                     kept = not args.claude or _agrees(spot, [*starts, *finals], near)
                     colour = SPOT_COLOUR if kept else IGNORED_COLOUR
                     corner = (int(spot.x) - 40, int(spot.y) - 40)
-                    cv2.rectangle(shown, corner, (int(spot.x) + 40, int(spot.y) + 40), colour, 3)
-                    label = f"spot {number}: {spot.first / fps:.1f}-{spot.last / fps:.1f}s"
+                    cv2.rectangle(shown, corner, (int(spot.x) + 40, int(spot.y) + 40), colour, 5)
+                    label = f"{spot.first / fps:.1f}-{spot.last / fps:.1f}s"
                     if args.claude:
-                        label += "  agrees with Claude" if kept else "  no Claude glass: ignored"
-                    cv2.putText(
-                        shown, label, (corner[0], corner[1] - 8), FONT, 0.8, colour, 2, cv2.LINE_AA
-                    )
+                        label = f"{'kept' if kept else 'ignored'} {label}"
+                    _label(shown, label, (corner[0], corner[1] - 12), colour)
             # Video files need even sizes.
             small = cv2.resize(shown, (OUTPUT_WIDTH, 2 * round(size[1] * scale / 2)))
             banner = (
-                f"{index / fps:4.1f}s  yellow: bright tops (CV)  red: CV spot kept  grey: ignored"
-                "  blue/magenta X: Claude's glasses at start/end"
+                (f"{index / fps:4.1f}s   yellow: bright tops (CV)   red: kept (CV and Claude agree)",
+                 "teal: ignored (no Claude glass)   blue / purple X: Claude's glasses at start / end")
                 if args.claude
-                else f"{index / fps:4.1f}s   yellow: bright patches taken for glass tops   "
-                f"red: resting spots ({len(spots)} found, a triangle needs 6)"
+                else (f"{index / fps:4.1f}s   yellow: bright patches taken for glass tops",
+                      f"red: resting spots ({len(spots)} found, a triangle needs 6)")
             )
-            cv2.rectangle(small, (0, 0), (OUTPUT_WIDTH, 34), (25, 25, 25), -1)
-            cv2.putText(small, banner, (10, 23), FONT, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.rectangle(small, (0, 0), (OUTPUT_WIDTH, 66), (20, 20, 20), -1)
+            for row, line in enumerate(banner):
+                cv2.putText(small, line, (12, 27 + 30 * row), FONT, 0.75, (255, 255, 255), 2,
+                            cv2.LINE_AA)
             writer.append_data(cv2.cvtColor(small, cv2.COLOR_BGR2RGB))
     print(output)
 
