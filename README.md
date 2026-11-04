@@ -11,6 +11,10 @@
 
 **▶️ Watch first: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min). My tracked hand beside the robot on cluttered tables, with an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight. Then [the original demo reel](docs/videos/demo_reel.mp4).
 
+[![My annotated demonstration beside the G1 in MuJoCo](docs/images/annotated_demo_vs_robot.jpg)](docs/videos/annotated_demo_vs_robot.mp4)
+
+**[▶️ Annotated demo beside the robot](docs/videos/annotated_demo_vs_robot.mp4)**: on the left, my cluttered-table video with what each reader recognises (yellow: shiny tops the CV reader finds; red: kept, because the CV reader and Claude agree; teal: ignored, because Claude sees no glass there, such as the charger and earbud case; blue and purple crosses: Claude's glasses at the start and end). On the right, the G1 builds the same triangle in MuJoCo. One run, pelvis pinned; the clutter isn't placed in the simulation.
+
 ---
 
 ## 📖 Table of Contents
@@ -89,6 +93,23 @@ webcam video of steel glasses, no marker
 | *When* each glass moved | Frame-by-frame bright-top reader (or SAM 2) | Needs every frame; free |
 | Pixels to centimetres | The table's corners | Exact geometry, no marker |
 | Moving the robot | Inverse kinematics (mink) | Programmed, measured, repeatable |
+
+### 🔍 Telling glasses from shiny clutter: the CV reader and Claude must agree
+
+Steel glasses are shiny, and so are plugs, chargers and the feet of a laptop stand. The frame-by-frame CV reader looks for bright, round tops, so on its own it takes some of these for glasses and misses glasses whose tops are dim. Claude recognises glasses reliably but only looks at two pictures, the first and the last frame. So each one checks the other:
+
+![What the CV reader and Claude each see on a cluttered table](docs/images/cv_claude_agreement.jpg)
+
+*One frame of [the annotated video](docs/videos/task2_clutter_take4_annotated.mp4). Yellow rings: bright tops the CV reader found. Blue and magenta crosses: Claude's glasses in the first and last frames. Red: kept, because both agree. Grey: ignored, because Claude sees no glass there (a plug, two feet of the laptop stand). The glass on the left has no yellow ring: the CV reader missed its dull top, and Claude's point brings it back.*
+
+| CV reader | Claude | Decision |
+|---|---|---|
+| Sees a glass | Sees a glass at the same place | **Keep it**, at the CV reader's more exact position |
+| Doesn't see it | Sees a glass | **Add it** at Claude's point |
+| Sees a "glass" | Sees nothing there | **Ignore it** as clutter |
+| Something lands mid-video | No glass there at the end | **Ignore it**, like a plug or earbud case moved aside |
+
+The CV reader still decides **when** each glass moved, because that needs every frame. If its times are impossible (a glass landing before any glass left), the time a glass landed is taken from when the picture at Claude's end point started to look like the end. This happened when a charger was set down right where a glass later landed.
 
 ---
 
