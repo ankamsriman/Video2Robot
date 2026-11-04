@@ -92,7 +92,7 @@ def main() -> None:
                     row = xs[ys <= top]
                     tracks[int(glass)].append(
                         [frame * args.stride, float(row.mean() / scale),
-                         float(ys.min() / scale), int(len(xs))]
+                         float(ys.min() / scale), len(xs)]
                     )  # fmt: skip
         frames = sorted(folder.glob("*.jpg"))
         overlay = output / "sam_tracks.mp4"
