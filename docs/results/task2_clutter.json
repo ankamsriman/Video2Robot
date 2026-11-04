@@ -1,0 +1,14 @@
+[
+ {
+  "video": "task2_triangle_clutter_take1",
+  "setup": "B",
+  "success": false,
+  "refused": "Expected 6 resting spots for a triangle, found 4"
+ },
+ {
+  "video": "task2_triangle_clutter_take1",
+  "setup": "A",
+  "success": false,
+  "refused": "Expected 6 resting spots for a triangle, found 4"
+ }
+]

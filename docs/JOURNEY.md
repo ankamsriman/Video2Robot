@@ -69,6 +69,7 @@ Ideas that didn't help are listed too, because they shaped the design as much as
 | # | Problem seen | Idea | Test | Before → after | Kept? |
 |---|---|---|---|---|---|
 | 5.1 | Task 2: 4 of 9 real videos refused or wrong, mostly a missed starting glass | **Claude (Sonnet) points to every glass**; missed ones are added, measured positions stay in charge | 9 real Task 2 videos | **4 of 9 → 8 of 9** (not a fair test) | Optional |
+| 5.1b | The 4 → 8 above mixed different options per video | Rerun every video with the same options: no Claude (an arm per glass) against Claude + the logistic regression model | 9 real Task 2 videos | **4 of 9 → 8 of 9**. Claude rescued takes 3, 4, 7, 8, all refused for a missed glass. Towers within 0.2–0.6 cm of mine. The model chose an arm per glass on all 9. The "check" video fails at reach either way | Yes |
 | 5.2 | Would Claude be fooled by other bright things? | Cluttered simulated tables | 10 scenes | **10 of 10** found exactly the glasses, about 1 cm off | Yes |
 | 5.3 | Which Claude model? | Compare Haiku, Sonnet, Opus | 10 cases | All 9 of 10; Sonnet most accurate (0.33 cm) and far cheaper than Opus | Sonnet |
 | 5.4 | Task 3 still 2 of 9 with Claude | — | — | No change: Task 3's problem isn't reading | See stage 7 |

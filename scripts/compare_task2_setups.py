@@ -2,15 +2,20 @@
 
   A: Claude finds the glasses, and the logistic regression model picks the arms
      (each glass with the arm on its side, or one arm for all).
+  B: Claude finds the glasses; each glass always uses the arm on its own side (no model).
   C: no Claude; each glass always uses the arm on its own side.
 
 Claude is asked once per video, and its points are saved, so rerunning makes no API calls.
-A third setup, Claude with each glass always on its own side's arm, was dropped: on every
-real video the model already chose exactly that, so it would repeat A.
+On the first 9 videos the model chose an arm per glass every time, so B would repeat A
+there; B matters on new layouts. On cluttered tables only Claude can tell glasses from other
+bright things, so C is pointless there.
 
 PYTHONPATH=. .venv/bin/python scripts/compare_task2_setups.py
+PYTHONPATH=. .venv/bin/python scripts/compare_task2_setups.py --videos task2_triangle_clutter_take1 \
+    --setups A B --output docs/results/task2_clutter.json
 """
 
+import argparse
 import json
 import logging
 from pathlib import Path
@@ -36,6 +41,7 @@ POINTS = ROOT / "data/processed/task2_setups/claude_points.json"
 OUTPUT = ROOT / "docs/results/task2_setups.json"
 SETUPS = {
     "A": {"claude": True, "two_arms": False, "choose_arms": True},
+    "B": {"claude": True, "two_arms": True, "choose_arms": False},
     "C": {"claude": False, "two_arms": True, "choose_arms": False},
 }
 
@@ -79,18 +85,23 @@ def _run(video: Path, setup: str, points, config: GlassVideoConfig) -> dict:
 
 def main() -> None:
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--videos", nargs="+", default=list(VIDEOS))
+    parser.add_argument("--setups", nargs="+", default=["A", "C"], choices=list(SETUPS))
+    parser.add_argument("--output", type=Path, default=OUTPUT)
+    args = parser.parse_args()
     config = GlassVideoConfig(**yaml.safe_load(CONFIG_PATH.read_text())["real_video"])
     saved = json.loads(POINTS.read_text()) if POINTS.exists() else {}
     results = []
-    for name in VIDEOS:
+    for name in args.videos:
         video = ROOT / "data/raw" / f"{name}.mov"
         points = _claude_points(video, saved)
-        for setup in SETUPS:
+        for setup in args.setups:
             outcome = _run(video, setup, points, config)
             results.append(outcome)
             print(json.dumps(outcome), flush=True)
-            OUTPUT.write_text(json.dumps(results, indent=1))
-    for setup in SETUPS:
+            args.output.write_text(json.dumps(results, indent=1))
+    for setup in args.setups:
         runs = [r for r in results if r["setup"] == setup]
         print(f"Setup {setup}: {sum(r['success'] for r in runs)} of {len(runs)} built")
 
