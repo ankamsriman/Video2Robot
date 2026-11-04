@@ -3,7 +3,10 @@
 import numpy as np
 
 from src.perception.glass_tracker import Spot
+from dataclasses import replace
+
 from src.perception.vlm_rescue import (
+    later_arrivals,
     arrival_frame,
     departure_frame,
     departure_from_order,
@@ -317,3 +320,27 @@ def test_a_landing_where_a_stacked_glass_belongs_is_kept() -> None:
     )  # fmt: skip
 
     assert kept == (covered_top,)
+
+
+def test_an_arrival_made_early_by_nearby_clutter_takes_the_pictures_later_time() -> None:
+    charger_then_glass = _spot(741.0, 389.0, first=480, last=900)
+    start = _spot(424.0, 416.0, first=0, last=560)
+
+    spots = later_arrivals((start, charger_then_glass), [(725.0, 391.0)], [600], 20.0)
+
+    assert spots == (start, replace(charger_then_glass, first=600))
+
+
+def test_arrivals_are_never_made_earlier_and_far_spots_are_left_alone() -> None:
+    landed = _spot(741.0, 389.0, first=480, last=900)
+    far = _spot(100.0, 100.0, first=300, last=900)
+
+    spots = later_arrivals((landed, far), [(725.0, 391.0), (100.0, 400.0)], [400, 700], 20.0)
+
+    assert spots == (landed, far)
+
+
+def test_an_end_point_with_no_measured_arrival_changes_nothing() -> None:
+    landed = _spot(741.0, 389.0, first=480, last=900)
+
+    assert later_arrivals((landed,), [(725.0, 391.0)], [None], 20.0) == (landed,)

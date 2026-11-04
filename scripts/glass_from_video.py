@@ -58,6 +58,7 @@ from src.perception.vlm_rescue import (
     departure_from_order,
     drop_clutter,
     drop_misread_ends,
+    later_arrivals,
     missing_points,
     patch_change,
     rescued_spot,
@@ -294,7 +295,7 @@ def read_video(
     spots = _add_unseen_departure(spots, unknown, fps, rescue) if unknown else spots
     untouched = tuple(view.position(point, config.glass_height) for point in unused)
     if len(spots) != SPOTS_IN_FLIP:
-        demo = read_triangle(spots, view, fps, config)
+        demo = _read_triangle_retimed(spots, finals, end_patches, view, fps, rescue, config)
         return dataclasses.replace(demo, untouched=untouched), False
     demo = dataclasses.replace(read_flip(spots, view, fps, config), untouched=untouched)
     last_frame = np.median(np.stack(ending), axis=0).astype(np.uint8)
@@ -436,11 +437,7 @@ def _match_ends(
     reference = max(last - round(rescue["end_seconds"] * fps), 0)
     added = []
     for point in unseen_ends(spots, finals, last, fps, gap, near):
-        series = patches[finals.index(point)]
-        change = np.array(
-            [float(np.mean(np.abs(patch - series[reference]))) for patch in series[: reference + 1]]
-        )
-        arrived = arrival_frame(change, rescue["change_threshold"], fps, rescue["settle_seconds"])
+        arrived = _patch_arrival(patches[finals.index(point)], reference, fps, rescue)
         if arrived is None:
             logger.warning("A glass the model saw at the end at %s never seemed to arrive", point)
             continue
@@ -448,6 +445,36 @@ def _match_ends(
     if added:
         logger.warning("Added %d end glass(es) the reader missed", len(added))
     return tuple(sorted((*spots, *added), key=lambda spot: spot.first))
+
+
+def _patch_arrival(series, reference: int, fps: float, rescue: dict) -> int | None:
+    """When the picture at one end point began to match how it looks near the end."""
+    change = np.array(
+        [float(np.mean(np.abs(patch - series[reference]))) for patch in series[: reference + 1]]
+    )
+    return arrival_frame(change, rescue["change_threshold"], fps, rescue["settle_seconds"])
+
+
+def _read_triangle_retimed(spots, finals, patches, view, fps, rescue, config) -> TriangleDemo:
+    """Read a triangle; if a landing seems to come too early, time it from the pictures.
+
+    Only used when the plain reading is impossible, so videos that read already can't change.
+    """
+    try:
+        return read_triangle(spots, view, fps, config)
+    except VideoReadError as error:
+        if not finals or "arrive before" not in str(error):
+            raise
+    last = len(patches[0]) - 1
+    reference = max(last - round(rescue["end_seconds"] * fps), 0)
+    arrivals = [_patch_arrival(series, reference, fps, rescue) for series in patches]
+    early = config.run_gap_seconds * fps
+    landed = [spot for spot in spots if spot.first > early]
+    moved = dict(zip(landed, later_arrivals(landed, finals, arrivals, rescue["near_pixels"])))
+    retimed = tuple(moved.get(spot, spot) for spot in spots)
+    logger.warning("Timed %d landing(s) from the pictures at the end points",
+                   sum(moved[spot] != spot for spot in landed))
+    return read_triangle(retimed, view, fps, config)
 
 
 def _add_rescued(spots, points, changes, fps, rescue) -> tuple[tuple, list]:

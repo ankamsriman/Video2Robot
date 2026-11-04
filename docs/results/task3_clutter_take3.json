@@ -1,0 +1,8 @@
+[
+ {
+  "video": "task3_flip_clutter_take3",
+  "setup": "A",
+  "success": false,
+  "refused": "Expected 6 resting spots for a triangle, found 5"
+ }
+]

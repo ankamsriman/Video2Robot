@@ -292,3 +292,26 @@ def trust_model_departures(
         else:
             unknown.append(point[0])
     return tuple(kept), unknown
+
+
+def later_arrivals(
+    spots: Sequence[Spot],
+    end_points: Sequence[Point],
+    arrivals: Sequence[int | None],
+    near_pixels: float,
+) -> tuple[Spot, ...]:
+    """Move a landing later when the picture at the model's end point settled later.
+
+    Something bright set down just behind a glass's landing place, such as a charger, can
+    look like that glass arriving early. `arrivals` says, for each end point, when the
+    picture there began to match the end; a spot near it that seemed to arrive sooner takes
+    that time. Arrivals are only ever moved later, never earlier.
+    """
+
+    def retimed(spot: Spot) -> Spot:
+        for point, arrived in zip(end_points, arrivals, strict=True):
+            if arrived is not None and arrived > spot.first and _near(spot, [point], near_pixels):
+                return replace(spot, first=arrived)
+        return spot
+
+    return tuple(retimed(spot) for spot in spots)

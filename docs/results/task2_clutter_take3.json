@@ -1,0 +1,16 @@
+[
+ {
+  "video": "task2_triangle_clutter_take3",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.3,
+  "refused": null
+ }
+]
