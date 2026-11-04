@@ -60,7 +60,7 @@ File and video names still use the earlier numbering: `task2_…` files are Task
 
 **What's programmed:** the grip, the flip and the arm motion, by inverse kinematics.
 
-**Only one small model is trained here:** a 16-weight logistic regression model that picks one arm or two. **No VLA, RL or ACT policy is used:** they need a GPU and robot demonstrations this project doesn't have ([`notes.md`](notes.md), chapter 22). Optional parts use models others trained: MediaPipe (hands), Claude (finding glasses) and SAM 2 (following glasses by shape).
+**Only one small model is trained here:** a 16-weight logistic regression model that picks one arm or two. **No VLA, RL or ACT policy is used:** they need a GPU and robot demonstrations this project doesn't have ([`notes.md`](notes.md), chapter 21). Optional parts use models others trained: MediaPipe (hands), Claude (finding glasses) and SAM 2 (following glasses by shape).
 
 **The robot is simulated, with its pelvis pinned** (it can't fall, and it can't walk). Every result below says which numbers come from real videos and which from simulator layouts, and which are "not a fair test" (tuned on the same videos).
 
