@@ -1,0 +1,80 @@
+[
+ {
+  "video": "task3_flip_right_take1",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 0.5,
+  "refused": null
+ },
+ {
+  "video": "task3_flip_take2",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_c: reach",
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 0.5,
+  "refused": null
+ },
+ {
+  "video": "task3_flip_take3",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_d: reach",
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 0.5,
+  "refused": null
+ },
+ {
+  "video": "task3_flip_take4",
+  "setup": "A",
+  "success": false,
+  "refused": "Expected 6 resting spots for a triangle, found 8"
+ },
+ {
+  "video": "task3_flip_take5",
+  "setup": "A",
+  "success": false,
+  "refused": "Expected 6 resting spots for a triangle, found 8"
+ },
+ {
+  "video": "task3_flip_take6",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_a: reach",
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 16.3,
+  "refused": null
+ },
+ {
+  "video": "task3_flip_take7",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_a: reach",
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 45.3,
+  "refused": null
+ },
+ {
+  "video": "task3_flip_take8",
+  "setup": "A",
+  "success": false,
+  "refused": "A glass seems to arrive before any glass left its spot"
+ },
+ {
+  "video": "task3_flip_take9",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 0.4,
+  "refused": null
+ }
+]

@@ -51,5 +51,8 @@ def test_the_robot_hands_over_to_its_other_arm() -> None:
     assert env.hand_position[1] > 0
     assert np.linalg.norm(env.hand_position - np.array(env.motion.home_position)) < 0.03
     assert env.move_hand(np.array((0.35, 0.2, 1.0)))
-    site = env.model.site("right_grasp").id
-    assert env.data.site_xpos[site][2] < right_hand[2]
+    # The idle hand waits raised beside the body, well above the table, so it can't rest
+    # on the table's edge (it did in hard take 2 when it hung at the side).
+    idle = env.data.site_xpos[env.model.site("right_grasp").id]
+    assert idle[2] > scene.table.top_height + 0.25
+    assert idle[1] < right_hand[1] - 0.1

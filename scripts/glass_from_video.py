@@ -210,11 +210,6 @@ def read_video(
     ending = []
     points = model_points or []
     finals = end_points or []
-    if len(points) > GLASSES_IN_TRIANGLE and sam_tracks is None:
-        # The end-of-video rules were built and tested on triangles. A flip's top glass
-        # shows a dark opening, and they misread it, so a flip keeps start-only reading.
-        logger.warning("%d glasses at the start, so the end-of-video check is skipped", len(points))
-        finals = []
     rescue = yaml.safe_load(CONFIG_PATH.read_text())["vlm_rescue"] if points or finals else {}
     end_patches: list[list[np.ndarray]] = [[] for _ in finals]
     references: list = []
@@ -258,6 +253,12 @@ def read_video(
         spots, points, changes, finals, end_patches, unused = _set_aside_unused(
             spots, points, changes, finals, end_patches, fps, rescue, config
         )
+    if len(points) > GLASSES_IN_TRIANGLE:
+        # Four glasses that all move is a flip. The end-of-video rules were built and
+        # tested on triangles, and misread a flip's dark top, so a flip keeps start-only
+        # reading. An unused glass was set aside above, so it can't be mistaken for one.
+        logger.warning("%d moving glasses, so the end-of-video check is skipped", len(points))
+        finals = []
     unknown: list = []
     if points:
         spots, unknown = _add_rescued(spots, points, changes, fps, rescue)

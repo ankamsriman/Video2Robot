@@ -1198,6 +1198,8 @@ The picture `docs/results/logistic_regression_explained.png` shows all of this: 
 
 **Result:** hard take 1 went from a knocked glass to **built, 0.3 cm** from yours.
 
+**The idle hand on the table (your observation, 4 Nov).** In hard take 2 you saw the robot's left hand hit the table. The contact log confirmed it: while the right arm worked, the idle left arm **hung at the robot's side**, and its hand and wrist rested on the table's edge for 68 frames. Turning that arm further out didn't stop it, and knocked a glass. **Leaving the idle arm raised beside the body**, about 28 cm above the table, did: 0 frames of contact, and all videos built as before.
+
 **Copying which side you put the first glass on (tried, not kept).** You noticed the robot put its first lower glass on the opposite side to you. That's deliberate: with one arm, it fills its far side first, so it never reaches past a glass it just placed. Copying your order instead broke take 4 (reach) and hard take 1 (place). So it's an option, `--copy-side-order`, off by default.
 
 ### What this doesn't show
@@ -1273,6 +1275,10 @@ Claude now costs about 1–2 cents a video (2 pictures).
 **Sunlight.** Your video lit only by sunlight was read correctly on its fair test. Claude added one starting and two end glasses the shiny-top reader missed in the new light. The robot then failed for a different reason: the tower was too close to its chest.
 
 **What these don't show:** each rule came from the video that failed, so those videos are "not a fair test" once fixed. A fresh video is the honest check.
+
+**Two safety nets added late on 4 Nov:**
+- If Claude gives no answer about the last picture (it happened on a Task 3 video, where you fill the frame as you step away), it tries pictures 1.5 s and 3 s earlier. Without an answer it skips the end check, rather than stopping.
+- All these rules were built and tested on **triangles**. On the **flip** task, with 4 glasses and a top glass showing a dark opening, two of them misread and refused Task 3 take 1, a video that builds. So with 4 starting glasses, the reader keeps its earlier start-only behaviour.
 
 ### Version 4: SAM 2 follows each glass by its shape (optional)
 **SAM 2** (Segment Anything 2, from Meta) outlines any object you click on, and keeps outlining it through a video. We use its smallest model, "tiny", 156 MB.

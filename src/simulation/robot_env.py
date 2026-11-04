@@ -47,6 +47,9 @@ CORRECTION_STEPS = 6
 CORRECTION_TOLERANCE = 0.003
 CORRECTION_GAIN = 0.7
 HANDOVER_SECONDS = 3.0
+# Leave the idle arm raised beside the body, off the table, instead of hanging it at the
+# side: hanging, its wrist rested on the table's edge (hard take 2, 68 frames of contact).
+KEEP_IDLE_ARM_RAISED = True
 # Off the table's near edge, out to the side, and above the tallest tower.
 HANDOVER_POINT = (0.14, 0.32, 1.02)
 logger = logging.getLogger(__name__)
@@ -156,7 +159,8 @@ class RobotEnv:
                 strict=True,
             )
         )
-        self.move_joints(hanging, HANDOVER_SECONDS)
+        if not KEEP_IDLE_ARM_RAISED:
+            self.move_joints(hanging, HANDOVER_SECONDS)
         self.motion = motion_for_arm(self.motion, arm)
         self._ik = self._iks.setdefault(arm, ArmIK(self.model, arm))
         self._site = self.model.site(f"{arm}_grasp").id

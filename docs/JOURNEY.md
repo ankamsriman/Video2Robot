@@ -93,6 +93,10 @@ Every fresh video below was first run with the system **exactly as it was** when
 
 | 5.15 | A fresh video in **sunlight only**, with clutter and the steel laptop stand. **Fair test** | Run with nothing changed | 1 new real video | **Reading worked:** Claude added 1 starting and 2 end glasses the shiny-top reader missed in the new light. **Robot failed** placing the first glass: I built the tower about 16 cm from my edge, closer than the robot's tested 24–36 cm, so its arm couldn't bend to place there | Reading: yes. Robot: open (see 8.4) |
 
+| 5.16 | Task 3 with Claude's two-frame reading: Claude gave no answer for take 2's last picture (the person fills it while stepping away), and the run stopped | Try pictures 1.5 s and 3 s before the end; without an answer, skip the end check | Task 3 take 2 | The run continues instead of stopping | Yes |
+| 5.17 | The end rules and the clutter rule were built on triangles. On a flip (4 glasses, the top one showing a dark opening) they misread: Task 3 take 1, which builds, was refused | With 4 starting glasses, use start-only reading and skip the clutter rule | Task 3 take 1 | Refused → **built again, 0.5 cm** | Yes |
+| 5.18 | That flip rule (any 4 starting glasses) broke hard take 1, a triangle with a 4th glass that never moved | Set aside unused glasses first; only 4 glasses that all move count as a flip | Hard take 1, Task 3 takes 1 and 9 | All three read correctly. Task 3: **2 of 9**, as before | Yes |
+
 ## Stage 8: the robot's own motion
 | # | Problem seen | Idea | Test | Before → after | Kept? |
 |---|---|---|---|---|---|
@@ -103,6 +107,9 @@ Every fresh video below was first run with the system **exactly as it was** when
 | 8.5 | I thought the hands hit the table during swaps; maybe pull them further back toward the body (my idea) | Count every moment the robot touches the table, with the handover point 14 cm out (current) and 6 cm out | Hard take 1 | Both built. Table touched in 157 of 3579 frames at 14 cm, 210 of 3604 at 6 cm. Mostly fingertips while gripping low, not the swap | Not needed: pulling back didn't reduce contact |
 | 8.6 | Safety check of all 14 Task 2 videos with today's rules and swap | — | 14 real videos | **13 of 14.** Hard take 2 now builds too. Take 4 now fails: its third glass sits at the edge of reach (37 cm in, 26 cm to the side), and holding the waist still during the swap left the hand 3.1 cm short instead of about 2 | See 8.7 |
 | 8.7 | Take 4 broke under the new swap | Hold the waist still only while the old hand leaves; let it turn again as the new hand comes in | Take 4, hard takes 1 and 2 | Take 4 still fails at reach; hard takes 1 and 2 still build | Dropped. Net effect of the new swap: hard takes 1 and 2 gained, take 4 lost |
+| 8.8 | In hard take 2 I saw the robot's left hand hitting the table (my observation) | Check first: log every contact. Confirmed: the idle left hand and wrist rested on the table's edge for 68 frames while the right arm worked, because the idle arm hung at the side | Hard take 2 | — | Confirmed |
+| 8.9 | Same | Hang the idle arm 0.3 rad further out | Hard take 2 | Still touching (thumb), and a glass knocked | Dropped |
+| 8.10 | Same | Leave the idle arm raised beside the body, about 28 cm above the table, instead of hanging it | All 14 Task 2 videos | Hard take 2: **68 → 0 frames touching**, still built. 13 of 14 build, as before | Yes |
 
 ## Stage 9: SAM 2, following glasses by shape (4 Nov)
 | # | Problem seen | Idea | Test | Before → after | Kept? |
