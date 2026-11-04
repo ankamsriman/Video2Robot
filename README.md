@@ -3,17 +3,19 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Simulator: MuJoCo](https://img.shields.io/badge/Simulator-MuJoCo-orange.svg)](https://mujoco.org/)
 [![Robot: Unitree G1](https://img.shields.io/badge/Robot-Unitree%20G1%20(simulated)-lightgrey.svg)](https://github.com/google-deepmind/mujoco_menagerie/tree/main/unitree_g1)
-[![Tests: 307 passing](https://img.shields.io/badge/tests-307%20passing-brightgreen.svg)](tests/)
+[![Tests: 312 passing](https://img.shields.io/badge/tests-312%20passing-brightgreen.svg)](tests/)
 
 > I film myself stacking steel glasses at a table. A simulated Unitree G1 humanoid watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo. It uses no printed marker and no hand-written labels.
 
-![Task B from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
-
-**▶️ Watch first: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min). My tracked hand beside the robot on cluttered tables, with an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight. Then [the original demo reel](docs/videos/demo_reel.mp4).
-
 [![My annotated demonstration beside the G1 in MuJoCo](docs/images/annotated_demo_vs_robot.gif)](docs/videos/annotated_demo_vs_robot.mp4)
 
-**[▶️ Annotated demo beside the robot](docs/videos/annotated_demo_vs_robot.mp4)**: on the left, my cluttered-table video with what each reader recognises (yellow: shiny tops the CV reader finds; red: kept, because the CV reader and Claude agree; teal: ignored, because Claude sees no glass there, such as the charger and earbud case; blue and purple crosses: Claude's glasses at the start and end). On the right, the G1 builds the same triangle in MuJoCo. One run, pelvis pinned; the clutter isn't placed in the simulation.
+*Task A on a cluttered table. Left: my video, marked with what each reader recognises. **Yellow** discs are shiny tops the CV reader finds, **red** boxes are kept because the CV reader and Claude agree, **teal** boxes are ignored because Claude sees no glass there (a charger, an earbud case, a plug), and **blue / purple** crosses are Claude's glasses at the start / end. Right: the G1 builds the same triangle in MuJoCo. [Full-quality video](docs/videos/annotated_demo_vs_robot.mp4).*
+
+![Task B from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
+
+*Task B: the robot builds the triangle, then flips a fourth glass onto it.*
+
+**▶️ More: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min: cluttered tables, an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight) and [the original demo reel](docs/videos/demo_reel.mp4).
 
 ---
 
@@ -129,7 +131,7 @@ The CV reader still decides **when** each glass moved, because that needs every 
 │   ├── reasoning/        # arm choice, standing spot, logistic regression model, Claude client
 │   ├── simulation/       # G1 scene, inverse kinematics, pick, place, flip, arm swap
 │   └── verification/     # triangle and flip checks, step checks
-├── tests/                # 307 tests
+├── tests/                # 312 tests
 ├── notes.md              # the whole project explained from zero, as a book
 ├── PLAN.md               # phases and status
 └── README.md             # this file
@@ -150,7 +152,7 @@ cd Video2Robot
 **2. Create the environment and download the G1 model and hand tracker:**
 ```bash
 scripts/setup.sh          # .venv with the exact tested versions, MuJoCo Menagerie's G1, MediaPipe hands
-.venv/bin/pytest          # 307 tests
+.venv/bin/pytest          # 312 tests
 ```
 
 **3. (Optional) Claude helper:** put your Anthropic API key in a `.env` file as `VIDEO2ROBOT_CLAUDE_KEY=...`. It has its own name so tools that load `.env` can't hand it to anything else. Git ignores `.env`.
@@ -214,6 +216,9 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sampl
 .venv-sam/bin/python scripts/sam_track_glasses.py --video data/raw/<video>.mov
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/<video>.mov --find-glasses --sam-tracks
 
+# See live, on the webcam, what the CV reader takes for glass tops (Q quits)
+PYTHONPATH=. .venv/bin/python scripts/live_cv_reader.py
+
 # Watch a run live in the MuJoCo window (Mac: mjpython)
 PYTHONPATH=. .venv/bin/mjpython scripts/watch_video_live.py --video data/raw/<video>.mov --claude --choose-arms --slow 2
 ```
@@ -224,11 +229,11 @@ PYTHONPATH=. .venv/bin/mjpython scripts/watch_video_live.py --video data/raw/<vi
 PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123
 PYTHONPATH=. .venv/bin/python scripts/area_test.py flip --trials 30 --seed 9101
 
-# Compare setups on real videos: A = Claude + model, B = Claude + an arm per glass, C = no Claude
+# Compare setups on real videos (setup letters, not task letters): A = Claude + model, B = Claude + an arm per glass, C = no Claude
 PYTHONPATH=. .venv/bin/python scripts/compare_task2_setups.py --setups A C
 
-# See why a video failed: what the reader saw, and its start and end positions on the frames
-PYTHONPATH=. .venv/bin/python scripts/explain_reading.py --video data/raw/<video>.mov
+# See why a video failed: what the CV reader saw, Claude's glasses, and which spots were kept or ignored
+PYTHONPATH=. .venv/bin/python scripts/explain_reading.py --video data/raw/<video>.mov --claude
 PYTHONPATH=. .venv/bin/python scripts/annotate_start_end.py --video data/raw/<video>.mov
 
 # All tests, with coverage
@@ -263,7 +268,7 @@ sam_reader:
 | **Task A**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
 | **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
 | **Task A**, all 17 videos I kept, final system | not run | **16 of 17** | The failure: sunlight (tower too close to the robot's chest). I deleted 3 other videos as beyond the robot's reach, all failures: a glass beyond reach, a glass at the edge of reach, and a triangle built against the robot's chest. Counting them, 16 of 20 |
-| **Task B** | 2 of 9 | 2 of 9 | Most failures are glasses beyond a robot that can't walk |
+| **Task B**, all 12 of my videos | 2 of 9 | **2 of 12** | Most failures are glasses beyond a robot that can't walk. The 3 newest, on cluttered tables, are read correctly by Claude's rules, but the glasses are out of reach |
 
 **What the robot can do, with exact simulator positions:**
 
@@ -301,7 +306,6 @@ Each idea came from counting the failures of the one before. The full record, ab
 | Arm swap | A swap twisted the body into the table; an idle hand rested on it | Hands rise and pass beside the body; the idle arm waits raised | 68 → **0** frames touching the table |
 | Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by shape | Correct timing (about 70 min a video on this Mac) |
 | Moving clutter | A charger set down where a glass later landed made a landing look 4 s early, and the video was refused | Only when the order is impossible, time each landing from when the picture at Claude's end point looked final | Refused → built; fresh videos after it: **3 of 3** read, **2 of 3** built (the failure, a triangle built against the robot's chest, was later deleted as out of reach) |
-| Live webcam control | It followed the hand in only 14–22% of frames in later live tries | — | **Removed** before submitting |
 
 ---
 
@@ -313,6 +317,8 @@ Each idea came from counting the failures of the one before. The full record, ab
 - **Narrow setup:** one fixed camera, a dark table, steel glasses, and four rough corners picked once per camera position.
 - **Optional services:** Claude needs an API key and sends two frames per video to Anthropic. SAM 2 is slow on a CPU.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not its own camera.
+- **No clutter in the simulation:** clutter is recognised and ignored in the video, but not placed on the simulated table, and the robot doesn't plan its arm around obstacles.
+- **Where the glasses go matters:** a triangle built near the person's edge of the table sits against the robot's chest, and the arm swap can then twist the body into the glasses. Build near the middle, about 20–27 cm from your edge.
 
 **Next steps:**
 - teach the robot to step closer for far glasses;
