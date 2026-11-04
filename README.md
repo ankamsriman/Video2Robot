@@ -11,7 +11,7 @@
 
 **▶️ Watch first: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min). My tracked hand beside the robot on cluttered tables, with an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight. Then [the original demo reel](docs/videos/demo_reel.mp4).
 
-[![My annotated demonstration beside the G1 in MuJoCo](docs/images/annotated_demo_vs_robot.jpg)](docs/videos/annotated_demo_vs_robot.mp4)
+[![My annotated demonstration beside the G1 in MuJoCo](docs/images/annotated_demo_vs_robot.gif)](docs/videos/annotated_demo_vs_robot.mp4)
 
 **[▶️ Annotated demo beside the robot](docs/videos/annotated_demo_vs_robot.mp4)**: on the left, my cluttered-table video with what each reader recognises (yellow: shiny tops the CV reader finds; red: kept, because the CV reader and Claude agree; teal: ignored, because Claude sees no glass there, such as the charger and earbud case; blue and purple crosses: Claude's glasses at the start and end). On the right, the G1 builds the same triangle in MuJoCo. One run, pelvis pinned; the clutter isn't placed in the simulation.
 
