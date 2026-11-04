@@ -102,7 +102,7 @@ Steel glasses are shiny, and so are plugs, chargers and the feet of a laptop sta
 
 ![What the CV reader and Claude each see on a cluttered table](docs/images/cv_claude_agreement.jpg)
 
-*One frame of [the annotated video](docs/videos/task2_clutter_take4_annotated.mp4). Yellow rings: bright tops the CV reader found. Blue and magenta crosses: Claude's glasses in the first and last frames. Red: kept, because both agree. Grey: ignored, because Claude sees no glass there (a plug, two feet of the laptop stand). The glass on the left has no yellow ring: the CV reader missed its dull top, and Claude's point brings it back.*
+*One frame of [the annotated video](docs/videos/task2_clutter_take6_annotated.mp4). Yellow discs: bright tops the CV reader found. Blue and purple crosses: Claude's glasses in the first and last frames. Red: kept, because both agree. Teal: ignored, because Claude sees no glass there (a plug, a charger, an earbud case, a foot of the laptop stand).*
 
 | CV reader | Claude | Decision |
 |---|---|---|
@@ -262,7 +262,7 @@ sam_reader:
 |---|:---:|:---:|---|
 | **Task A**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
 | **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
-| **Task A**, all 16 of my videos, final system | not run | **13 of 16** (13 of 15 without the one I excluded) | Failures: take 4 (a glass at the edge of reach), sunlight (tower too close), and the excluded video (a glass beyond reach) |
+| **Task A**, all 17 videos I kept, final system | not run | **16 of 17** | The failure: sunlight (tower too close to the robot's chest). I deleted 3 other videos as beyond the robot's reach, all failures: a glass beyond reach, a glass at the edge of reach, and a triangle built against the robot's chest. Counting them, 16 of 20 |
 | **Task B** | 2 of 9 | 2 of 9 | Most failures are glasses beyond a robot that can't walk |
 
 **What the robot can do, with exact simulator positions:**
@@ -300,7 +300,7 @@ Each idea came from counting the failures of the one before. The full record, ab
 | Fresh hard videos | Clutter, dull tops, an unused glass, glints, a hidden glass | Claude reads the first **and last** frames; one rule per failure | 0 of 7 → **6 of 7** |
 | Arm swap | A swap twisted the body into the table; an idle hand rested on it | Hands rise and pass beside the body; the idle arm waits raised | 68 → **0** frames touching the table |
 | Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by shape | Correct timing (about 70 min a video on this Mac) |
-| Moving clutter | A charger set down where a glass later landed made a landing look 4 s early, and the video was refused | Only when the order is impossible, time each landing from when the picture at Claude's end point looked final | Refused → built; fresh videos after it: **3 of 3** read, **2 of 3** built (the failure: a triangle too close to the robot's chest) |
+| Moving clutter | A charger set down where a glass later landed made a landing look 4 s early, and the video was refused | Only when the order is impossible, time each landing from when the picture at Claude's end point looked final | Refused → built; fresh videos after it: **3 of 3** read, **2 of 3** built (the failure, a triangle built against the robot's chest, was later deleted as out of reach) |
 | Live webcam control | It followed the hand in only 14–22% of frames in later live tries | — | **Removed** before submitting |
 
 ---
