@@ -207,12 +207,31 @@ def rest_spots(
     )
 
 
+def _top_last(ends: list[Spot], view: TableView, config: GlassVideoConfig) -> list[Spot]:
+    """Put the top glass last, chosen by where it sits, not by when it was first seen.
+
+    The top glass sits over the middle of the other two. A hand can hide a lower glass
+    until after the top is placed, so arrival order alone can mistake which is on top.
+    """
+    if len(ends) != 3:
+        return ends
+    height = config.glass_height
+
+    def offset(top: int) -> float:
+        lower = [view.position((s.x, s.y), height) for i, s in enumerate(ends) if i != top]
+        raised = view.position((ends[top].x, ends[top].y), 2 * height)
+        return float(np.linalg.norm(raised - (lower[0] + lower[1]) / 2))
+
+    top = min(range(3), key=offset)
+    return [*(spot for i, spot in enumerate(ends) if i != top), ends[top]]
+
+
 def _read_moves(
     spots: Sequence[Spot], glasses: int, view: TableView, fps: float, config: GlassVideoConfig
 ) -> TriangleDemo:
     """Pair each spot a glass left with the next new spot, and check the top glass's place."""
     starts = sorted(spots[:glasses], key=lambda spot: spot.last)
-    ends = sorted(spots[glasses:], key=lambda spot: spot.first)
+    ends = _top_last(sorted(spots[glasses:], key=lambda spot: spot.first), view, config)
     for start, end in zip(starts, ends, strict=False):
         if start.last > end.first:
             raise VideoReadError("A glass seems to arrive before any glass left its spot")

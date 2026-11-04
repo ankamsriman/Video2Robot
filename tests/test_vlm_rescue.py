@@ -271,3 +271,13 @@ def test_a_glass_the_model_still_sees_at_the_end_is_left_alone() -> None:
 
     assert spots == (stays,)
     assert unknown == []
+
+
+def test_a_spot_that_comes_and_goes_mid_video_away_from_every_end_glass_is_dropped() -> None:
+    # Hard take 3: the steel laptop stand shone from 3.9 s to 14.6 s, then stopped.
+    lower = Spot(843.0, 403.0, 147, 700, 553)
+    stand_glint = Spot(1290.0, 450.0, 117, 438, 200)
+
+    kept = drop_misread_ends((lower, stand_glint), [(845.0, 400.0)], 716, FPS, 1.0, 30.0)
+
+    assert kept == (lower,)

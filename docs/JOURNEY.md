@@ -76,6 +76,31 @@ Ideas that didn't help are listed too, because they shaped the design as much as
 | 5.4 | Task 3 still 2 of 9 with Claude | — | — | No change: Task 3's problem isn't reading | See stage 7 |
 | 5.5 | A fresh Task 2 video on a cluttered table (phone, earbud case, card, charger, laptop stand) | Fair test, nothing tuned on it | 1 new real video | **Refused**, with and without Claude. The reader took the earbud case and laptop stand for glasses, and missed all three starting glasses, whose tops looked dim from this camera angle. Claude added 2 missed glasses but can't remove false ones (`scripts/explain_reading.py` shows it frame by frame) | Next: drop spots far from every glass Claude finds |
 
+### Stage 5, continued: fresh cluttered videos (4 Nov), and making Claude read both ends
+Every fresh video below was first run with the system **exactly as it was** when I recorded it (a fair test). Each failure led to one rule, and that video is "not a fair test" afterwards.
+
+| # | Problem seen | Idea | Test | Before → after | Kept? |
+|---|---|---|---|---|---|
+| 5.6 | Cluttered take 1 (laptop stand, earbud case): the reader took bright clutter for glasses and missed dull ones. **Fair test: refused** | Drop bright spots there from the start that are far from every glass Claude sees | Cluttered take 1 | Still refused: the top glass at the end looked dull | Yes |
+| 5.7 | Cluttered take 2: a box first seen 1 s in looked like a glass arriving. **Fair test: refused** | Clutter is anything far from Claude's glasses that appears before any glass has left | Cluttered take 2 | Refused → **built, 0.4 cm** | Yes |
+| 5.8 | End positions still came only from shiny tops, which depend on lighting (my question) | **Version 3, my idea:** Claude also reads the last frame. Where Claude and the reader agree, the reader's exact position is used; where only Claude sees a glass, Claude's point; where only the reader does, it's dropped | Both cluttered takes | Take 2's dull top glass now found by Claude, not inferred | Yes |
+| 5.9 | Cluttered take 1: one dull glass's departure couldn't be measured | Work out when it left from the order: a glass leaves before it lands | Cluttered take 1 | Refused → **built, 0.2 cm** | Yes |
+| 5.10 | The safety check found version 3 broke 4 of 8 earlier videos: a top glass the reader saw, then lost before the end, was added twice | Match Claude's end points against every glass the reader saw arrive | 8 earlier videos | 4 of 8 → **8 of 8** | Yes |
+| 5.11 | Hard take 1: a 4th glass that never moved confused the counting. **Fair test: refused** | A glass Claude sees in the same place at both ends, which the reader confirms never left, takes no part (it stays on the simulated table) | Hard take 1 | Unused glass set aside | Yes |
+| 5.12 | Hard take 1: a glass beside a white tube seemed never to leave (the tube stayed bright) | Trust Claude's end view: no glass there at the end means it left | Hard take 1 | Reading fixed (robot: see 8.1) | Yes |
+| 5.13 | Hard take 3: the steel laptop stand glinted mid-video. **Fair test: refused** | Every landing must be where Claude sees a glass at the end; mid-video spots elsewhere are dropped | Hard take 3 | Refused → **built, 0.5 cm** | Yes |
+| 5.14 | Hard take 4: a hand hid a lower glass until after the top was placed, so arrival order picked the wrong top. **Fair test: refused** | Choose the top glass by position (centred over the other two), not by arrival time | Hard take 4 | Refused → **built, 0.5 cm** | Yes |
+
+| 5.15 | A fresh video in **sunlight only**, with clutter and the steel laptop stand. **Fair test** | Run with nothing changed | 1 new real video | **Reading worked:** Claude added 1 starting and 2 end glasses the shiny-top reader missed in the new light. **Robot failed** placing the first glass: I built the tower about 16 cm from my edge, closer than the robot's tested 24–36 cm, so its arm couldn't bend to place there | Reading: yes. Robot: open (see 8.4) |
+
+## Stage 8: the robot's own motion
+| # | Problem seen | Idea | Test | Before → after | Kept? |
+|---|---|---|---|---|---|
+| 8.1 | Hard take 1: during the arm swap the body twisted and the table was shoved; a glass ended up off the table | **My idea:** keep the arms off the table during a swap. The old hand rises straight up, both hands pass beside the body at that height, the new hand comes in high, and the waist stays still | Hard take 1 | Knocked glass → **built, 0.3 cm** | Yes |
+| 8.2 | Hard take 3: the robot put its first lower glass on the opposite side to me (my observation) | Copy the side I put the first lower glass on | Take 4, hard take 1 | Both broke: take 4 at reach, hard take 1 at place. The old rule fills the arm's far side first so the hand never reaches past a placed glass | Optional (`--copy-side-order`), off by default |
+| 8.3 | Hard take 2: the third glass, on the robot's far right, is knocked while gripping. **Fair test: robot failure** | — | — | Still open | — |
+| 8.4 | Sunlight take: the tower stood about 16 cm from my edge, too close to the robot's chest to place a glass | — (a rule for how far back to stand, like Task 3's standing spot, could help) | — | Still open | — |
+
 ## Stage 6: copying how I move, not just what I did
 
 | # | Problem seen | Idea | Test | Before → after | Kept? |

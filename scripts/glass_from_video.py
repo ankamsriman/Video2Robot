@@ -500,6 +500,7 @@ def run_robot(
     suffix_extra: str = "",
     notes: dict | None = None,
     choose_arms: bool = False,
+    copy_side_order: bool = False,
 ) -> dict:
     """Place the glasses as the video shows, run the robot, and report the outcome.
 
@@ -567,6 +568,13 @@ def run_robot(
     layout = {name: tuple(start) for name, start in zip(names, starts, strict=True)}
     if left_out is not None:
         layout[FLIPPED_NAME] = tuple(_to_robot(left_out, scene, table_width))
+    video_first_left = bool(demo.ends[0][1] > demo.ends[1][1])
+    report["first_lower_glass_side_from_video"] = "left" if video_first_left else "right"
+    if copy_side_order and not is_flip:
+        # Copy which side the person put their first lower glass on. A larger "left" is
+        # further to the robot's left, the same in table and simulator positions. Off by
+        # default: on take 4 and hard take 1 it made the hand reach past a placed glass.
+        first_on_left = video_first_left
     triangle = dataclasses.replace(
         load_triangle_config(path),
         center=tuple(tower),
@@ -649,6 +657,11 @@ def main() -> None:
         help="ask a vision language model for glasses the reader may have missed",
     )
     parser.add_argument(
+        "--copy-side-order",
+        action="store_true",
+        help="for a triangle, put the first lower glass on the side the person did",
+    )
+    parser.add_argument(
         "--choose-arms",
         action="store_true",
         help="for a triangle, let the outcome model choose one arm or two",
@@ -693,6 +706,7 @@ def main() -> None:
         suffix_extra,
         {"instruction": instruction_report} if instruction_report else None,
         args.choose_arms,
+        args.copy_side_order,
     )
     print(json.dumps(report, indent=2))
 

@@ -1187,6 +1187,19 @@ It beats always choosing the same way, but only by one layout over a simple rule
 
 The picture `docs/results/logistic_regression_explained.png` shows all of this: maps of the table coloured by its choice, the weights, and these results.
 
+### Swapping arms without knocking anything (your idea, 4 Nov)
+**The problem.** In hard take 1, while handing over from the right arm to the left, the robot twisted its whole body. That shoved the table, and a glass ended up off it.
+
+**Your idea:** keep the arms clear of the table while swapping. The swap now goes:
+1. The old hand rises **straight up**, about 30 cm above the table, higher than even the finished tower.
+2. It moves, still high, to a point **beside the body, just off the table's edge**, and hangs back.
+3. The new hand comes to the same kind of point on its own side, moves **high over to the table's middle**, and only then comes down.
+4. **The waist stays still** throughout, so the body can't twist into the table.
+
+**Result:** hard take 1 went from a knocked glass to **built, 0.3 cm** from yours.
+
+**Copying which side you put the first glass on (tried, not kept).** You noticed the robot put its first lower glass on the opposite side to you. That's deliberate: with one arm, it fills its far side first, so it never reaches past a glass it just placed. Copying your order instead broke take 4 (reach) and hard take 1 (place). So it's an option, `--copy-side-order`, off by default.
+
 ### What this doesn't show
 - All of it is simulator layouts with the robot's pelvis pinned.
 - On your 9 real Task 2 videos it chose an arm per glass every time, so on real videos it never had to make a hard choice.
@@ -1222,6 +1235,44 @@ Claude's answer is checked against a short list of allowed tasks and orders. If 
 
 ### Which Claude model
 Haiku, Sonnet and Opus were compared on 10 cases. All three got 9 of 10 fully right. Sonnet was the most accurate (0.33 cm average error) and far cheaper than Opus, so the project uses Sonnet.
+
+### Version 3: Claude reads the start *and* the end (4 Nov)
+**The problem you spotted:** Claude only looked at the first frame. Where the glasses *finished* was still read from shiny tops, and shine depends on the light.
+
+**Who does what now:**
+
+| Job | Tool | Why |
+|---|---|---|
+| Which things are glasses at the start | Claude, one early picture | It recognises glasses and ignores clutter |
+| Where the glasses are at the end | Claude, one picture near the end | Same reason, and it doesn't need a shiny top |
+| *When* each glass moved, so the order | The frame-by-frame reader | It needs every frame, and costs nothing; Claude on every frame would cost about $5–7 a video |
+| Pixels to centimetres | The table's corners | Exact geometry |
+
+Claude now costs about 1–2 cents a video (2 pictures).
+
+**How the two are combined.** A Claude point and a reader spot within 30 pixels (about 1–2 cm) are the same glass:
+
+| Case | Meaning | Used |
+|---|---|---|
+| Both see it | Same glass | The reader's position, the more exact one |
+| Only Claude | The reader missed it (a dull top) | Claude's point |
+| Only the reader | The reader misread something (clutter, a glint, an arm) | Dropped |
+
+**Worked example: cluttered take 2.** At the end, the reader saw the two lower glasses but not the dull top glass. Claude saw all three, so the top glass came from Claude's point. The plug and the box, which the reader saw, matched no Claude glass and were dropped. The robot built the triangle 0.4 cm from yours.
+
+**More rules found by your hard videos.** Each one first failed a fair test, and the rule came from its failure:
+
+| Video | What went wrong | Rule |
+|---|---|---|
+| Cluttered take 1 | One dull glass's departure couldn't be seen | Work it out from the order: a glass leaves before it lands |
+| Hard take 1 | A 4th glass never moved | A glass Claude sees in the same place at both ends, which never left, takes no part |
+| Hard take 1 | A white tube beside a glass stayed bright after the glass left | No glass there at the end, per Claude, means it left |
+| Hard take 3 | The steel laptop stand glinted mid-video | Every landing must be where Claude sees a glass at the end |
+| Hard take 4 | A hand hid a lower glass until after the top was placed | Choose the top glass by position, not arrival time |
+
+**Sunlight.** Your video lit only by sunlight was read correctly on its fair test. Claude added one starting and two end glasses the shiny-top reader missed in the new light. The robot then failed for a different reason: the tower was too close to its chest.
+
+**What these don't show:** each rule came from the video that failed, so those videos are "not a fair test" once fixed. A fresh video is the honest check.
 
 ### The API key, and an expensive lesson
 The key lives only in `.env`, a file git ignores, under the name **`VIDEO2ROBOT_CLAUDE_KEY`**.
@@ -1555,9 +1606,19 @@ Take 3 shows the real limit: a robot that can't walk can't reach glasses spread 
 
 ---
 
-### Ideas discussed but not built
-- **A recurrent network (RNN/GRU) trained on demonstrations.** It was in one plan, but there was no time to collect training data. The only thing trained in this project is the 16-weight logistic regression model.
-- **SAM 2 and dex-retargeting.** Not needed. The glasses are identical, and rest spots keep their order.
+### Bigger AI methods: what they are, and what was realistic here
+You asked about several well-known methods. Here is each one in plain words, what it would need, and what was done with it.
+
+| Method | What it is | What it needs | What happened here |
+|---|---|---|---|
+| **VLA** (vision-language-action model, such as OpenVLA or π0) | One big network that reads camera images and an instruction, and outputs robot motor commands directly | A GPU with lots of memory, and thousands of robot demonstrations to fine-tune on | **Not built.** This Mac has no suitable GPU, and there are no robot demonstrations to train on. Our split (Claude decides *what*, inverse kinematics decides *how*) gets the same "watch and do" result without training |
+| **RL** (reinforcement learning, such as PPO) | The robot learns by trial and error, rewarded when the triangle stands | Millions of simulated tries, normally run in parallel on a GPU for hours or days | **Not built.** On this CPU, even a simple grasp would take days to learn. The step checks (chapter 20) would make a good reward signal if a GPU were available |
+| **ACT** (Action Chunking Transformer) | Imitation learning: a network copies demonstrations and predicts short bursts of motion | 50 or more demonstrations of the robot itself doing the task, usually teleoperated, plus GPU training | **Not built.** The live hand control (chapter 19) could record such demonstrations; training would need a GPU. Copying our own scripted robot would only learn what is already programmed |
+| **A small RNN/GRU** trained on your demonstrations | A small network that learns timing from sequences | Many recorded demonstrations | **Not built,** for the same reason: too few demonstrations |
+| **SAM 2 / SAM 3** (Segment Anything) | Outlines any object in a picture from a click, and follows that outline through a video | Runs on CPU slowly; its smallest model is 156 MB | **Tried on 4 Nov:** given Claude's points as the clicks, it follows each glass by its *shape*, not its shine. See chapter 17 for how it compared with the bright-top reader |
+| **Dex-retargeting** | Maps a human hand's finger joints onto a robot hand with different fingers | A hand model and the robot's finger layout | **Not needed:** the live demo maps three fingers by bend angle (chapter 19), and the task grips are programmed |
+
+**The only model trained in this project** is the 16-weight logistic regression model (chapter 16). Everything else either is programmed, or uses a model someone else trained: MediaPipe for hands, Claude for finding glasses, and SAM 2 for outlines.
 
 ### The journey in one table
 

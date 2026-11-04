@@ -142,16 +142,20 @@ def drop_misread_ends(
     gap_seconds: float,
     near_pixels: float,
 ) -> tuple[Spot, ...]:
-    """Remove spots still there at the end that sit far from every glass the model saw then.
+    """Remove spots that sit far from every glass the model saw at the end.
 
-    The model points to every glass in a frame near the end. A bright spot there that
-    matches none of them is a misread, such as a reflection or some clutter.
+    That covers spots still there at the end, and spots that appeared after the start:
+    each glass moves once and stays where it lands, so a landing must be where the model
+    sees a glass at the end. A bright spot anywhere else is a misread, such as a reflection,
+    clutter moved mid-video, or an arm. Spots there from the start are judged elsewhere.
     """
     if not end_points:
         return tuple(spots)
     final = _at_the_end(spots, last_frame, fps, gap_seconds)
+    landed = [spot for spot in spots if spot.first > gap_seconds * fps]
+    judged = [*final, *landed]
     return tuple(
-        s for s in spots if s not in final or _near(s, end_points, near_pixels)
+        s for s in spots if s not in judged or _near(s, end_points, near_pixels)
     )
 
 

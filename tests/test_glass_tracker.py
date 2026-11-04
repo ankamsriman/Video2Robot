@@ -322,3 +322,20 @@ def test_a_glass_still_standing_at_the_end_with_no_top_seen_is_refused() -> None
 
     with pytest.raises(VideoReadError, match="Expected 6"):
         read_triangle(spots, view, 30.0, CONFIG)
+
+
+def test_the_top_glass_is_found_by_where_it_sits_not_when_it_was_first_seen() -> None:
+    # Hard take 4: a hand hid one lower glass, so the reader first saw it after the top.
+    view = table_view(_corners(), WIDTH, DEPTH, SIZE)
+    h = CONFIG.glass_height
+    spots = [
+        *_triangle_spots()[:3],
+        _spot(0.27, 0.48, h, 220, 880),
+        _spot(0.27, 0.44, 2 * h, 720, 880),
+        _spot(0.27, 0.40, h, 800, 880),
+    ]
+
+    demo = read_triangle(spots, view, 30.0, CONFIG)
+
+    assert np.allclose(demo.tower_center, (0.27, 0.44), atol=0.004)
+    assert demo.top_offset == pytest.approx(0.0, abs=0.005)
