@@ -1,7 +1,7 @@
 """Make a video that shows what the glass reader sees, so a refused video can be understood.
 
 Each frame shows:
-- yellow rings: every bright, round patch the reader takes for a glass top in that frame;
+- dark-yellow discs: every bright, round patch the reader takes for a glass top in that frame;
 - labelled boxes: the resting spots it settled on, and when each was seen;
 - the tracked hand: 21 points, the wrist marked, and how closed the fingers are;
 - with --claude: Claude's glasses in the first frame (blue) and last frame (magenta), and
@@ -31,7 +31,8 @@ from src.perception.table_view import refine_corners, table_view
 from src.simulation.scene import ROOT
 
 FONT = cv2.FONT_HERSHEY_SIMPLEX
-TOP_COLOUR = (0, 220, 255)
+TOP_FILL = (0, 150, 205)  # dark yellow (BGR)
+TOP_RIM = (0, 70, 110)
 SPOT_COLOUR = (60, 60, 230)
 TABLE_COLOUR = (60, 200, 60)
 START_COLOUR = (255, 140, 0)
@@ -57,6 +58,15 @@ def _cross(image: np.ndarray, point, colour, text: str) -> None:
     cv2.drawMarker(image, (x, y), colour, cv2.MARKER_TILTED_CROSS, 46, 4, cv2.LINE_AA)
     cv2.putText(image, text, (x + 26, y + 40), FONT, 0.8, colour, 2, cv2.LINE_AA)
 OUTPUT_WIDTH = 1280
+
+
+def draw_top(image: np.ndarray, point, radius: int = 24) -> None:
+    """A filled dark-yellow disc with a darker rim: easy to see on any background."""
+    centre = (int(point[0]), int(point[1]))
+    layer = image.copy()
+    cv2.circle(layer, centre, radius, TOP_FILL, -1, cv2.LINE_AA)
+    cv2.addWeighted(layer, 0.75, image, 0.25, 0, dst=image)
+    cv2.circle(image, centre, radius, TOP_RIM, 3, cv2.LINE_AA)
 
 
 def _read_frames(video: Path) -> tuple[list[np.ndarray], float]:
@@ -104,7 +114,7 @@ def main() -> None:
             shown = _draw_hands(frame, landmarker, int(index * 1000 / fps), fingers)
             cv2.polylines(shown, [corners.astype(np.int32)], True, TABLE_COLOUR, 2)
             for x, y in tops[index]:
-                cv2.circle(shown, (int(x), int(y)), 22, TOP_COLOUR, 3, cv2.LINE_AA)
+                draw_top(shown, (x, y))
             for point in starts:
                 _cross(shown, point, START_COLOUR, "Claude: glass at start")
             for point in finals:
