@@ -1,4 +1,4 @@
-"""Compare two ways of doing Task 2 on every real Task 2 video.
+"""Compare two ways of doing Task A on every real Task A video.
 
   A: Claude finds the glasses, and the logistic regression model picks the arms
      (each glass with the arm on its side, or one arm for all).

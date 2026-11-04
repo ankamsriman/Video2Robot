@@ -2,7 +2,7 @@
 
 Each run keeps a layout's glasses where they are and lets the robot choose where to stand.
 
-  video: wobble the layout read from Task 3's video, by about the reader's own uncertainty.
+  video: wobble the layout read from Task B's video, by about the reader's own uncertainty.
   wide: random layouts anywhere on the table, with the tower on either side of the glasses.
 
 Setups are only ever checked once, so results use new random seeds.

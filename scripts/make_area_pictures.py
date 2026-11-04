@@ -122,21 +122,21 @@ def main() -> None:
     _draw(
         table,
         ((TRIANGLE_STARTS, GREEN),),
-        "Task 2 INITIAL: put all 3 glasses inside the GREEN area",
+        "Task A INITIAL: put all 3 glasses inside the GREEN area",
         ("12 to 34 cm from your edge", "Centre line to 30 cm on your right", *gaps),
         "task2_initial_area",
     )
     _draw(
         table,
         ((TRIANGLE_TOWER, BLUE),),
-        "Task 2 FINAL: the MIDDLE of the tower goes inside the BLUE area",
+        "Task A FINAL: the MIDDLE of the tower goes inside the BLUE area",
         ("24 to 36 cm from your edge", "12 cm on your left to 24 cm on your right"),
         "task2_final_area",
     )
     _draw(
         table,
         ((FLIP_STARTS, GREEN), (FLIP_FOURTH, ORANGE)),
-        "Task 3 INITIAL: glasses 1-3 in GREEN, the glass to flip in ORANGE",
+        "Task B INITIAL: glasses 1-3 in GREEN, the glass to flip in ORANGE",
         (
             "GREEN: 13 to 19 cm from your edge, 14 cm left to 10 cm right",
             "ORANGE: 23 to 28 cm from your edge, 4 cm left to 10 cm right",
@@ -147,7 +147,7 @@ def main() -> None:
     _draw(
         table,
         ((FLIP_TOWER, BLUE),),
-        "Task 3 FINAL: the MIDDLE of the tower goes inside the BLUE area",
+        "Task B FINAL: the MIDDLE of the tower goes inside the BLUE area",
         ("20 to 27 cm from your edge", "26 to 31 cm on your right"),
         "task3_final_area",
     )

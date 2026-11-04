@@ -1,4 +1,4 @@
-"""Train the small outcome model on saved Task 2 runs, and test it on layouts it never saw.
+"""Train the small outcome model on saved Task A runs, and test it on layouts it never saw.
 
 Every layout was run both ways, with one arm (the nearest) and with two arms, so for each
 test layout we know what each choice really gave. The model picks one way per layout, and is

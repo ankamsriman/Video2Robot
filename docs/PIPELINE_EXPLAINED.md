@@ -8,7 +8,7 @@ This follows one real video, `task2_triangle_take5`, through every step. Every n
 
 1. [The whole pipeline on one page](#1-the-whole-pipeline-on-one-page)
 2. [Step by step](#2-step-by-step)
-3. [What changes for Task 3](#3-what-changes-for-task-3)
+3. [What changes for Task B](#3-what-changes-for-task-b)
 4. [What comes from your video, and what is programmed](#4-what-comes-from-your-video-and-what-is-programmed)
 5. [Where it fails, and how far to trust it](#5-where-it-fails-and-how-far-to-trust-it)
 6. [Code that this pipeline doesn't use](#6-code-that-this-pipeline-doesnt-use)
@@ -38,7 +38,7 @@ This follows one real video, `task2_triangle_take5`, through every step. Every n
      |   PLAN FOR THE ROBOT
      v
  Step 8  Turn table positions into positions from the robot
- Step 9  Choose the arm (and, in Task 3, the standing spot)
+ Step 9  Choose the arm (and, in Task B, the standing spot)
      |
      |   ACT AND CHECK
      v
@@ -281,7 +281,7 @@ Notice that a sixth spot is missing. A full triangle should show 6: three starts
   - No spot is sitting above those two.
 
   If so, the third glass must be on top. Otherwise, the video is refused.
-- **7 spots.** It's read as a flip. See [Task 3](#3-what-changes-for-task-3).
+- **7 spots.** It's read as a flip. See [Task B](#3-what-changes-for-task-b).
 - **Any other number.** It's refused, and the robot doesn't run. Refusing is better than running on a wrong reading.
 
 **Result for this video:**
@@ -485,9 +485,9 @@ For take 5, "nearest at the bottom, farthest on top" gives `{"task": "triangle",
 
 ---
 
-## 3. What changes for Task 3
+## 3. What changes for Task B
 
-Task 3 adds a fourth glass, which the robot must flip and put on top with its opening facing up. Here's what's different, using `task3_flip_right_take1`.
+Task B adds a fourth glass, which the robot must flip and put on top with its opening facing up. Here's what's different, using `task3_flip_right_take1`.
 
 **Reading the video (Step 7).** The flipped glass adds a start, but no end, because its opening is dark and shows no bright top. So a flip shows **7 spots**: 4 starts and 3 ends (`read_flip`).
 
@@ -524,7 +524,7 @@ This matters for the challenge's rule that your recorded data has to play a real
 | The order they move in | How to carry, level and aim | Glass size |
 | Where the tower goes | The flip's twist | Rough table corners |
 | Whether a flip happened | How fingers open and lift away | |
-| So also: which arm, and in Task 3, where the robot stands | What counts as success | |
+| So also: which arm, and in Task B, where the robot stands | What counts as success | |
 
 The robot didn't learn its movements from watching your hand. By default, the pipeline never looks at your hand. Only the optional `--hand-path` mode does, and it copies only the height and timing of your carry. A different layout in your video produces a different robot run, but the way it grips is always the same.
 
@@ -532,7 +532,7 @@ The robot didn't learn its movements from watching your hand. By default, the pi
 
 ## 5. Where it fails, and how far to trust it
 
-**Results on your later Task 2 videos:**
+**Results on your later Task A videos:**
 
 | Videos | Result |
 |---|---|
@@ -542,7 +542,7 @@ The robot didn't learn its movements from watching your hand. By default, the pi
 
 Before I added the rule for an unseen top glass, 0 of these 8 succeeded. After it, 2 of 8 did. I wrote that rule after seeing these videos, so **they aren't a fair test of it.**
 
-**Six later Task 3 videos were a fair test,** run with nothing changed, in varied layouts. **None succeeded:** three were refused, and the robot failed the other three. The README lists each one. In a layout chosen to suit the robot, take 8 was refused and take 9 succeeded, though that layout passed only 3 of 6 simulator runs when nudged.
+**Six later Task B videos were a fair test,** run with nothing changed, in varied layouts. **None succeeded:** three were refused, and the robot failed the other three. The README lists each one. In a layout chosen to suit the robot, take 8 was refused and take 9 succeeded, though that layout passed only 3 of 6 simulator runs when nudged.
 
 **Other limits to be honest about:**
 
@@ -553,7 +553,7 @@ Before I added the rule for an unseen top glass, 0 of these 8 succeeded. After i
 - **Glasses are simplified:** solid, rigid and a guessed weight.
 - **The table's corners fit less well on the newer takes,** as explained in [Step 3](#step-3-where-the-camera-is).
 - **Compression changes the reading.** The compressed sample copy of this video, `data/raw/sample/task2_triangle_take5.mp4`, did see the top glass, 1.1 cm off, and read the second move at 7.2 s instead of 7.7 s. The robot's result was the same. This shows the reader is sensitive to small changes in the picture.
-- **A risk in the new rule.** A Task 3 video that loses two spots could look like 5 spots, and be read as Task 2. Check the `task` line in the report.
+- **A risk in the new rule.** A Task B video that loses two spots could look like 5 spots, and be read as Task A. Check the `task` line in the report.
 
 ---
 
@@ -585,7 +585,7 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2
 # Put the video and robot side by side
 PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/task2_triangle_take5.mov
 
-# Run the same thing for Task 3
+# Run the same thing for Task B
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task3_flip_right_take1.mov
 
 # Watch the task live in MuJoCo

@@ -7,7 +7,7 @@
 
 > I film myself stacking steel glasses at a table. A simulated Unitree G1 humanoid watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo. It uses no printed marker and no hand-written labels.
 
-![Task 3 from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
+![Task B from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
 
 **▶️ Watch first: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min). My tracked hand beside the robot on cluttered tables, with an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight. Then [the original demo reel](docs/videos/demo_reel.mp4).
 
@@ -44,8 +44,10 @@
 
 | Task | What the person does |
 |---|---|
-| **Task 2** | Builds three identical steel glasses into a triangle: two side by side, one on top |
-| **Task 3** | Builds the triangle, then turns a fourth glass over and stands it on top, opening up |
+| **Task A** | Builds three identical steel glasses into a triangle: two side by side, one on top |
+| **Task B** | Builds the triangle, then turns a fourth glass over and stands it on top, opening up |
+
+File and video names still use the earlier numbering: `task2_…` files are Task A and `task3_…` files are Task B.
 
 **What the video decides:**
 - where each glass starts;
@@ -186,10 +188,10 @@ To record your own:
 
 ### 1. Video to robot
 ```bash
-# Task 2: a triangle. The report and robot video go to data/processed/<video>/
+# Task A: a triangle. The report and robot video go to data/processed/<video>/
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_right_take1.mp4
 
-# Task 3: the flipped tower
+# Task B: the flipped tower
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task3_flip_right_take1.mp4
 
 # Your video beside the robot's, with the tracked hand drawn on
@@ -237,7 +239,7 @@ PYTHONPATH=. .venv/bin/python scripts/annotate_start_end.py --video data/raw/<vi
 
 ## ⚙️ Configuration
 
-All tunable numbers live in YAML files in `configs/`: `cups_real.yaml` for Task 2 and the video reader, `flip_real.yaml` for Task 3. A snippet:
+All tunable numbers live in YAML files in `configs/`: `cups_real.yaml` for Task A and the video reader, `flip_real.yaml` for Task B. A snippet:
 
 ```yaml
 vlm:
@@ -258,17 +260,17 @@ sam_reader:
 
 | Task | Without AI | With Claude | Notes |
 |---|:---:|:---:|---|
-| **Task 2**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
-| **Task 2**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
-| **Task 2**, all 16 of my videos, final system | not run | **13 of 16** (13 of 15 without the one I excluded) | Failures: take 4 (a glass at the edge of reach), sunlight (tower too close), and the excluded video (a glass beyond reach) |
-| **Task 3** | 2 of 9 | 2 of 9 | Most failures are glasses beyond a robot that can't walk |
+| **Task A**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
+| **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
+| **Task A**, all 16 of my videos, final system | not run | **13 of 16** (13 of 15 without the one I excluded) | Failures: take 4 (a glass at the edge of reach), sunlight (tower too close), and the excluded video (a glass beyond reach) |
+| **Task B** | 2 of 9 | 2 of 9 | Most failures are glasses beyond a robot that can't walk |
 
 **What the robot can do, with exact simulator positions:**
 
 | Test | Result |
 |---|:---:|
-| Task 2, 30 random layouts in its working area | **28 of 30** |
-| Task 3, 30 random layouts in its working area | **28 of 30** |
+| Task A, 30 random layouts in its working area | **28 of 30** |
+| Task B, 30 random layouts in its working area | **28 of 30** |
 | Arm choice on 60 new layouts: always one arm / always two / hand rule / **logistic regression** / best possible | 43 / 44 / 49 / **50** / 51 |
 | Claude finding glasses on 10 cluttered simulated tables | **10 of 10** |
 
@@ -277,8 +279,8 @@ sam_reader:
 - [moving plug](docs/videos/task2_hard_video_to_robot.mp4)
 - [arm swap with an unused glass](docs/videos/task2_arm_swap_video_to_robot.mp4)
 - [SAM 2 in sunlight](docs/videos/sam2_sunlight_tracks.mp4)
-- [Task 2](docs/videos/task2_video_to_robot.mp4)
-- [Task 3](docs/videos/task3_new_video_to_robot.mp4)
+- [Task A](docs/videos/task2_video_to_robot.mp4)
+- [Task B](docs/videos/task3_new_video_to_robot.mp4)
 
 **Every result in detail**, with each video, each check and each comparison: [`docs/RESULTS_IN_DETAIL.md`](docs/RESULTS_IN_DETAIL.md).
 
@@ -307,7 +309,7 @@ Each idea came from counting the failures of the one before. The full record, ab
 
 - **Simulation only, with a pinned pelvis:** no balance, no walking, and limited reach. Most remaining failures are glasses beyond reach.
 - **Programmed motion:** no learned policy. The only trained model picks the arms.
-- **Not fair tests:** many Task 2 successes come from rules built on the same videos. Fresh videos were 0 of 7 on their first run.
+- **Not fair tests:** many Task A successes come from rules built on the same videos. Fresh videos were 0 of 7 on their first run.
 - **Narrow setup:** one fixed camera, a dark table, steel glasses, and four rough corners picked once per camera position.
 - **Optional services:** Claude needs an API key and sends two frames per video to Anthropic. SAM 2 is slow on a CPU.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not its own camera.

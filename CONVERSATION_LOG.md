@@ -64,7 +64,7 @@ SeeDo has three gaps, and we turn each into something measurable:
 | Retry loop | Weak grip went from 0 of 8 to 8 of 8, after fixing a test that measured nothing |
 | Working area | 70 of 78 positions passed, larger than first estimated |
 
-### Task 3: the flipped cup
+### Task B: the flipped cup
 Your idea: a fourth cup on the triangle, opening up, with the robot turning it over. It went from 1 of 9 to 21 of 24 on new setups, on its own branch. You then asked for 100%: aiming at the measured top cup and cancelling the shift on release gave 50 of 50 on new setups. The flip is programmed, so it isn't learned from video.
 
 ### Picturing the recording view
@@ -85,42 +85,42 @@ You recorded steel glasses with no marker, and with no blocks to hand. That rule
 
 | Decision | Why |
 |---|---|
-| Tasks are Task 2 and Task 3, and real-video sorting is dropped | You have no blocks, and the triangle already meets the hard rule |
+| Tasks are Task A and Task B, and real-video sorting is dropped | You have no blocks, and the triangle already meets the hard rule |
 | No marker | The table's corners and measured size do the job |
 | Identical glasses kept | Rest spots keep the order, so no SAM 2 or coloured cups |
-| Task 3 can be recorded again in the flip's area | The arm can't flip across its own chest |
-| Positions may be moved to fit the robot, always reported | Better than hiding the limit or giving up on Task 3 |
+| Task B can be recorded again in the flip's area | The arm can't flip across its own chest |
+| Positions may be moved to fit the robot, always reported | Better than hiding the limit or giving up on Task B |
 | Repo stays private until you say so | Your choice |
 
 ### Corrections along the way
 The table was first given as 80 x 60 cm, and the video's shape disagreed, so it was measured again at 80 x 50. A rim of 1.3 cm was a voice-typing slip for 7.3 cm. I also wrongly said the robot always grips from the side: it grips the first three glasses from above.
 
-### Task 3 no longer needs moved glasses
+### Task B no longer needs moved glasses
 The fitted layout showed your video was a mirror image of what the right arm wants. So the robot now picks its arm and standing spot from the layout. On your original video, that's the left arm, 23.4 cm right of the table's middle, with no glass moved. The robot starts at that spot, since it can't walk.
 
-### Task 2 uses the nearest arm
+### Task A uses the nearest arm
 You asked for the robot to choose the arm nearest the glasses. It helps on left-side layouts (24 of 30 against 10 of 30), and not on layouts spread across both sides (20 against 21 of 30). It keeps one arm for the whole task.
 
-### Eight new Task 2 takes
+### Eight new Task A takes
 You recorded eight takes. The reader accepted 2 and the robot failed both, so none succeeded. I added a rule that works out an unseen top glass from the other glasses, and takes 2 and 5 then succeeded with the left arm. The rule came after seeing these videos, so they aren't a fair test of it. Takes 3, 4, 7 and 8 are still refused because a starting glass is missed. Take 4 and take 6 are mixed layouts one arm can't do, so they suit your two-arm idea.
 
-### Six new Task 3 takes
-You recorded six Task 3 takes in different layouts, and I ran them with nothing changed. None succeeded: the reader refused three, and the robot failed the other three. Updating the table's corners changed no result. We agreed the order: one more Task 3 video, make the submission safe, then improve Task 2 with your two-arm idea and a better reader.
+### Six new Task B takes
+You recorded six Task B takes in different layouts, and I ran them with nothing changed. None succeeded: the reader refused three, and the robot failed the other three. Updating the table's corners changed no result. We agreed the order: one more Task B video, make the submission safe, then improve Task A with your two-arm idea and a better reader.
 
-### Task 3 works on a new video
+### Task B works on a new video
 Take 8 was refused, and the glass to flip was too far for the robot. Take 9 succeeded with nothing changed: left arm, tower 0.4 cm off. It's one run of a chosen layout, and that layout passed only 3 of 6 simulator runs when nudged.
 
 ### Your two-arm idea
-Built as an optional mode, for Task 2 only. My first version scored 9 of 30, because the old arm knocked glasses during the swap. With the hands going around the glasses, it tied with one arm on random layouts (20 against 20, and 22 against 21 of 30). It clearly beat one arm on your take 4 and take 6 layouts, which were picked because one arm struggled, and it made the real take 6 video succeed. So it's off by default.
+Built as an optional mode, for Task A only. My first version scored 9 of 30, because the old arm knocked glasses during the swap. With the hands going around the glasses, it tied with one arm on random layouts (20 against 20, and 22 against 21 of 30). It clearly beat one arm on your take 4 and take 6 layouts, which were picked because one arm struggled, and it made the real take 6 video succeed. So it's off by default.
 
 ### Copying your hand's path
 You pointed out that the video told the robot what to do, not how to move. So the hand tracker now follows your hand, and with `--hand-path` the robot carries each glass with your hand's height and timing. Takes 1, 2, 5 and 6 succeed. The grip and finger poses stay programmed, and nothing is trained.
 
 ### A vision language model, overnight
-You added an API key and asked for a VLM. Claude now turns typed instructions into checked plans, chooses which glass to flip, and finds glasses the reader missed. Task 2 went from 4 to 8 of your 9 videos built, though I adjusted it on those same videos. On 10 cluttered simulated tables it found exactly the three glasses every time, within 1.5 cm. Grip timing was dropped: the tracker couldn't see the fingers around the glass.
+You added an API key and asked for a VLM. Claude now turns typed instructions into checked plans, chooses which glass to flip, and finds glasses the reader missed. Task A went from 4 to 8 of your 9 videos built, though I adjusted it on those same videos. On 10 cluttered simulated tables it found exactly the three glasses every time, within 1.5 cm. Grip timing was dropped: the tracker couldn't see the fingers around the glass.
 
 ### A small learned model, and the API limit
-A small outcome model now predicts whether one arm or two will work for a layout, and `--choose-arms` uses it. On 30 fresh layouts it chose well enough for 26 builds, against 25 for the hand rule. Sonnet and Opus pointed at glasses about equally well, and Haiku less precisely. Your account then hit its monthly API spending limit, mostly because of a costly Opus comparison. Once you raised it, `--find-glasses --choose-arms` built 8 of your 9 Task 2 videos with no options set by hand.
+A small outcome model now predicts whether one arm or two will work for a layout, and `--choose-arms` uses it. On 30 fresh layouts it chose well enough for 26 builds, against 25 for the hand rule. Sonnet and Opus pointed at glasses about equally well, and Haiku less precisely. Your account then hit its monthly API spending limit, mostly because of a costly Opus comparison. Once you raised it, `--find-glasses --choose-arms` built 8 of your 9 Task A videos with no options set by hand.
 
 ### Not a world model
 You asked why I called the outcome model a "world model". That overclaimed. It's logistic regression with about 16 learned weights that predicts only success or failure. A world model predicts how the scene changes step by step. I renamed it in the README, the code's description and every image, and renamed `world_model_where_it_matters.png` to `arm_choice_where_it_matters.png`. Uses that mean real world models, in `task.md` and the glossary in `notes.md`, stay. The results didn't change.
@@ -138,18 +138,18 @@ The first live webcam try failed, so three fixes went in:
 
 I asked which features from a list would raise the success rate. Honestly, none of finger pre-shape, grip timing or wrist copying would. So step checks came first: every pick and place now reports which step first failed. They changed no result (the same 28 of 30 flips, failing in the same runs).
 
-I pointed out that testing live control on a recorded video means little if the simulated glasses stand somewhere else. `--match-video` now places the video's glasses, and puts the hand on the table in 3D, from the table's corners and the hand's apparent size. On Task 2 take 1, the palm landed within about 1 cm of each glass as I took it.
+I pointed out that testing live control on a recorded video means little if the simulated glasses stand somewhere else. `--match-video` now places the video's glasses, and puts the hand on the table in 3D, from the table's corners and the hand's apparent size. On Task A take 1, the palm landed within about 1 cm of each glass as I took it.
 
 My API balance was draining: VS Code loads `.env` into terminals, and Claude Code used the key under its standard name. The project's key is now `VIDEO2ROBOT_CLAUDE_KEY`.
 
 ### Fresh hard videos, Claude reading both ends, and SAM 2 (4 Nov, day)
-I recorded fresh videos meant to confuse the system: cluttered tables, a 4th glass never moved, a glass the right way up, a steel laptop stand, a plug moved mid-video, and sunlight only. Each was first run with nothing changed: **0 of 7 built on their fair first run.** Each failure led to one rule. My main idea was that Claude should read the **last** frame as well as the first, because shiny tops depend on lighting. After the rules, 6 of the 7 build, and 13 of 14 Task 2 videos within reach do (not a fair test).
+I recorded fresh videos meant to confuse the system: cluttered tables, a 4th glass never moved, a glass the right way up, a steel laptop stand, a plug moved mid-video, and sunlight only. Each was first run with nothing changed: **0 of 7 built on their fair first run.** Each failure led to one rule. My main idea was that Claude should read the **last** frame as well as the first, because shiny tops depend on lighting. After the rules, 6 of the 7 build, and 13 of 14 Task A videos within reach do (not a fair test).
 
 I asked why we didn't just use Claude for everything. It costs about a cent per picture, so it reads the first and last frames, and the free frame-by-frame reader times the moves. I also suggested keeping the arms off the table during a swap, which rescued hard takes 1 and 2. I later saw the idle left hand touching the table; a contact log confirmed it, and leaving the idle arm raised fixed it. Copying my side order was tried and made optional, because it broke two videos.
 
 SAM 2.1 tiny, in a separate environment, followed each glass by shape. In sunlight it timed the moves correctly where shiny tops didn't, but it takes about 70 minutes a video on this Mac. VLA, RL and ACT were written up rather than built: they need a GPU and robot demonstrations.
 
-The session stopped from about 09:30 to 19:20, and jobs left running in the background were lost. Rerunning Task 3 then exposed two triangle-only rules misreading flips, which are now fixed: Task 3 is back to 2 of 9.
+The session stopped from about 09:30 to 19:20, and jobs left running in the background were lost. Rerunning Task B then exposed two triangle-only rules misreading flips, which are now fixed: Task B is back to 2 of 9.
 
 ### Live control removed (4 Nov, evening)
 I tested the final live webcam version three times. It followed my hand in only 14% and 22% of frames, and was hard to start, so I asked for it to be removed. The scripts and their tests are gone (the git history keeps them), the docs say it was tried and removed, and the finger-closure measurement stays for the side-by-side videos.

@@ -16,8 +16,8 @@ Throughout, **[Built]** means the code exists and has been tested. **[Planned]**
 7. [Our design and why](#7-our-design-and-why)
 8. [The code, file by file](#8-the-code-file-by-file)
    - [The vision and planning code](#8b-the-vision-and-planning-code)
-   - [Task 2: the cup triangle](#8c-task-2-the-cup-triangle)
-   - [Task 3: flipping a fourth cup](#8d-task-3-flipping-a-fourth-cup)
+   - [Task A: the cup triangle](#8c-task-a-the-cup-triangle)
+   - [Task B: flipping a fourth cup](#8d-task-b-flipping-a-fourth-cup)
 9. [Worked example: putting the apple in the box](#9-worked-example-putting-the-apple-in-the-box)
 10. [What went wrong and what it taught us](#10-what-went-wrong-and-what-it-taught-us)
 11. [Results and how to read them](#11-results-and-how-to-read-them)
@@ -27,8 +27,8 @@ Throughout, **[Built]** means the code exists and has been tested. **[Planned]**
 **Part Two: your real videos and real glasses**
 
 14. [Reading your videos: steel glasses, no marker](#14-reading-your-videos-steel-glasses-no-marker)
-15. [Task 3: choosing the arm and where to stand](#15-task-3-choosing-the-arm-and-where-to-stand)
-16. [Choosing arms for Task 2, and the logistic regression model](#16-choosing-arms-for-task-2-and-the-logistic-regression-model)
+15. [Task B: choosing the arm and where to stand](#15-task-b-choosing-the-arm-and-where-to-stand)
+16. [Choosing arms for Task A, and the logistic regression model](#16-choosing-arms-for-task-a-and-the-logistic-regression-model)
 17. [The vision language model (Claude) helper](#17-the-vision-language-model-claude-helper)
 18. [Copying your hand's carry](#18-copying-your-hands-carry---hand-path)
 19. [Live hand control (tried, then removed)](#19-live-hand-control-tried-then-removed)
@@ -51,7 +51,7 @@ Imagine you sit at a table and film yourself putting an apple in a box. You hand
 
 Doing this on a real humanoid would be expensive and risky, so we use a **simulator**: a program that acts like a video game with accurate physics. If the robot's fingers don't squeeze hard enough in the simulator, the object really does slip.
 
-**Where we are (4 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task 2, the triangle, it builds 8 of your 9 videos with Claude's help, and 3 of 9 without it. For Task 3, the flip, it builds 2 of 9; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
+**Where we are (4 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task A, the triangle, it builds 8 of your 9 videos with Claude's help, and 3 of 9 without it. For Task B, the flip, it builds 2 of 9; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
 
 **To read the project as a story of ideas, from the first failure to today, start with chapter 22.** Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 21 has the numbers to quote.
 
@@ -609,7 +609,7 @@ It runs these stages, and each saves its output so it can be rerun alone:
 
 ---
 
-## 8C. Task 2: the cup triangle
+## 8C. Task A: the cup triangle
 
 **This lives on a separate git branch, `cup-task`,** so it can't affect sorting. A branch is a separate line of history, and to look at it you'd run `git checkout cup-task`.
 
@@ -652,11 +652,11 @@ It worked on a rendered video: it found the order and built the triangle.
 - **Most results use a hand-written plan,** and none use real video, so the hard rule isn't met yet for this task. It's now been shown working from a rendered video, as below, but not a real one.
 - **The simulated hand has an advantage:** it knows each cup's exact position. A real robot wouldn't.
 - **Real cups differ:** they're hollow, flexible and much lighter, and the simulator's top cup rests on a solid surface.
-- **Pelvis is pinned,** as in Task 1.
+- **Pelvis is pinned,** as in the sorting task.
 
 ---
 
-## 8D. Task 3: flipping a fourth cup
+## 8D. Task B: flipping a fourth cup
 
 **This lives on its own git branch, `cup-flip`.** `main` and `cup-task` aren't affected.
 
@@ -685,7 +685,7 @@ Each failure taught something. It took about 12 attempts at the design:
 | Cup crept out over seconds | Soft friction model | Higher `impratio` | Simulation settings can matter as much as code |
 | Palm knocked the cup over | Coming straight down hit its wide base | Come down beside it, then slide in | |
 | Fingers carried the cup away | It's widest at the top, so lifting caught the rim | Centre the hand, back out sideways, then lift | |
-| Cup shoved 1.2 cm on release | The thumb stays loaded like a spring after squeezing | Set finger targets to their real positions first | The same cause as a Task 1 bug |
+| Cup shoved 1.2 cm on release | The thumb stays loaded like a spring after squeezing | Set finger targets to their real positions first | The same cause as a the sorting task bug |
 | Tower knocked over at the end | My own final arm swing | Remove the swing | |
 
 One of my diagnoses was wrong along the way: I blamed the fingertip paths, calculated them, and found they moved outward as they should. So it's worth checking a theory before building on it.
@@ -713,7 +713,7 @@ The 3 failures at 21 of 24 had the cup on top and flipped, but more than 2 cm of
 
 ### What this doesn't show
 - **The robot doesn't learn the flip from a video.** It's programmed. Nothing connects this task to video yet, not even a rendered one, so **the hard rule isn't met for it**. Your README must say so.
-- **The layout is restricted.** The tower has a fixed spot, and the fourth cup must start 40-44 cm forward. It isn't as flexible as Tasks 1 and 2.
+- **The layout is restricted.** The tower has a fixed spot, and the fourth cup must start 40-44 cm forward. It isn't as flexible as the sorting task and Task A.
 - **Simulation only:** rigid solid cups, a dark disc that represents the opening, a pinned pelvis, and a friction setting chosen because it worked.
 - **A real robot may behave differently.** Exact knowledge of the cup's position and tilt wouldn't be available, and the final fix relies on it: the robot reads both cups' exact positions from the simulator.
 
@@ -1002,7 +1002,7 @@ PYTHONPATH=. .venv/bin/python scripts/phase1_gate.py --trials 1 --first-seed 900
 # Watch a passing run
 open data/processed/phase1/pinned_trial_500.mp4
 
-# Your real video to the robot (Task 2 take 1)
+# Your real video to the robot (Task A take 1)
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_right_take1.mov
 
 # The same, with Claude finding the glasses and the model choosing arms (uses the API key)
@@ -1063,21 +1063,21 @@ A glass's top is 11.5 cm above the table, or 23 cm for the glass on top of the t
 
 **Example check:** after the correction, the top glass in take 1 lands within **0.2 cm** of the midpoint of the two lower glasses, which is exactly where it should be.
 
-### Recognising the flip (Task 3)
-A flipped glass shows its **open end**, which is dark, not bright. So Task 3 shows four starting spots but only three bright new spots. To confirm the flip, the code looks where the tower's top should be. At hand-picked spots, closed tops measured 80–88% bright pixels and the opening measured 0%.
+### Recognising the flip (Task B)
+A flipped glass shows its **open end**, which is dark, not bright. So Task B shows four starting spots but only three bright new spots. To confirm the flip, the code looks where the tower's top should be. At hand-picked spots, closed tops measured 80–88% bright pixels and the opening measured 0%.
 
 ### When the top glass isn't seen
 Against the bright floor, the top glass can go unnoticed. If the reader sees three glasses leave and two end side by side with nothing above them, it concludes the third must be on top. The report then says `top_glass_seen_in_video: false`.
 
 ### What this doesn't show
-The reader's settings were chosen by looking at your first videos, so later takes are the fairer test. Of the eight later Task 2 takes, four were refused because a starting glass was missed. That's the reader's main weakness, and chapter 17 shows how Claude fixes it.
+The reader's settings were chosen by looking at your first videos, so later takes are the fairer test. Of the eight later Task A takes, four were refused because a starting glass was missed. That's the reader's main weakness, and chapter 17 shows how Claude fixes it.
 
 ---
 
-## 15. Task 3: choosing the arm and where to stand
+## 15. Task B: choosing the arm and where to stand
 
 ### The problem
-The flip only works if the robot holds its forearm level and turns its wrist. It can only do that towards the working arm's **own side**: reaching across its chest, the right arm hits the robot's own body. In your first Task 3 video, the tower is on the robot's left of the glasses, so the right arm can't do it from the middle of the table.
+The flip only works if the robot holds its forearm level and turns its wrist. It can only do that towards the working arm's **own side**: reaching across its chest, the right arm hits the robot's own body. In your first Task B video, the tower is on the robot's left of the glasses, so the right arm can't do it from the middle of the table.
 
 ### The fix: choose the arm, then where to stand
 `plan_stand` in `src/reasoning/fit_layout.py`:
@@ -1095,7 +1095,7 @@ The G1's arms are mirror images. `src/simulation/mirror.py` imagines a mirror al
 So settings are written once, for the right arm, and the left arm gets their mirror image.
 
 ### What later testing showed (4 Nov)
-The step checks (chapter 20) showed that on later takes, **Task 3 fails because a glass is out of reach**:
+The step checks (chapter 20) showed that on later takes, **Task B fails because a glass is out of reach**:
 - In takes 2, 3 and 7, your glasses stood 20–39 cm from your edge of the table. The flip was only tested with starting glasses 13–19 cm from that edge.
 - The robot's hand stopped **11, 31 and 41 cm** short of a glass.
 
@@ -1113,7 +1113,7 @@ So standing closer rescued one take (one run). It isn't part of the system yet: 
 
 ---
 
-## 16. Choosing arms for Task 2, and the logistic regression model
+## 16. Choosing arms for Task A, and the logistic regression model
 
 ### Three ways to use the arms
 1. **One arm for everything (the nearest arm).** `nearest_arm` averages how far the glasses and tower are to the robot's side and picks that side's arm. On layouts toward the robot's left, this built 24 of 30, against 10 of 30 for the right arm alone.
@@ -1198,7 +1198,7 @@ The picture `docs/results/logistic_regression_explained.png` shows all of this: 
 
 ### What this doesn't show
 - All of it is simulator layouts with the robot's pelvis pinned.
-- On your 9 real Task 2 videos it chose an arm per glass every time, so on real videos it never had to make a hard choice.
+- On your 9 real Task A videos it chose an arm per glass every time, so on real videos it never had to make a hard choice.
 - **It isn't a world model.** It predicts only "will this succeed?", not how the scene changes step by step.
 
 ---
@@ -1222,10 +1222,10 @@ Claude's answer is checked against a short list of allowed tasks and orders. If 
 ### Results
 | Test | Without Claude | With Claude |
 |---|---|---|
-| Task 2, your 9 real videos | 3 of 9 | **8 of 9** (tower within 0.0–0.5 cm of yours) |
-| Task 3, your 9 real videos | 2 of 9 | 2 of 9 (no change: Task 3's problem is reach, chapter 15) |
+| Task A, your 9 real videos | 3 of 9 | **8 of 9** (tower within 0.0–0.5 cm of yours) |
+| Task B, your 9 real videos | 2 of 9 | 2 of 9 (no change: Task B's problem is reach, chapter 15) |
 | 10 cluttered simulator scenes | a brightness rule saw 20 bright patches | **10 of 10** found exactly the glasses, about 1 cm off |
-| 8 typed instructions (Task 3 take 9) | — | 8 of 8 put the glasses in the right order |
+| 8 typed instructions (Task B take 9) | — | 8 of 8 put the glasses in the right order |
 
 **Not a fair test:** the reader was tuned on these same videos.
 
@@ -1271,8 +1271,8 @@ Claude now costs about 1–2 cents a video (2 pictures).
 **What these don't show:** each rule came from the video that failed, so those videos are "not a fair test" once fixed. A fresh video is the honest check.
 
 **Two safety nets added late on 4 Nov:**
-- If Claude gives no answer about the last picture (it happened on a Task 3 video, where you fill the frame as you step away), it tries pictures 1.5 s and 3 s earlier. Without an answer it skips the end check, rather than stopping.
-- All these rules were built and tested on **triangles**. On the **flip** task, with 4 glasses and a top glass showing a dark opening, two of them misread and refused Task 3 take 1, a video that builds. So with 4 starting glasses, the reader keeps its earlier start-only behaviour.
+- If Claude gives no answer about the last picture (it happened on a Task B video, where you fill the frame as you step away), it tries pictures 1.5 s and 3 s earlier. Without an answer it skips the end check, rather than stopping.
+- All these rules were built and tested on **triangles**. On the **flip** task, with 4 glasses and a top glass showing a dark opening, two of them misread and refused Task B take 1, a video that builds. So with 4 starting glasses, the reader keeps its earlier start-only behaviour.
 
 ### Version 4: SAM 2 follows each glass by its shape (optional)
 **SAM 2** (Segment Anything 2, from Meta) outlines any object you click on, and keeps outlining it through a video. We use its smallest model, "tiny", 156 MB.
@@ -1378,7 +1378,7 @@ The pixel tells us the *direction* from the camera, and the size tells us *how f
 
 **The correction factor.** MediaPipe assumes an average hand size. If yours is bigger, your hand looks closer than it is. So one factor per video corrects the distance. It's chosen so that, at the moment you took each glass, your palm lands on that glass. This uses only the video.
 
-**Results, Task 2 take 1 (one run):**
+**Results, Task A take 1 (one run):**
 - Factor 0.91. Your palm landed **0.9, 1.3 and 0.6 cm** from each glass as you took it.
 - The robot's hand was **2.6, 15.3 and 5.9 cm** from each glass at those moments. Glass 2 had already been nudged 13 cm by the robot's arm before you reached it.
 - The robot keeps its palm facing down in this mode. Also copying your wrist asked for poses its arm couldn't reach, and the arm pointed straight up.
@@ -1427,7 +1427,7 @@ The checks only measure. On the 30-layout flip test:
 - no step was ever flagged in a run that succeeded.
 
 ### What it found
-**Task 3 fails mostly at reach** (chapter 15):
+**Task B fails mostly at reach** (chapter 15):
 - your real takes 2, 3 and 7: all at reach;
 - the simulator's random layouts: 19 of 22 passed, with 2 failures at reach and 1 at grip.
 
@@ -1437,7 +1437,7 @@ The checks only measure. On the 30-layout flip test:
 
 These are the numbers to quote. "Real video" means the robot's plan and glass positions came from your recording. The robot itself is always simulated, with its pelvis pinned.
 
-### Task 2: the triangle (9 real videos)
+### Task A: the triangle (9 real videos)
 | Setup | Built |
 |---|---|
 | No AI, nearest arm | 3 of 9 |
@@ -1445,7 +1445,7 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 | With Claude and the logistic regression model choosing arms | 8 of 9 |
 | Copying your hand's carry (`--hand-path`) | takes 1, 2, 5, 6 |
 
-### Task 3: the flip (9 real videos)
+### Task B: the flip (9 real videos)
 | | Result |
 |---|---|
 | Built and flipped | **2 of 9** (takes 1 and 9) |
@@ -1455,9 +1455,9 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 ### What the robot can do, with exact simulator positions
 | Test | Result |
 |---|---|
-| Task 2, 30 random layouts in its working area | 28 of 30 |
-| Task 3, 30 random layouts in its working area | 28 of 30 |
-| Task 3, choosing where to stand, random layouts | 25 of 30 |
+| Task A, 30 random layouts in its working area | 28 of 30 |
+| Task B, 30 random layouts in its working area | 28 of 30 |
+| Task B, choosing where to stand, random layouts | 25 of 30 |
 
 ### How to read these honestly
 - **"Not a fair test"** means the code was adjusted while looking at those same videos, so new videos would probably score lower.
@@ -1519,9 +1519,9 @@ The same story, row by row, is in `docs/JOURNEY.md`.
 
 ### Stage 2: the real tasks in the simulator (cups)
 
-**Task 2, the triangle.** The idea: place two cups side by side, then the third across their **measured** tops. **Tested on 30 setups: 30 of 30.** It worked first time, because stage 1's lessons carried over.
+**Task A, the triangle.** The idea: place two cups side by side, then the third across their **measured** tops. **Tested on 30 setups: 30 of 30.** It worked first time, because stage 1's lessons carried over.
 
-**Task 3, the flip.** Turning a cup over with the palm above it would leave the palm underneath at the end, where it would hit the tower. So the idea was to grip the cup **beside** it and turn it like food on a spit.
+**Task B, the flip.** Turning a cup over with the palm above it would leave the palm underneath at the end, where it would hit the tower. So the idea was to grip the cup **beside** it and turn it like food on a spit.
 
 **First test, 9 new setups: 1 of 9.** Then one fix at a time, each tested on new setups:
 
@@ -1540,7 +1540,7 @@ The same story, row by row, is in `docs/JOURNEY.md`.
 ### Stage 3: your real videos and real glasses
 
 **Starting point.** The block version: colour tracking and a printed marker.
-**Tested on:** your first Task 2 video.
+**Tested on:** your first Task A video.
 **Result:** unusable. Your glasses are steel, with almost no colour, and there was no marker.
 
 | Failure seen | Idea | Result |
@@ -1548,15 +1548,15 @@ The same story, row by row, is in `docs/JOURNEY.md`.
 | No colour to track | Follow the **bright closed tops** of the upside-down glasses | Every move in take 1 found, in order |
 | No marker to measure with | Use the **table's corners** and its measured size (80 × 50 cm) as the ruler | Check: the top glass measured within 0.2 cm of the midpoint of the two below it, where it must be |
 | Taller real glasses broke the robot's motion: **0 of 6** | Grip higher, level the glass, aim from measurements, lift clear after letting go | **19 of 20**, then **28 of 30** for each task once its working area was found |
-| Task 3 take 1: the right arm can't flip across its own chest | Move the glasses to fit the robot | Worked, but moved glasses up to 33 cm, a poor copy. **Dropped** |
+| Task B take 1: the right arm can't flip across its own chest | Move the glasses to fit the robot | Worked, but moved glasses up to 33 cm, a poor copy. **Dropped** |
 | Same problem | Choose the **arm and where to stand** from the layout, moving nothing | Take 1 builds; 25 of 30 random layouts |
 
-**A fair test on new videos.** You recorded 8 more Task 2 takes:
+**A fair test on new videos.** You recorded 8 more Task A takes:
 - **0 of 8** succeeded, and only 2 were even read.
 - The top glass was often lost against the bright floor, so I added a rule that works out an unseen top glass from the others. Result: **2 of 8** (takes 2 and 5). That's not a fair test, because the rule came from those videos.
 - 4 were still refused, because a starting glass was missed. That led to stage 5.
 
-You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in a layout chosen to suit the robot, built with nothing changed. That's one run, and when nudged by 1.5 cm in the simulator, it passed only 3 of 6.
+You also recorded 6 Task B takes in varied layouts: **0 of 6**. Then take 9, in a layout chosen to suit the robot, built with nothing changed. That's one run, and when nudged by 1.5 cm in the simulator, it passed only 3 of 6.
 
 **Lesson:** a method tuned on one video can fail on the next. That's why new videos matter.
 
@@ -1577,17 +1577,17 @@ You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in 
 
 ### Stage 5: when the reader misses glasses
 
-**Problem.** After stage 3, Task 2 built **4 of your 9 videos**. Most failures were a starting glass the reader never saw.
+**Problem.** After stage 3, Task A built **4 of your 9 videos**. Most failures were a starting glass the reader never saw.
 
 **Idea.** Ask Claude (chapter 17) to point at every glass in an early frame, and add the ones the reader missed. The measured positions stay in charge.
 
 | Test | Before | After |
 |---|---|---|
-| Your 9 real Task 2 videos, same options for every video | 4 of 9 | **8 of 9**: Claude rescued takes 3, 4, 7 and 8, each refused for a missed glass (not a fair test) |
+| Your 9 real Task A videos, same options for every video | 4 of 9 | **8 of 9**: Claude rescued takes 3, 4, 7 and 8, each refused for a missed glass (not a fair test) |
 | The one failure, `task2_triangle_check` | — | Read correctly, but its first glass was beyond the robot's reach (37 cm from your edge, 30 cm to the side). You judged it a poor example and removed it, so later tests use 8 videos. Counting it, 8 of 9 |
 | 10 cluttered simulated tables | a brightness rule saw 20 bright patches | **10 of 10** found exactly the glasses |
 | Which Claude model? (10 cases) | — | All 9 of 10; Sonnet most accurate and far cheaper than Opus, so Sonnet is used |
-| Your 9 real Task 3 videos | 2 of 9 | 2 of 9: no change, so Task 3's problem isn't reading (stage 7) |
+| Your 9 real Task B videos | 2 of 9 | 2 of 9: no change, so Task B's problem isn't reading (stage 7) |
 | A fresh video on a cluttered table (fair test) | refused | **refused**: the reader took an earbud case and a laptop stand for glasses and missed the dim starting glasses. Claude can add missed glasses but not remove false ones |
 
 ---
@@ -1605,13 +1605,13 @@ You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in 
 
 ---
 
-### Stage 7: finding where Task 3 fails, and fixing it
+### Stage 7: finding where Task B fails, and fixing it
 
 **Problem.** A failed run only said "the tower is wrong". That doesn't tell you what to fix.
 
 **Idea 1: step checks** (chapter 20). After each step, measure whether it worked. Tested on 30 flip layouts: the same **28 of 30**, the same failures, and no false alarms. So the checks only measure, as intended.
 
-**What they found.** Your real Task 3 takes 2, 3 and 7 all fail at **reach**. The hand stopped 11, 31 and 41 cm short. Your glasses stood 20–39 cm from your edge of the table, but the flip was only tested with starting glasses 13–19 cm from it.
+**What they found.** Your real Task B takes 2, 3 and 7 all fail at **reach**. The hand stopped 11, 31 and 41 cm short. Your glasses stood 20–39 cm from your edge of the table, but the flip was only tested with starting glasses 13–19 cm from it.
 
 **Idea 2: stand closer to the table.**
 
@@ -1650,10 +1650,10 @@ You asked about several well-known methods. Here is each one in plain words, wha
 | What | Where it started | Where it is now |
 |---|---|---|
 | Block sorting, simulator | 0 of 10 | 20 of 20 |
-| Task 3 flip, simulator | 1 of 9 | 50 of 50 |
+| Task B flip, simulator | 1 of 9 | 50 of 50 |
 | Real glasses, robot body | 0 of 6 | 28 of 30 |
-| Task 2, your real videos | 1 video | 4 of 9, and **8 of 9** with Claude |
-| Task 3, your real videos | 1 video, then 0 of 6 varied | 2 of 9, and take 2 promising with the robot closer |
+| Task A, your real videos | 1 video | 4 of 9, and **8 of 9** with Claude |
+| Task B, your real videos | 1 video, then 0 of 6 varied | 2 of 9, and take 2 promising with the robot closer |
 
 ---
 

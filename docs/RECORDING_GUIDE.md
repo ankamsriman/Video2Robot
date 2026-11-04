@@ -2,7 +2,7 @@
 
 **The current tasks use steel glasses, with no marker.** Follow "Steel glasses" below. The rest of this guide is for the earlier block-sorting pipeline, which needs a printed marker.
 
-## Steel glasses (Task 2 and Task 3)
+## Steel glasses (Task A and Task B)
 
 Keep the same camera and table position during a take, with all four table corners and the whole tower in view. Keep your hands off the table for 2 seconds at the start and end. Hold each glass from the side, around the middle, so its bright top stays visible, and move your hand clear after letting go.
 
@@ -10,17 +10,17 @@ Everything below is measured to where each glass's **base** stands: from your ed
 
 | Task | Stage | Area | Picture |
 |---|---|---|---|
-| **Task 2** | Glasses start | 12-34 cm from your edge, from the centre line to 30 cm on your right | `recording_views/task2_initial_area.png` |
-| **Task 2** | Tower middle ends | 24-36 cm from your edge, 12 cm on your left to 24 cm on your right | `recording_views/task2_final_area.png` |
-| **Task 3** | Glasses 1, 2, 3 start | 13-19 cm from your edge, 14 cm on your left to 10 cm on your right | `recording_views/task3_initial_area.png` |
-| **Task 3** | Glass to flip starts | 23-28 cm from your edge, 4 cm on your left to 10 cm on your right | `recording_views/task3_initial_area.png` |
-| **Task 3** | Tower middle ends | 20-27 cm from your edge, 26-31 cm on your right | `recording_views/task3_final_area.png` |
+| **Task A** | Glasses start | 12-34 cm from your edge, from the centre line to 30 cm on your right | `recording_views/task2_initial_area.png` |
+| **Task A** | Tower middle ends | 24-36 cm from your edge, 12 cm on your left to 24 cm on your right | `recording_views/task2_final_area.png` |
+| **Task B** | Glasses 1, 2, 3 start | 13-19 cm from your edge, 14 cm on your left to 10 cm on your right | `recording_views/task3_initial_area.png` |
+| **Task B** | Glass to flip starts | 23-28 cm from your edge, 4 cm on your left to 10 cm on your right | `recording_views/task3_initial_area.png` |
+| **Task B** | Tower middle ends | 20-27 cm from your edge, 26-31 cm on your right | `recording_views/task3_final_area.png` |
 
 Keep glasses at least 12 cm apart, centre to centre, and at least 15 cm from where the tower will stand. In the phone's view, left and right are swapped, because the phone faces you.
 
-**Task 2 can now also be recorded on the robot's left,** because it uses the nearest arm. It passed 24 of 30 there, against 28 of 30 for the areas above: glasses 12-34 cm from your edge and up to 36 cm on your left, with the tower middle 24-36 cm from your edge, from 12 cm on your right to 24 cm on your left. Keep all the glasses on one side, because layouts spread across both sides passed only 20 of 30.
+**Task A can now also be recorded on the robot's left,** because it uses the nearest arm. It passed 24 of 30 there, against 28 of 30 for the areas above: glasses 12-34 cm from your edge and up to 36 cm on your left, with the tower middle 24-36 cm from your edge, from 12 cm on your right to 24 cm on your left. Keep all the glasses on one side, because layouts spread across both sides passed only 20 of 30.
 
-**Task 3 now has a freer option,** because the robot chooses its arm and where it stands. It passed 25 of 30 random layouts, against 28 of 30 for the areas above:
+**Task B now has a freer option,** because the robot chooses its arm and where it stands. It passed 25 of 30 random layouts, against 28 of 30 for the areas above:
 
 - Glasses 1, 2, 3: 13-33 cm from your edge, grouped within about 20 cm side to side.
 - Glass to flip: 23-33 cm from your edge, in the same group. **This one matters most.**
@@ -53,7 +53,7 @@ This is how to film the demo videos for Phase 2. The layout matches what the sim
 Choose objects that look clearly different, ideally in different colours, with the table a contrasting colour. This makes tracking much easier.
 
 ## What the phone should see
-Pictures of the exact view for each task are in `docs/recording_views/`. They're drawn in the simulator to real measurements, and they aren't photos. `task1_start.png` and `task1_end.png` show Task 1, and Tasks 2 and 3 have the same pair.
+Pictures of the exact view for each task are in `docs/recording_views/`. They're drawn in the simulator to real measurements, and they aren't photos. `task1_start.png` and `task1_end.png` show the sorting task, and Tasks A and B have the same pair.
 
 ## What of you should be in the video
 Pictures are in `docs/recording_views/`, named `person_1_start.png` to `person_4_mistake.png`. They use a simple simulator model of a person, not a photo.

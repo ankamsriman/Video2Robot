@@ -284,7 +284,7 @@ def views() -> tuple[View, ...]:
     return (
         View(
             "task1_start",
-            "Task 1 sorting: first frame",
+            "The sorting task sorting: first frame",
             (
                 *trays,
                 Block("7 cm block", (0.35, -0.28), RED),
@@ -294,7 +294,7 @@ def views() -> tuple[View, ...]:
         ),
         View(
             "task1_end",
-            "Task 1 sorting: last frame",
+            "The sorting task sorting: last frame",
             (
                 *trays,
                 Block("", (0.50, -0.26), RED),
@@ -304,7 +304,7 @@ def views() -> tuple[View, ...]:
         ),
         View(
             "task2_start",
-            "Task 2 triangle: first frame",
+            "Task A triangle: first frame",
             (
                 Cup("7-8 cm cup", (0.33, -0.05, lower), YELLOW),
                 Cup("7-8 cm cup", (0.33, -0.17, lower), GREEN),
@@ -313,7 +313,7 @@ def views() -> tuple[View, ...]:
         ),
         View(
             "task2_end",
-            "Task 2 triangle: last frame",
+            "Task A triangle: last frame",
             (
                 Cup("", (tower_x, tower_y + LOWER_GAP, lower), YELLOW),
                 Cup("", (tower_x, tower_y - LOWER_GAP, lower), GREEN),
@@ -322,7 +322,7 @@ def views() -> tuple[View, ...]:
         ),
         View(
             "task3_start",
-            "Task 3 flip: first frame",
+            "Task B flip: first frame",
             (
                 Cup("7-8 cm cup", (0.33, 0.14, lower), YELLOW),
                 Cup("7-8 cm cup", (0.33, 0.02, lower), GREEN),
@@ -332,7 +332,7 @@ def views() -> tuple[View, ...]:
         ),
         View(
             "task3_end",
-            "Task 3 flip: last frame",
+            "Task B flip: last frame",
             (
                 Cup("", (flip_x, flip_y + LOWER_GAP, lower), YELLOW),
                 Cup("", (flip_x, flip_y - LOWER_GAP, lower), GREEN),

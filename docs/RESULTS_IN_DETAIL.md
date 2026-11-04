@@ -4,7 +4,7 @@ The full write-up of every result, moved here from the README on 4 Nov. The READ
 
 I film myself stacking steel glasses at a table. A simulated Unitree G1 watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo.
 
-![Task 3 from a new video: my video beside the robot as it flips the fourth glass](videos/task3_flip.gif)
+![Task B from a new video: my video beside the robot as it flips the fourth glass](videos/task3_flip.gif)
 
 **Watch first: [the real-world reel](videos/reel_real_world.mp4)** (about 3.5 min: my tracked hand beside the robot on cluttered tables, an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight), then [the original demo reel](videos/demo_reel.mp4).
 
@@ -12,8 +12,8 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 
 | What | Result |
 |---|---|
-| **Task 2:** three glasses into a triangle | My first 9 videos: **4 of 9** without AI, **8 of 9** with Claude finding the glasses ([video](videos/task2_video_to_robot.mp4)). Then 7 fresh videos on cluttered tables, one lit only by sunlight: **0 of 7 on their fair first run**. Each failure led to one rule (below), after which **13 of my 14 videos within reach build** ([cluttered](videos/task2_clutter_video_to_robot.mp4), [hard](videos/task2_hard_video_to_robot.mp4), [arm swap](videos/task2_arm_swap_video_to_robot.mp4)). Not a fair test: the rules came from those videos |
-| **Task 3:** a fourth glass flipped and stood on top, opening up | Built from 2 of my 9 videos ([video](videos/task3_new_video_to_robot.mp4)). One of the two, take 9, was new and untuned, in a layout I chose to suit the robot. 0 of 6 deliberately varied layouts worked |
+| **Task A:** three glasses into a triangle | My first 9 videos: **4 of 9** without AI, **8 of 9** with Claude finding the glasses ([video](videos/task2_video_to_robot.mp4)). Then 7 fresh videos on cluttered tables, one lit only by sunlight: **0 of 7 on their fair first run**. Each failure led to one rule (below), after which **13 of my 14 videos within reach build** ([cluttered](videos/task2_clutter_video_to_robot.mp4), [hard](videos/task2_hard_video_to_robot.mp4), [arm swap](videos/task2_arm_swap_video_to_robot.mp4)). Not a fair test: the rules came from those videos |
+| **Task B:** a fourth glass flipped and stood on top, opening up | Built from 2 of my 9 videos ([video](videos/task3_new_video_to_robot.mp4)). One of the two, take 9, was new and untuned, in a layout I chose to suit the robot. 0 of 6 deliberately varied layouts worked |
 | **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](videos/task2_two_arms_video_to_robot.mp4)) |
 | **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](videos/task2_hand_path_video_to_robot.mp4)) |
 | **Vision language model (Claude),** optional | Points at the glasses in the first and last frames, about 2 cents a video: it ignores clutter and finds dull glasses the shiny-top reader misses, while that reader times the moves. Also turns a typed instruction into a checked plan. On cluttered simulated tables it found exactly the three glasses in 10 of 10 scenes |
@@ -35,11 +35,11 @@ Each idea came from counting the failures of the one before. The full record is 
 | Flip (simulator) | Thrown, slipping and off-centre cups | Wrist-only twist, deeper grip, aim at the measured cup | 1 of 9 → **50 of 50** |
 | Real glasses | Steel glasses have no colour; no marker recorded | Bright closed tops; the table's corners as the ruler | Unusable → moves read in order |
 | Real glasses, robot body | Taller glasses broke the motion | Grip higher, level, aim from measurements | 0 of 6 → **28 of 30** |
-| Task 3 layout | The right arm can't flip across its own chest | Choose the arm and where to stand | Take 1 builds; 25 of 30 random layouts |
+| Task B layout | The right arm can't flip across its own chest | Choose the arm and where to stand | Take 1 builds; 25 of 30 random layouts |
 | Arms | Left-side layouts failed with the right arm | Nearest arm, then an arm per glass, then a logistic regression model to choose | 10 → **24 of 30**; model 50 of 60 |
-| Reading | A missed starting glass refused 4 of 9 Task 2 videos | Claude points to every glass; measurements stay in charge | 4 → **8 of 9** (not a fair test) |
+| Reading | A missed starting glass refused 4 of 9 Task A videos | Claude points to every glass; measurements stay in charge | 4 → **8 of 9** (not a fair test) |
 | Copying motion | The robot copied *what*, not *how* | Copy the hand's carry height and timing (live webcam control was tried, then removed as unreliable) | 4 of 4 carries; palm within about 1 cm of each glass |
-| Task 3 failures | Takes 2, 3, 7 failed: why? | Step checks: all three fail at **reach** | Stand 10 cm closer: take 2 builds (one run) |
+| Task B failures | Takes 2, 3, 7 failed: why? | Step checks: all three fail at **reach** | Stand 10 cm closer: take 2 builds (one run) |
 | Fresh cluttered and hard videos | Clutter taken for glasses, dull glasses missed, an unused glass, glints, a hand hiding a glass. 0 of 7 on fair first runs | Claude reads the first **and last** frames; one rule per failure (an unused glass, a glass that left, a top chosen by position) | 6 of 7 build after the fixes (not a fair test) |
 | Arm swap | Swapping arms twisted the body and knocked a glass off the table | My idea: hands rise and pass beside the body, off the table; waist held still | Hard takes 1 and 2 build; take 4 (a glass at the edge of reach) lost |
 | Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by its shape | Correct timing in sunlight (slow: about 70 min per video) |
@@ -67,7 +67,7 @@ Without the recording, the robot has no starting positions, no tower position, n
 | Identical steel glasses | Colour tracking can't tell them apart, so a glass is identified by where it rests. The order survives, with no labels and no large vision model |
 | The table as the ruler, no marker | Its four corners and measured size (80 x 50 cm) give real distances and the camera's position, with nothing printed |
 | Correct for height | A glass top is 11.5 cm above the table, and a stacked one 23 cm. Without this, positions come out several centimetres wrong |
-| Task 2 uses the nearest arm | Glasses and tower on the robot's left suit its left arm far better: 24 of 30 against 10 of 30 |
+| Task A uses the nearest arm | Glasses and tower on the robot's left suit its left arm far better: 24 of 30 against 10 of 30 |
 | Let the layout choose the arm and standing spot | The flip only works towards the arm's own side. My video had the tower on the robot's left, which the right arm can't do, so the left arm mirrors the right arm's settings and no glass has to move |
 | Refuse rather than guess | If a video doesn't read as a clear task, the system says so and stops |
 | Report every compromise | The arm and standing spot go in each report, and any glass moved to fit is listed in cm |
@@ -85,15 +85,15 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 | The same video, robot kept mid-table with its right arm | As above | **Failed:** dropped the fourth glass in the twist |
 | `task2_triangle_take2`, glasses on both sides | 3 of 3 moves. **Top glass not seen, worked out from the others** | **Built the triangle** with the left arm, tower 0.4 cm off |
 | `task2_triangle_take5`, glasses on my left | As above | **Built the triangle** with the left arm, tower 0.5 cm off |
-| `task2_triangle_check`, glasses on my left | 3 of 3 moves | **Failed, then excluded by me:** the hand knocked a glass while reaching for a far one, 37 cm from my edge and 30 cm to the side, beyond the robot's reach. I judged it a poor example and removed it from later tests. Counting it, Task 2 is 8 of 9 with Claude |
+| `task2_triangle_check`, glasses on my left | 3 of 3 moves | **Failed, then excluded by me:** the hand knocked a glass while reaching for a far one, 37 cm from my edge and 30 cm to the side, beyond the robot's reach. I judged it a poor example and removed it from later tests. Counting it, Task A is 8 of 9 with Claude |
 | `task2_triangle_take6`, glasses on both sides | 3 of 3 moves | **Failed:** glasses knocked or tilted. The same layout also failed all 12 simulator runs, including a changed order and one glass moved closer. **With `--two-arms`, it built the triangle,** tower 0.2 cm off |
 | `task2_triangle_take3`, `take4`, `take7`, `take8` | **Refused:** a starting glass was missed | Not run |
 | `task2_triangle_left_take1`, my first video | **Refused:** 8 spots found, 6 expected | Not run. An earlier version read it, and the robot couldn't reach a glass on its far left |
 | `task3_flip_left_take1` | **Refused:** the order didn't make sense | Not run |
 
-**Eight later Task 2 takes.** With the reader as it stood, 2 of the 8 could be read and the robot failed both, so **0 of 8 succeeded**. It missed dull glass tops, and tops against the bright floor. I then added one rule: if all three starts were left and two glasses end side by side, the third must be on top. That made 4 of 8 readable and **2 of 8 succeed**, shown in `videos/task2_left_arm_video_to_robot.mp4`. I wrote that rule after seeing these videos, so they aren't a fair test of it. Gentler brightness limits made reading worse, so I dropped them.
+**Eight later Task A takes.** With the reader as it stood, 2 of the 8 could be read and the robot failed both, so **0 of 8 succeeded**. It missed dull glass tops, and tops against the bright floor. I then added one rule: if all three starts were left and two glasses end side by side, the third must be on top. That made 4 of 8 readable and **2 of 8 succeed**, shown in `videos/task2_left_arm_video_to_robot.mp4`. I wrote that rule after seeing these videos, so they aren't a fair test of it. Gentler brightness limits made reading worse, so I dropped them.
 
-**Two arms, Task 2 only.** With `--two-arms`, each glass uses the arm on its own side, and the arms take turns, going around the glasses. It's optional and off by default.
+**Two arms, Task A only.** With `--two-arms`, each glass uses the arm on its own side, and the arms take turns, going around the glasses. It's optional and off by default.
 
 | Test | Two arms | One arm (nearest) |
 |---|---|---|
@@ -104,7 +104,7 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 
 **On random layouts it's a tie.** I picked those two real layouts because one arm struggled there, which flatters two arms, so this doesn't show it's better in general. Most remaining failures are tilted glasses, which swapping arms doesn't fix. From the real video, `task2_triangle_take6` **built the triangle** with two arms, tower 0.2 cm off, where one arm fails. See `videos/task2_two_arms_video_to_robot.mp4`.
 
-**Copying my hand's path, Task 2 only.** With `--hand-path`, a hand tracker (MediaPipe) follows my hand, and the robot carries each glass with my hand's height and timing, at its own safe speed. This is a first step towards retargeting, and nothing is trained. The grip, levelling, aiming and release stay programmed, and finger poses aren't copied.
+**Copying my hand's path, Task A only.** With `--hand-path`, a hand tracker (MediaPipe) follows my hand, and the robot carries each glass with my hand's height and timing, at its own safe speed. This is a first step towards retargeting, and nothing is trained. The grip, levelling, aiming and release stay programmed, and finger poses aren't copied.
 
 One camera can't judge depth, so I assume the hand moves in the upright plane between each glass's start and end. So only height and progress along the way are copied, not any sideways curve. Heights are limited to 20-38 cm so the glass clears others.
 
@@ -136,8 +136,8 @@ Other wordings, on a four-glass video, all gave the right order, 7 of 7: "start 
 
 | My real videos | Without | With `--find-glasses` |
 |---|---|---|
-| Task 2, 9 videos | 4 built (with `--two-arms` for take 6) | **8 built** (takes 3, 7, 8 rescued, and take 4 with `--two-arms`). None refused |
-| Task 3, 9 videos | 2 built | 2 built. Take 6 is now read, but the robot fails it. 3 still refused |
+| Task A, 9 videos | 4 built (with `--two-arms` for take 6) | **8 built** (takes 3, 7, 8 rescued, and take 4 with `--two-arms`). None refused |
+| Task B, 9 videos | 2 built | 2 built. Take 6 is now read, but the robot fails it. 3 still refused |
 
 I built and adjusted this on these same failed videos, including fixing a version that broke two working videos, so these aren't a fair test. Pointing at glasses in my real frames agreed with my reader within 0.1-1.0 cm. Raw results: `results/find_glasses_all_videos.json`.
 
@@ -152,9 +152,9 @@ I built and adjusted this on these same failed videos, including fixing a versio
 
 With Claude's positions and with the true ones, the robot passed and failed on exactly the same scenes, so the remaining failures are the robot's. These are rendered pictures, not real video. See `results/clutter/`.
 
-*Which Claude model.* On the same 10 pictures, 5 real frames and 5 cluttered scenes, Haiku, Sonnet and Opus each found exactly the glasses in 9 of 10. The tenth, my first Task 3 video, may well be a correct glass my reader only saw later. Mean errors were 0.65, 0.33 and 0.37 cm, so I use Sonnet. Opus also used about 70,000 input tokens per picture, roughly 50 times what Sonnet used for the same pictures, which used up most of my small API budget. See `results/vlm_model_comparison.json`.
+*Which Claude model.* On the same 10 pictures, 5 real frames and 5 cluttered scenes, Haiku, Sonnet and Opus each found exactly the glasses in 9 of 10. The tenth, my first Task B video, may well be a correct glass my reader only saw later. Mean errors were 0.65, 0.33 and 0.37 cm, so I use Sonnet. Opus also used about 70,000 input tokens per picture, roughly 50 times what Sonnet used for the same pictures, which used up most of my small API budget. See `results/vlm_model_comparison.json`.
 
-**A small logistic regression model, Task 2.** It predicts only whether a run will succeed: one weighted sum of 7 layout numbers, about 16 learned weights, written in NumPy. It isn't a world model, which would predict how the scene changes step by step. In the code it's called the outcome model. I ran 150 random layouts both ways, one arm and two arms, so each layout's true outcome is known for both choices.
+**A small logistic regression model, Task A.** It predicts only whether a run will succeed: one weighted sum of 7 layout numbers, about 16 learned weights, written in NumPy. It isn't a world model, which would predict how the scene changes step by step. In the code it's called the outcome model. I ran 150 random layouts both ways, one arm and two arms, so each layout's true outcome is known for both choices.
 
 | Choosing per layout, on layouts never trained on | 60 test layouts | 30 fresh layouts (seed 9000) |
 |---|---|---|
@@ -164,11 +164,11 @@ With Claude's positions and with the true ones, the robot passed and failed on e
 | **Logistic regression model** | **50** | **26** |
 | Best possible, knowing the answers | 51 | 27 |
 
-It learned the pattern I'd only spotted by eye, and it does slightly better than the hand rule. The samples are small, so the gap between them isn't proven. I first noticed the pattern in seed 8700, one of the test sets, so seed 9000 is the fair column. With `--choose-arms`, the model picks before the robot moves. On my real Task 2 videos it chose two arms every time, which fits, because my towers were all near the middle. With `--find-glasses --choose-arms` and no other options, the robot built **8 of my 9 Task 2 videos**. Only the check video failed, as it does every other way. Run `scripts/outcome_test.py` to repeat the test above.
+It learned the pattern I'd only spotted by eye, and it does slightly better than the hand rule. The samples are small, so the gap between them isn't proven. I first noticed the pattern in seed 8700, one of the test sets, so seed 9000 is the fair column. With `--choose-arms`, the model picks before the robot moves. On my real Task A videos it chose two arms every time, which fits, because my towers were all near the middle. With `--find-glasses --choose-arms` and no other options, the robot built **8 of my 9 Task A videos**. Only the check video failed, as it does every other way. Run `scripts/outcome_test.py` to repeat the test above.
 
-**What goes wrong when the tower is far to one side, Task 2.** In 60 random layouts with two arms, towers within 12 cm of the table's middle passed 34 of 35, and those further out passed 8 of 25 (one arm: 27 of 35, and 14 of 25). I chose the 12 cm line after seeing results. Replaying the 25 far towers showed why: when an arm reached across the body to the far side, its hand stopped short in 25 of 46 placements, against 1 of 25 for the arm on the tower's side. My own towers were all within about 7 cm of the middle. Task 3 doesn't show this, because the robot stands somewhere different for each layout.
+**What goes wrong when the tower is far to one side, Task A.** In 60 random layouts with two arms, towers within 12 cm of the table's middle passed 34 of 35, and those further out passed 8 of 25 (one arm: 27 of 35, and 14 of 25). I chose the 12 cm line after seeing results. Replaying the 25 far towers showed why: when an arm reached across the body to the far side, its hand stopped short in 25 of 46 placements, against 1 of 25 for the arm on the tower's side. My own towers were all within about 7 cm of the middle. Task B doesn't show this, because the robot stands somewhere different for each layout.
 
-**Six later Task 3 takes, the fair test.** I recorded these in deliberately different layouts, and ran them with nothing changed. **None of the 6 succeeded:**
+**Six later Task B takes, the fair test.** I recorded these in deliberately different layouts, and ran them with nothing changed. **None of the 6 succeeded:**
 
 | Video | Glasses | Reading | Robot |
 |---|---|---|---|
@@ -186,11 +186,11 @@ It learned the pattern I'd only spotted by eye, and it does slightly better than
 | `task3_flip_take8` | **Refused:** the top glass was barely seen | Not run. In simulator runs at the positions read, the robot failed to grip the glass to flip all 6 times, because it was about 39 cm from my edge |
 | `task3_flip_take9` | 4 of 4 moves in order, flip recognised | **Built and flipped with no glass moved.** Left arm, robot standing 24.4 cm right of the table's middle. Tower 0.4 cm off. See `videos/task3_new_video_to_robot.mp4` |
 
-Take 9 is the first Task 3 success on a video nothing was tuned on, but it's one run of a chosen layout. With its positions nudged by up to 1.5 cm in the simulator, only 3 of 6 runs passed, so that layout is fragile.
+Take 9 is the first Task B success on a video nothing was tuned on, but it's one run of a chosen layout. With its positions nudged by up to 1.5 cm in the simulator, only 3 of 6 runs passed, so that layout is fragile.
 
-So Task 3 doesn't yet handle layouts it wasn't set up for. It uses one arm from one standing spot, which can't serve glasses spread across the table. Updating the table's corners afterwards didn't change which videos passed or failed, for these 6 or the 8 Task 2 takes.
+So Task B doesn't yet handle layouts it wasn't set up for. It uses one arm from one standing spot, which can't serve glasses spread across the table. Updating the table's corners afterwards didn't change which videos passed or failed, for these 6 or the 8 Task A takes.
 
-**How far to trust this.** Each success is one run of one video, and I set the reading's settings while looking at these same videos. I also came up with the arm and standing-spot idea from the Task 3 video's own layout. Neither has been tested on a take kept apart from tuning. The robot doesn't walk to its standing spot: the simulation simply starts it there.
+**How far to trust this.** Each success is one run of one video, and I set the reading's settings while looking at these same videos. I also came up with the arm and standing-spot idea from the Task B video's own layout. Neither has been tested on a take kept apart from tuning. The robot doesn't walk to its standing spot: the simulation simply starts it there.
 
 ### Checks on the reading
 
@@ -202,7 +202,7 @@ I have no ground-truth ruler measurements for the glass positions, so these are 
 | The top glass should sit midway between the lower two | 0.2 cm and 0.7 cm off |
 | The table's corners, fitted back into the picture | About 1 pixel on the first two videos. After the camera moved and I updated the rough corners, 0.75 to 4.3 pixels on the later takes I checked |
 | Hand-picked rough corners moved by up to 20 pixels, 25 tries each | Positions change by 0.11 cm at most |
-| Flip check at the tower's top | Correct for both right-side videos: dark opening in Task 3, none in Task 2 |
+| Flip check at the tower's top | Correct for both right-side videos: dark opening in Task B, none in Task A |
 
 ### What the robot can physically do
 
@@ -213,20 +213,20 @@ These tests use simulator positions and a hand-written plan, so they don't invol
 | Triangle, across the table's right side | Glasses 12-34 cm from the edge, centre to 30 cm right. Tower middle 24-36 cm from the edge, 12 cm left to 24 cm right | **28 of 30** |
 | Flipped tower, robot mid-table, right arm | Glasses 13-19 cm from the edge, 14 cm left to 10 cm right. Glass to flip 23-28 cm from the edge, 4 cm left to 10 cm right. Tower middle 20-27 cm from the edge, 26-31 cm right | **28 of 30** |
 
-Letting Task 2 choose the nearest arm, compared on identical layouts:
+Letting Task A choose the nearest arm, compared on identical layouts:
 
 | Layouts | Nearest arm | Right arm only |
 |---|---|---|
 | Glasses 12-34 cm from the edge, up to 36 cm left. Tower middle 24-36 cm from the edge, 12 cm right to 24 cm left | **24 of 30** | 10 of 30 |
 | Glasses and tower spread across both sides | 20 of 30 | 21 of 30 |
 
-So it helps when everything is on one side, and doesn't when the layout is spread across both. The robot keeps one arm for the whole task, and doesn't swap arms between glasses. On my Task 2 video it picks the right arm.
+So it helps when everything is on one side, and doesn't when the layout is spread across both. The robot keeps one arm for the whole task, and doesn't swap arms between glasses. On my Task A video it picks the right arm.
 
-Letting Task 3 choose its arm and standing spot, with no glass moved:
+Letting Task B choose its arm and standing spot, with no glass moved:
 
 | Test | Setups | Result |
 |---|---|---|
-| Task 3 video's layout, wobbled by up to 1.5 cm | Left arm | **19 of 21** |
+| Task B video's layout, wobbled by up to 1.5 cm | Left arm | **19 of 21** |
 | Random layouts along the whole table, first try | Glasses and glass to flip 13-33 cm from the edge | 12 of 30 |
 | The same, with the glass to flip 23-33 cm from the edge | New random layouts. Tower middle 20-27 cm from the edge, 18-40 cm to either side of the glasses' middle | **25 of 30** (left arm 13 of 17, right arm 12 of 13) |
 
@@ -310,7 +310,7 @@ Samples are in `data/raw/sample/`, with the collection note in [`DATA_COLLECTION
 
 - **Learn more from these runs.** The logistic regression model is a small first step. Each successful simulator run can also become a demonstration for an ACT policy, a real world model that predicts each step, or reinforcement learning.
 - **Fix far-off towers** by passing a glass between hands through the middle of the table, instead of one arm reaching across the body.
-- **A better video reader.** A vision language model already rescues most refused Task 2 videos. A trained tracker such as SAM 2 could follow glasses through the whole video.
+- **A better video reader.** A vision language model already rescues most refused Task A videos. A trained tracker such as SAM 2 could follow glasses through the whole video.
 - **A closer, first-person camera,** so that finger poses can be seen and retargeted to the robot's hand.
 
 ## Earlier work in this repo

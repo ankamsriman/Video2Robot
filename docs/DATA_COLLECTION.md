@@ -10,7 +10,7 @@
 | `task3_flip_right_take1` | Triangle, then a fourth glass flipped and placed opening up | 45 s | My right side of the table |
 | `task2_triangle_take2` to `take8` | Triangle, seven takes in different layouts, camera moved slightly from take 1 | 17-24 s | Various, including both sides |
 | `task2_triangle_check` | Triangle. **Excluded** from later tests by me: its first glass stood beyond the robot's reach | 21 s | My left side |
-| `task3_flip_take2` to `take7` | Flipped tower, six takes in different layouts, same camera as the Task 2 takes above | 23-34 s | Various, including both sides |
+| `task3_flip_take2` to `take7` | Flipped tower, six takes in different layouts, same camera as the Task A takes above | 23-34 s | Various, including both sides |
 | `task3_flip_take8`, `take9` | Flipped tower, in a layout chosen to suit the robot | 29-30 s | My right side of the table |
 | `old_left_side/task2_triangle_left_take1` | Triangle | 25 s | My left side |
 | `old_left_side/task3_flip_left_take1` | Flipped tower | 32 s | My left side |
@@ -34,7 +34,7 @@ Samples of the first two, and of `task2_triangle_take5`, `task2_triangle_take6` 
 1. Stand at the table's near edge, facing the camera, with the glasses upside down, closed end up.
 2. Move one glass at a time with my right hand, holding it from the side so its top stays visible.
 3. Let go and move my hand clear between glasses.
-4. For Task 3, turn the last glass over in the air and stand it on top, opening up.
+4. For Task B, turn the last glass over in the air and stand it on top, opening up.
 
 ## Labels
 

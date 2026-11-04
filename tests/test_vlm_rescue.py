@@ -291,7 +291,7 @@ def test_a_spot_that_comes_and_goes_mid_video_away_from_every_end_glass_is_dropp
 
 
 def test_a_start_first_noticed_late_still_sets_when_the_first_glass_left() -> None:
-    # Task 3 take 1: the first glass to move was first noticed at 2.9 s and left at 4.8 s,
+    # Task B take 1: the first glass to move was first noticed at 2.9 s and left at 4.8 s,
     # so a glass put down at 9.7 s is a landing, not clutter.
     first_mover = Spot(533.0, 424.0, 87, 144, 58)
     other_start = Spot(431.0, 483.0, 0, 468, 469)
@@ -309,7 +309,7 @@ def test_a_start_first_noticed_late_still_sets_when_the_first_glass_left() -> No
 
 
 def test_a_landing_where_a_stacked_glass_belongs_is_kept() -> None:
-    # Task 3: the triangle's top glass lands at 14.1 s and is covered at 20.8 s by the
+    # Task B: the triangle's top glass lands at 14.1 s and is covered at 20.8 s by the
     # flipped glass, so the model's end view can't see it. Its place, centred above two
     # glasses the model sees, exempts it.
     covered_top = Spot(1385.0, 168.0, 423, 624, 202)

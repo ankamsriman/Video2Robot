@@ -1,4 +1,4 @@
-"""A small learned model that predicts whether a Task 2 run will succeed.
+"""A small learned model that predicts whether a Task A run will succeed.
 
 It's logistic regression, written with NumPy alone: given a layout and a way of doing the
 task, it predicts the chance of success, so the robot can pick the way most likely to work

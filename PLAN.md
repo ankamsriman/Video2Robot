@@ -22,28 +22,28 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 
 ## Status
 
-**The plan changed on Mon Nov 2, once real videos arrived:** steel glasses, no marker, Task 2 and Task 3, with real-video sorting dropped. Phases 2-6 below describe the original sorting plan, and were replaced as follows.
+**The plan changed on Mon Nov 2, once real videos arrived:** steel glasses, no marker, Task A and Task B, with real-video sorting dropped. Phases 2-6 below describe the original sorting plan, and were replaced as follows.
 
 | Step | Status |
 |---|---|
 | Real video to positions, without a marker | Done on 2 right-side videos; 2 old left-side videos are refused |
-| Task 2, video to robot | 3 videos succeed (takes 1, 2, 5); of 8 later takes, 4 read and 2 succeed, not a fair test of the top-glass rule |
-| Task 3, video to robot | Done with no glass moved: the layout picks the arm and standing spot. One video, one run |
+| Task A, video to robot | 3 videos succeed (takes 1, 2, 5); of 8 later takes, 4 read and 2 succeed, not a fair test of the top-glass rule |
+| Task B, video to robot | Done with no glass moved: the layout picks the arm and standing spot. One video, one run |
 | Outcome model, logistic regression (optional) | Chooses one or two arms; 26 of 30 fresh layouts, hand rule 25 |
-| VLM helper (optional) | Instructions and missed-glass finding work; Task 2 real videos 8 of 9; clutter 10 of 10 found |
-| Task 2 hand path (optional) | Copies height and timing; takes 1, 2, 5 and 6 succeed, not a fair test |
-| Task 2 two arms (optional) | Tie on random layouts; real take 6 succeeds |
-| Task 2 nearest arm | 24 of 30 against 10 of 30 on left-side layouts; 20 against 21 of 30 when spread across both sides |
+| VLM helper (optional) | Instructions and missed-glass finding work; Task A real videos 8 of 9; clutter 10 of 10 found |
+| Task A hand path (optional) | Copies height and timing; takes 1, 2, 5 and 6 succeed, not a fair test |
+| Task A two arms (optional) | Tie on random layouts; real take 6 succeeds |
+| Task A nearest arm | 24 of 30 against 10 of 30 on left-side layouts; 20 against 21 of 30 when spread across both sides |
 | Choosing arm and standing spot | 19 of 21 on the video's layout wobbled; 25 of 30 on random layouts |
 | What the robot can do, in chosen areas | 28 of 30 for each task, pinned pelvis |
-| Test on new takes kept apart from tuning | Task 3: **0 of 6** in varied layouts. In a chosen layout, 1 of 2 (take 9; 3 of 6 when nudged) |
+| Test on new takes kept apart from tuning | Task B: **0 of 6** in varied layouts. In a chosen layout, 1 of 2 (take 9; 3 of 6 when nudged) |
 | README, data sample, example videos | Done, data note needs the user's details |
 | Live hand control (separate demo) | **Removed 4 Nov.** Worked on recorded video and in one live try (64% of frames), but later live tries followed only 14-22% of frames. Code in git history; finger closure kept for videos |
 | Step checks | Every pick and place reports its first failed step (reach, grip, lift, carry, twist, place, release, others still). They only measure: same 28 of 30 flips, same failures |
-| Task 3 reach | Real takes 2, 3 and 7 fail at reach: glasses 20-39 cm from the person's edge of the table, beyond the tested 13-19 cm for starting glasses. Standing 10 cm closer, take 2 succeeds (one run); take 7 still misses the fourth glass by 5 cm; take 3's glass is 47 cm to the side. Not yet a rule in the system |
+| Task B reach | Real takes 2, 3 and 7 fail at reach: glasses 20-39 cm from the person's edge of the table, beyond the tested 13-19 cm for starting glasses. Standing 10 cm closer, take 2 succeeds (one run); take 7 still misses the fourth glass by 5 cm; take 3's glass is 47 cm to the side. Not yet a rule in the system |
 | notes.md | Rebuilt Part Two (chapters 14-22) as a from-scratch book for the real videos, with worked examples |
 | Journey | `docs/JOURNEY.md`: about 40 ideas in seven stages, each with problem, test, before → after, kept or dropped; summarised in the README. Every new experiment is added there |
-| Claude reads both ends (version 3) | Claude points at glasses in the first and last frames; the frame-by-frame reader times the moves. Rules for clutter, unused glasses, glints and hidden glasses, each from a fresh video that first failed. Task 2: 13 of all 16 videos build, 13 of 15 without the excluded one (not a fair test); 7 fresh videos were 0 of 7 on their fair first run |
+| Claude reads both ends (version 3) | Claude points at glasses in the first and last frames; the frame-by-frame reader times the moves. Rules for clutter, unused glasses, glints and hidden glasses, each from a fresh video that first failed. Task A: 13 of all 16 videos build, 13 of 15 without the excluded one (not a fair test); 7 fresh videos were 0 of 7 on their fair first run |
 | Arm swap | Hands rise, pass beside the body off the table, waist held still (the user's idea): hard takes 1 and 2 build, take 4 (a glass at the edge of reach) lost |
 | SAM 2 (version 4, optional) | SAM 2.1 tiny in a separate environment follows each glass by shape; in sunlight it timed the moves correctly where shiny tops didn't. About 70 minutes per video on this Mac |
 | Real-world reel | `docs/videos/reel_real_world.mp4`, 3.5 minutes |
@@ -111,10 +111,10 @@ Stress test, `data/processed/stress_retry.md`: weak grip went from 0 of 8 to 8 o
 - Whole-body balance with a centre-of-mass constraint, so the pelvis need not be pinned
 - A two-handed task, or a five-finger hand
 
-## Task 2: cup triangle (branch `cup-task`, not merged)
+## Task A: cup triangle (branch `cup-task`, not merged)
 Physics: 30 of 30 on new setups, 10 of 10 with 15 g cups, hand-written plan. Recognised from a rendered video and rebuilt by the G1. Real video not tried. `scripts/cup_from_video.py` runs it. Merge only if the user asks.
 
-## Task 3: flipped fourth cup (branch `cup-flip`, not merged)
+## Task B: flipped fourth cup (branch `cup-flip`, not merged)
 Physics: 50 of 50 on new setups (seeds 300-349; 21 of 24 before the aiming fix), hand-written plan, programmed flip, pinned pelvis, restricted layout. No video link yet, so the hard rule isn't met for this task. `scripts/flip_trial.py` runs it.
 
 ## Needed from the user
