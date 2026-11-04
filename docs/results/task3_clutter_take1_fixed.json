@@ -1,0 +1,12 @@
+[
+ {
+  "video": "task3_flip_clutter_take1",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_b: reach",
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 10.5,
+  "refused": null
+ }
+]

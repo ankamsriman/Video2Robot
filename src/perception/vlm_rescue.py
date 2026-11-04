@@ -5,7 +5,7 @@ a starting spot. When that glass left is measured without the model: a small pat
 picture at its spot keeps looking like the first frame until the glass is taken away.
 """
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import replace
 
 import numpy as np
@@ -56,9 +56,9 @@ def drop_clutter(
             np.hypot(p[0] - spot.x, p[1] - spot.y) <= near_pixels for p in points
         )
 
-    starts = [
-        spot for spot in spots if at_a_glass(spot) and spot.first / fps <= early_seconds
-    ]
+    # A spot at one of the model's starting glasses is a start, however late the reader
+    # first noticed it (a top can be hidden by a hand at first).
+    starts = [spot for spot in spots if at_a_glass(spot)]
     first_departure = min((spot.last for spot in starts), default=0)
     return tuple(
         spot
@@ -141,6 +141,7 @@ def drop_misread_ends(
     fps: float,
     gap_seconds: float,
     near_pixels: float,
+    exempt: Callable[[Spot], bool] | None = None,
 ) -> tuple[Spot, ...]:
     """Remove spots that sit far from every glass the model saw at the end.
 
@@ -148,14 +149,18 @@ def drop_misread_ends(
     each glass moves once and stays where it lands, so a landing must be where the model
     sees a glass at the end. A bright spot anywhere else is a misread, such as a reflection,
     clutter moved mid-video, or an arm. Spots there from the start are judged elsewhere.
+    `exempt` keeps spots the model can't see at the end, such as a flip's covered glass.
     """
     if not end_points:
         return tuple(spots)
     final = _at_the_end(spots, last_frame, fps, gap_seconds)
     landed = [spot for spot in spots if spot.first > gap_seconds * fps]
     judged = [*final, *landed]
+    allowed = exempt or (lambda spot: False)
     return tuple(
-        s for s in spots if s not in judged or _near(s, end_points, near_pixels)
+        s
+        for s in spots
+        if s not in judged or _near(s, end_points, near_pixels) or allowed(s)
     )
 
 

@@ -1,0 +1,72 @@
+[
+ {
+  "video": "task2_triangle_right_take1",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "right",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.2,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take2",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.2,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take3",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "left",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.3,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take4",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_c: reach",
+  "arm": [
+   "left",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 4.7,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take5",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "left",
+   "left"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.5,
+  "refused": null
+ }
+]

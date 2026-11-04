@@ -1,0 +1,32 @@
+[
+ {
+  "video": "task3_flip_right_take1",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 0.5,
+  "refused": null
+ },
+ {
+  "video": "task3_flip_take9",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 0.4,
+  "refused": null
+ },
+ {
+  "video": "task3_flip_take2",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_c: reach",
+  "arm": null,
+  "model_chose": null,
+  "tower_error_cm": 0.5,
+  "refused": null
+ }
+]

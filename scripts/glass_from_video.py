@@ -19,6 +19,7 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task3
 
 import argparse
 import dataclasses
+import itertools
 import json
 import logging
 from pathlib import Path
@@ -253,12 +254,7 @@ def read_video(
         spots, points, changes, finals, end_patches, unused = _set_aside_unused(
             spots, points, changes, finals, end_patches, fps, rescue, config
         )
-    if len(points) > GLASSES_IN_TRIANGLE:
-        # Four glasses that all move is a flip. The end-of-video rules were built and
-        # tested on triangles, and misread a flip's dark top, so a flip keeps start-only
-        # reading. An unused glass was set aside above, so it can't be mistaken for one.
-        logger.warning("%d moving glasses, so the end-of-video check is skipped", len(points))
-        finals = []
+
     unknown: list = []
     if points:
         spots, unknown = _add_rescued(spots, points, changes, fps, rescue)
@@ -278,7 +274,23 @@ def read_video(
         )  # fmt: skip
         unknown = [*unknown, *gone]
     if finals:
-        spots = _match_ends(spots, finals, end_patches, fps, rescue, config, len(unknown))
+        def tower_top(spot) -> bool:
+            """A spot centred above two glasses the model sees at the end: a stacked glass.
+
+            In a flip the triangle's top glass is covered at the end, so the model can't
+            see it; this keeps it while other mid-video spots are judged as usual.
+            """
+            lower = [view.position(point, config.glass_height) for point in finals]
+            raised = view.position((spot.x, spot.y), 2 * config.glass_height)
+            return any(
+                np.linalg.norm(raised - (a + b) / 2) <= config.max_top_offset
+                for a, b in itertools.combinations(lower, 2)
+            )
+
+        spots = _match_ends(
+            spots, finals, end_patches, fps, rescue, config, len(unknown), len(points),
+            tower_top,
+        )  # fmt: skip
     spots = _add_unseen_departure(spots, unknown, fps, rescue) if unknown else spots
     untouched = tuple(view.position(point, config.glass_height) for point in unused)
     if len(spots) != SPOTS_IN_FLIP:
@@ -405,7 +417,10 @@ def _patch(gray: np.ndarray, point: tuple[float, float], half: int) -> np.ndarra
     return gray[max(y - half, 0) : y + half, max(x - half, 0) : x + half].astype(float)
 
 
-def _match_ends(spots, finals, patches, fps, rescue, config, unknown: int = 0) -> tuple:
+def _match_ends(
+    spots, finals, patches, fps, rescue, config, unknown: int = 0, glasses: int = 0,
+    tower_top=None,
+) -> tuple:
     """Check the glasses at the end against the model's view of the last frames.
 
     A spot still there at the end that matches no glass the model saw is a misread, and is
@@ -414,7 +429,7 @@ def _match_ends(spots, finals, patches, fps, rescue, config, unknown: int = 0) -
     """
     last = len(patches[0]) - 1
     gap, near = config.run_gap_seconds, rescue["near_pixels"]
-    spots = drop_misread_ends(spots, finals, last, fps, gap, near)
+    spots = drop_misread_ends(spots, finals, last, fps, gap, near, exempt=tower_top)
     starts = [spot for spot in spots if spot.first / fps <= rescue["early_seconds"]]
     if len(starts) + unknown != GLASSES_IN_TRIANGLE:
         return spots
@@ -438,13 +453,10 @@ def _match_ends(spots, finals, patches, fps, rescue, config, unknown: int = 0) -
 def _add_rescued(spots, points, changes, fps, rescue) -> tuple[tuple, list]:
     """Drop bright clutter, and add a starting spot for each glass the reader missed.
 
-    The clutter rule was built and tested on triangles. On a flip it dropped a real
-    glass (Task 3 take 1), so with four starting glasses it is skipped.
     """
-    if len(points) <= GLASSES_IN_TRIANGLE:
-        spots = drop_clutter(
-            spots, points, fps, rescue["early_seconds"], rescue["near_pixels"]
-        )
+    spots = drop_clutter(
+        spots, points, fps, rescue["early_seconds"], rescue["near_pixels"]
+    )
     spots = seen_from_start(
         points, spots, fps, rescue["early_seconds"], rescue["near_pixels"]
     )

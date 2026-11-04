@@ -273,11 +273,47 @@ def test_a_glass_the_model_still_sees_at_the_end_is_left_alone() -> None:
     assert unknown == []
 
 
-def test_a_spot_that_comes_and_goes_mid_video_away_from_every_end_glass_is_dropped() -> None:
+def test_a_spot_that_comes_and_goes_mid_video_away_from_every_end_glass_is_dropped() -> (
+    None
+):
     # Hard take 3: the steel laptop stand shone from 3.9 s to 14.6 s, then stopped.
     lower = Spot(843.0, 403.0, 147, 700, 553)
     stand_glint = Spot(1290.0, 450.0, 117, 438, 200)
 
-    kept = drop_misread_ends((lower, stand_glint), [(845.0, 400.0)], 716, FPS, 1.0, 30.0)
+    kept = drop_misread_ends(
+        (lower, stand_glint), [(845.0, 400.0)], 716, FPS, 1.0, 30.0
+    )
 
     assert kept == (lower,)
+
+
+def test_a_start_first_noticed_late_still_sets_when_the_first_glass_left() -> None:
+    # Task 3 take 1: the first glass to move was first noticed at 2.9 s and left at 4.8 s,
+    # so a glass put down at 9.7 s is a landing, not clutter.
+    first_mover = Spot(533.0, 424.0, 87, 144, 58)
+    other_start = Spot(431.0, 483.0, 0, 468, 469)
+    landed = Spot(909.0, 496.0, 291, 1356, 1066)
+
+    kept = drop_clutter(
+        (first_mover, other_start, landed),
+        [(539.0, 423.0), (431.0, 486.0)],
+        FPS,
+        1.0,
+        30.0,
+    )
+
+    assert landed in kept
+
+
+def test_a_landing_where_a_stacked_glass_belongs_is_kept() -> None:
+    # Task 3: the triangle's top glass lands at 14.1 s and is covered at 20.8 s by the
+    # flipped glass, so the model's end view can't see it. Its place, centred above two
+    # glasses the model sees, exempts it.
+    covered_top = Spot(1385.0, 168.0, 423, 624, 202)
+
+    kept = drop_misread_ends(
+        (covered_top,), [(682.0, 413.0)], 816, FPS, 1.0, 30.0,
+        exempt=lambda spot: spot is covered_top,
+    )  # fmt: skip
+
+    assert kept == (covered_top,)

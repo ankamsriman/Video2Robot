@@ -1,0 +1,14 @@
+[
+ {
+  "video": "task2_triangle_hard_take1",
+  "setup": "B",
+  "success": false,
+  "refused": "A glass seems to arrive before any glass left its spot"
+ },
+ {
+  "video": "task2_triangle_hard_take1",
+  "setup": "A",
+  "success": false,
+  "refused": "A glass seems to arrive before any glass left its spot"
+ }
+]
