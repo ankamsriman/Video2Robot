@@ -51,7 +51,7 @@ Imagine you sit at a table and film yourself putting an apple in a box. You hand
 
 Doing this on a real humanoid would be expensive and risky, so we use a **simulator**: a program that acts like a video game with accurate physics. If the robot's fingers don't squeeze hard enough in the simulator, the object really does slip.
 
-**Where we are (4 Nov):** the robot now learns from **your real phone videos** of steel glasses. For Task 2, the triangle, it builds 8 of your 9 videos with Claude's help, and 3 of 9 without it. For Task 3, the flip, it builds 2 of 9; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
+**Where we are (4 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task 2, the triangle, it builds 8 of your 9 videos with Claude's help, and 3 of 9 without it. For Task 3, the flip, it builds 2 of 9; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
 
 **To read the project as a story of ideas, from the first failure to today, start with chapter 22.** Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 21 has the numbers to quote.
 
@@ -1042,7 +1042,7 @@ your video ──► read the table ──► find the glasses ──► work ou
 The first version found objects by colour and measured positions with a printed marker. Your glasses are steel, so they have almost no colour, and you recorded without a marker. Both old tools were useless.
 
 ### Finding glasses with no colour
-Each glass stands upside down, so its closed end faces up. Seen from above, that closed end is a **bright circle** against the dark table. So the reader (`src/perception/glass_tracker.py`) looks, in every frame, for round patches much brighter than that frame's table. It compares within one frame, so when the phone changes its brightness by itself, nothing breaks.
+Each glass stands upside down, so its closed end faces up. Seen from above, that closed end is a **bright circle** against the dark table. So the reader (`src/perception/glass_tracker.py`) looks, in every frame, for round patches much brighter than that frame's table. It compares within one frame, so when the camera changes its brightness by itself, nothing breaks.
 
 **Example.** In `task2_triangle_right_take1`, three bright circles sit still for the first 3 seconds. At 3.0 s one of them disappears from its spot, and a new one appears beside the others a few seconds later. That's one move.
 

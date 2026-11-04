@@ -101,6 +101,8 @@ BACKGROUND_SAMPLES = 40
 LAST_FRAMES = 30
 GLASS_NAMES = ("cup_a", "cup_b", "cup_c")
 FLIPPED_NAME = "cup_d"
+# If the model gives no glasses for the last picture, try these earlier ones.
+END_TRIES_SECONDS = (0.5, 1.5, 3.0)
 logger = logging.getLogger("glass_from_video")
 
 
@@ -133,7 +135,23 @@ def rough_corners(video: Path, labels: Path = LABELS) -> np.ndarray:
     raise VideoReadError(f"No table corners for {video.name} in {labels}")
 
 
-def glasses_from_model(video: Path, at_end: bool = False) -> list[tuple[float, float]]:
+def glasses_near_end(video: Path) -> list[tuple[float, float]]:
+    """Claude's glasses near the end, trying slightly earlier pictures if one gets no answer.
+
+    The last moments can show the person filling the picture as they step away. If no
+    picture gets an answer, the end check is skipped and the reader's ends are used.
+    """
+    for seconds in END_TRIES_SECONDS:
+        try:
+            return glasses_from_model(video, at_end=True, before_end=seconds)
+        except InstructionError as error:
+            logger.warning("No glasses from the model %.1f s before the end: %s", seconds, error)
+    return []
+
+
+def glasses_from_model(
+    video: Path, at_end: bool = False, before_end: float | None = None
+) -> list[tuple[float, float]]:
     """Ask a vision language model where every glass top is, in pixels.
 
     It looks early in the video, or with `at_end` near its end, where the glasses finished.
@@ -144,7 +162,8 @@ def glasses_from_model(video: Path, at_end: bool = False) -> list[tuple[float, f
     capture = cv2.VideoCapture(str(video))
     if at_end:
         count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        before = round(rescue["end_seconds"] * capture.get(cv2.CAP_PROP_FPS))
+        seconds = rescue["end_seconds"] if before_end is None else before_end
+        before = round(seconds * capture.get(cv2.CAP_PROP_FPS))
         capture.set(cv2.CAP_PROP_POS_FRAMES, max(count - 1 - before, 0))
     else:
         capture.set(cv2.CAP_PROP_POS_MSEC, rescue["frame_seconds"] * 1000)
@@ -191,6 +210,11 @@ def read_video(
     ending = []
     points = model_points or []
     finals = end_points or []
+    if len(points) > GLASSES_IN_TRIANGLE and sam_tracks is None:
+        # The end-of-video rules were built and tested on triangles. A flip's top glass
+        # shows a dark opening, and they misread it, so a flip keeps start-only reading.
+        logger.warning("%d glasses at the start, so the end-of-video check is skipped", len(points))
+        finals = []
     rescue = yaml.safe_load(CONFIG_PATH.read_text())["vlm_rescue"] if points or finals else {}
     end_patches: list[list[np.ndarray]] = [[] for _ in finals]
     references: list = []
@@ -688,7 +712,7 @@ def main() -> None:
     config = GlassVideoConfig(**raw)
     try:
         points = glasses_from_model(args.video) if args.find_glasses else None
-        finals = glasses_from_model(args.video, at_end=True) if args.find_glasses else None
+        finals = glasses_near_end(args.video) if args.find_glasses else None
     except InstructionError as error:
         logger.error("Couldn't ask the vision model for glasses: %s", error)
         raise SystemExit(1) from error

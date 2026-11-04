@@ -27,6 +27,7 @@ from scripts.glass_from_video import (
     CONFIG_PATH,
     VideoReadError,
     glasses_from_model,
+    glasses_near_end,
     read_video,
     run_robot,
 )
@@ -51,7 +52,7 @@ def _claude_points(video: Path, saved: dict) -> tuple[list, list]:
     """Claude's glasses near the start and near the end, asked once and then saved."""
     for key, at_end in ((video.stem, False), (f"{video.stem}@end", True)):
         if key not in saved:
-            saved[key] = glasses_from_model(video, at_end=at_end)
+            saved[key] = glasses_near_end(video) if at_end else glasses_from_model(video)
             POINTS.parent.mkdir(parents=True, exist_ok=True)
             POINTS.write_text(json.dumps(saved, indent=1))
     return saved[video.stem], saved[f"{video.stem}@end"]

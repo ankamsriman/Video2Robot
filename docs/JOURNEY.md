@@ -12,7 +12,7 @@ Ideas that didn't help are listed too, because they shaped the design as much as
 
 **How to read the numbers:**
 - "Simulator layouts" are random setups with exact positions. They test the robot's body, not the video reading.
-- "Real videos" are my phone recordings.
+- "Real videos" are my webcam recordings: one fixed webcam, about 97 cm above the table and looking down about 43 degrees, from the far side.
 - "Not a fair test" means the idea was built while looking at those same videos.
 - The robot is always simulated, with its pelvis pinned. It can't fall, and it can't walk.
 

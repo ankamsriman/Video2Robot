@@ -45,7 +45,7 @@ Each idea came from counting the failures of the one before. The full record is 
 ## How my recording drives the robot
 
 ```
-phone video of steel glasses, no marker
+webcam video of steel glasses, no marker
   -> table corners and measured table size: pixels to real centimetres
   -> bright closed glass tops: where each glass rests, and when it leaves
   -> pair each spot left with the next new spot: the moves, in order

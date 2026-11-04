@@ -150,7 +150,7 @@ The table is a rectangle in real life, but it looks like a trapezium in the pict
 | Value | Result |
 |---|---|
 | Focal length | 1932.5 pixels |
-| Camera, forward from your edge | 1.318 m (so about 82 cm beyond the table's phone-side edge) |
+| Camera, forward from your edge | 1.318 m (so about 82 cm beyond the table's camera-side edge) |
 | Camera, along your edge from the corner at your right | 0.425 m (close to the middle) |
 | Camera, above the table | 0.973 m |
 

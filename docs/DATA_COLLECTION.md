@@ -1,6 +1,6 @@
 # How the data was collected
 
-> **Draft.** Lines marked **[to confirm]** need checking by the person who recorded the videos.
+> One line marked **[to confirm]** still needs checking by the person who recorded the videos.
 
 ## What was recorded
 
@@ -8,21 +8,25 @@
 |---|---|---|---|
 | `task2_triangle_right_take1` | Three glasses built into a triangle | 29 s | My right side of the table |
 | `task3_flip_right_take1` | Triangle, then a fourth glass flipped and placed opening up | 45 s | My right side of the table |
-| `task2_triangle_take2` to `take8`, and `task2_triangle_check` | Triangle, eight takes in different layouts, camera moved slightly from take 1 | 17-24 s | Various, including both sides |
+| `task2_triangle_take2` to `take8` | Triangle, seven takes in different layouts, camera moved slightly from take 1 | 17-24 s | Various, including both sides |
+| `task2_triangle_check` | Triangle. **Excluded** from later tests by me: its first glass stood beyond the robot's reach | 21 s | My left side |
 | `task3_flip_take2` to `take7` | Flipped tower, six takes in different layouts, same camera as the Task 2 takes above | 23-34 s | Various, including both sides |
 | `task3_flip_take8`, `take9` | Flipped tower, in a layout chosen to suit the robot | 29-30 s | My right side of the table |
 | `old_left_side/task2_triangle_left_take1` | Triangle | 25 s | My left side |
 | `old_left_side/task3_flip_left_take1` | Flipped tower | 32 s | My left side |
+| `task2_triangle_clutter_take1`, `take2` (4 Nov) | Triangle on a cluttered table: phone, earbud case, card, charger, tube, plug, box, steel laptop stand | 24 s | My right side |
+| `task2_triangle_hard_take1` to `take4` (4 Nov) | Triangle, made hard on purpose: a 4th glass never moved (1), a glass the right way up (2), the steel laptop stand (3), a plug moved mid-video (4) | 20-29 s | Various |
+| `task2_triangle_sunlight_take1` (4 Nov) | Triangle on a cluttered table, lit by sunlight only | 21 s | Both sides |
 
 Samples of the first two, and of `task2_triangle_take5`, `task2_triangle_take6` and `task3_flip_take9`, are in `data/raw/sample/`. They are compressed `.mp4` copies of the originals, at full size.
 
 ## Setup
 
 - **Files:** `.mov`, 1620 x 1080, 30 frames per second.
-- **Camera:** fixed in place, beyond the far edge of the table, looking down at it and at me. Measured movement during each take was under 1 pixel. **[to confirm: phone model, and what held it]**
+- **Camera:** a Logitech Brio 100 webcam, fixed in place beyond the far edge of the table, looking down at it and at me. Worked out by the code from the table's corners: about 97 cm above the table, 104 cm from its centre, looking down about 43 degrees, the same in every video. Measured movement during each take was under 1 pixel.
 - **Table:** dark striped top, measured at 80 x 50 cm, to about 1 cm.
-- **Glasses:** steel, all alike, 11.5 cm tall, 7.3 cm across the rim, 5.5 cm across the closed end. Measured with an on-screen ruler app. **[to confirm: tool used]**
-- **Light:** indoor room. **[to confirm: which lights, and the time of day]**
+- **Glasses:** steel, all alike, 11.5 cm tall, 7.3 cm across the rim, 5.5 cm across the closed end. **[to confirm: measured with an on-screen ruler app?]**
+- **Light:** indoor room lit by the floor's LED lights, for every video except `task2_triangle_sunlight_take1`, which was lit by sunlight only.
 - **Marker:** none. The table's corners act as the reference.
 
 ## How each take was done
