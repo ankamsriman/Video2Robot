@@ -435,10 +435,15 @@ def _match_ends(spots, finals, patches, fps, rescue, config, unknown: int = 0) -
 
 
 def _add_rescued(spots, points, changes, fps, rescue) -> tuple[tuple, list]:
-    """Drop bright clutter, and add a starting spot for each glass the reader missed."""
-    spots = drop_clutter(
-        spots, points, fps, rescue["early_seconds"], rescue["near_pixels"]
-    )
+    """Drop bright clutter, and add a starting spot for each glass the reader missed.
+
+    The clutter rule was built and tested on triangles. On a flip it dropped a real
+    glass (Task 3 take 1), so with four starting glasses it is skipped.
+    """
+    if len(points) <= GLASSES_IN_TRIANGLE:
+        spots = drop_clutter(
+            spots, points, fps, rescue["early_seconds"], rescue["near_pixels"]
+        )
     spots = seen_from_start(
         points, spots, fps, rescue["early_seconds"], rescue["near_pixels"]
     )
