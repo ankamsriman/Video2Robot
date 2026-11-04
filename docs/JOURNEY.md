@@ -127,6 +127,7 @@ Every fresh video below was first run with the system **exactly as it was** when
 | 6.4 | Could the robot copy me live? | Webcam hand tracking drives arm, wrist and fingers | Take 6 as a stand-in camera | Followed 476 of 561 frames | Separate demo |
 | 6.5 | First live webcam try: the arm flew up, the body spun | Start only on a still hand; lock the waist; start over after 2 s without a hand | Live webcam | Failed → followed **941 of 1460** frames | Yes |
 | 6.6 | Copying a video means little if the glasses stand elsewhere | `--match-video`: place the video's glasses, and put the hand on the table in 3D from its apparent size | Task 2 take 1 | Palm within **0.9–1.3 cm** of each glass; robot hand 2.6 / 15.3 / 5.9 cm | Yes |
+| 6.7 | The final live version, tested with me on the webcam (4 Nov evening) | Two live tries, then easier start settings | 3 live tries | Followed my hand in 14% and 22% of frames; hard to start; often out of reach | **Removed** before submitting, as unreliable. Its finger-closure measurement stays, for the videos |
 
 ## Stage 7: finding where Task 3 fails, and fixing it
 

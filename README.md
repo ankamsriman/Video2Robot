@@ -4,7 +4,7 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 
 ![Task 3 from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
 
-**Watch first: [the real-world reel](docs/videos/reel_real_world.mp4)** (4 min: my tracked hand beside the robot on cluttered tables, an unused glass, a glass the right way up, a moving plug, SAM 2 in sunlight, live hand control), then [the original demo reel](docs/videos/demo_reel.mp4).
+**Watch first: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min: my tracked hand beside the robot on cluttered tables, an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight), then [the original demo reel](docs/videos/demo_reel.mp4).
 
 ## At a glance
 
@@ -36,7 +36,7 @@ Each idea came from counting the failures of the one before. The full record is 
 | Task 3 layout | The right arm can't flip across its own chest | Choose the arm and where to stand | Take 1 builds; 25 of 30 random layouts |
 | Arms | Left-side layouts failed with the right arm | Nearest arm, then an arm per glass, then a logistic regression model to choose | 10 → **24 of 30**; model 50 of 60 |
 | Reading | A missed starting glass refused 4 of 9 Task 2 videos | Claude points to every glass; measurements stay in charge | 4 → **8 of 9** (not a fair test) |
-| Copying motion | The robot copied *what*, not *how* | Copy the hand's carry height and timing; live control matched to the video | 4 of 4 carries; palm within about 1 cm of each glass |
+| Copying motion | The robot copied *what*, not *how* | Copy the hand's carry height and timing (live webcam control was tried, then removed as unreliable) | 4 of 4 carries; palm within about 1 cm of each glass |
 | Task 3 failures | Takes 2, 3, 7 failed: why? | Step checks: all three fail at **reach** | Stand 10 cm closer: take 2 builds (one run) |
 | Fresh cluttered and hard videos | Clutter taken for glasses, dull glasses missed, an unused glass, glints, a hand hiding a glass. 0 of 7 on fair first runs | Claude reads the first **and last** frames; one rule per failure (an unused glass, a glass that left, a top chosen by position) | 6 of 7 build after the fixes (not a fair test) |
 | Arm swap | Swapping arms twisted the body and knocked a glass off the table | My idea: hands rise and pass beside the body, off the table; waist held still | Hard takes 1 and 2 build; take 4 (a glass at the edge of reach) lost |
@@ -230,38 +230,9 @@ Letting Task 3 choose its arm and standing spot, with no glass moved:
 
 Run these with `scripts/area_test.py` and `scripts/stand_test.py`. Raw results and earlier area tests are in `docs/results/`. Pictures of the areas are in `docs/recording_views/`.
 
-### Live hand control, a separate demo
+### Live hand control: tried, then removed
 
-`scripts/live_teleop.py` lets a webcam drive the robot. MediaPipe finds 21 points on my hand in each frame, and the simulated G1 copies it:
-- **Hand position:** where my wrist is in the picture sets the robot hand's sideways and up/down position. How big my hand looks sets forward and back.
-- **Wrist:** how my palm has turned since the start sets the robot's wrist.
-- **Fingers:** how bent my thumb, index and middle finger are sets the robot's three fingers.
-
-My pose when it starts becomes the robot's starting pose. The robot copies; nothing is learned. It's a different demo from the video-to-task pipeline above, and it doesn't change those results.
-
-So far it has been tested only with a recorded video standing in for the camera (my take 6):
-- **Speed:** about 12 frames a second, including drawing and saving.
-- **Following:** the robot followed in 476 of 561 frames. It held still while the hand was lost.
-- **Direction:** sideways and up/down moved the right way (correlation 0.97 between my hand and the robot's target).
-- **Accuracy:** the robot hand was a median 3 cm from its target.
-- **Depth:** forward/back is the weak part, estimated from how big the hand looks, and hit its limit in 29% of frames.
-
-**With a live webcam (a Logitech Brio across the table):**
-- **The first try failed.** Control started on my hand as I walked into view, which flung the arm out of reach. The waist turned with every move. An odd frame width also broke saving.
-- **Fixes:** control now starts only on a hand held still, and starts over after 2 seconds without a hand. Only the arm moves; the waist stays locked.
-- **Second try:** the robot followed my hand in 941 of 1460 frames, at 8 frames a second, now faster with a 720p picture.
-
-**Matching a recorded video (`--match-video`).** Copying a video only means something if the robot's glasses stand where mine did. This mode reads the video's glasses and places them in the simulator. It then places my palm on the table in 3D, from the table's corners and how big my hand looks. One distance factor per video corrects for my hand's size. It's fitted on where the glasses stood when I took them, so it uses only the video.
-
-On Task 2 take 1 (one run):
-- My palm landed 0.9, 1.3 and 0.6 cm from each glass as I took it.
-- The robot's hand was 2.6, 15.3 and 5.9 cm from each glass at those moments. Glass 2 had already been nudged 13 cm by the robot's arm.
-- The robot keeps its palm down in this mode. Copying my wrist as well often asked for poses its arm can't reach.
-- On other takes the palm's position is less reliable (1 to 30 cm). How big the hand looks changes as it turns.
-
-```bash
-PYTHONPATH=. .venv/bin/python scripts/live_teleop.py --source data/raw/task2_triangle_right_take1.mov --match-video --save out.mp4
-```
+I also built a separate demo where a webcam's view of my hand drove the robot's arm, wrist and fingers live. It worked on a recorded video standing in for the camera, and in my best live try the robot followed my hand in 941 of 1460 frames. But with a live webcam it stayed unreliable: in later tries it followed my hand in only 14% and 22% of frames, often reached "out of reach" poses, and was hard to start. So I removed it before submitting. It's described in `docs/JOURNEY.md` (stage 6) and remains in the git history.
 
 ## What worked and what didn't
 
@@ -283,7 +254,7 @@ PYTHONPATH=. .venv/bin/python scripts/live_teleop.py --source data/raw/task2_tri
 
 - **Pinned pelvis:** no balance, and reach is limited.
 - **Three-finger Dex3 hand,** not a five-finger hand.
-- **Programmed motion:** no learned policy. The optional hand path copies only my hand's height and timing, not my fingers or wrist. The separate live demo copies wrist and fingers, but only while a person drives it.
+- **Programmed motion:** no learned policy. The optional hand path copies only my hand's height and timing, not my fingers or wrist.
 - **The standing spot is set, not walked to,** and the glass to flip must start 23 cm or more from the table's near edge. Closer in, most runs failed to grip it.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not from its own camera.
 - **Hand-picked corners:** someone picks four rough table corners once per camera position, in `data/labels/`. A fit to each video's table edges then sharpens them.
@@ -318,10 +289,6 @@ PYTHONPATH=. .venv/bin/python scripts/outcome_test.py
 
 # Optional for a triangle: carry each glass along the hand's path in the video
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
-
-# Live: your webcam's view of your hand drives the robot (c: new starting pose, q: quit)
-PYTHONPATH=. .venv/bin/python scripts/live_teleop.py
-PYTHONPATH=. .venv/bin/python scripts/live_teleop.py --source data/raw/sample/task2_triangle_take6.mp4 --save out.mp4
 
 # Test what the robot can do, with random setups
 PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123

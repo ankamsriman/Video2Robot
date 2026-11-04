@@ -12,8 +12,8 @@ import numpy as np
 from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision
 
+from src.perception.finger_closure import finger_curls, load_finger_settings
 from src.simulation.scene import ROOT
-from src.teleop.hand_retarget import finger_curls, load_teleop_config
 
 PANEL_HEIGHT = 540
 FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -135,7 +135,7 @@ def main() -> None:
     robot_label = f"G1 in simulation, {source} ({speed:.1f}x speed)"
     person_label = "Recorded person"
     if args.show_hand:
-        config = load_teleop_config(ROOT / "configs/cups_real.yaml")
+        config = load_finger_settings(ROOT / "configs/cups_real.yaml")
         with _hand_landmarker() as landmarker:
             person = [
                 _draw_hands(frame, landmarker, int(index * 1000 / fps), config)

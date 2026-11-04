@@ -122,32 +122,9 @@ real_video:
   opening_radius: 0.025
   max_opening_brightness: 110
 
-# Live control: a webcam watches your hand and the robot copies it (scripts/live_teleop.py).
-# Distances are metres, angles radians. Image moves are fractions of the picture's size.
-teleop:
-  gain_sideways: 0.60          # robot hand travel for your hand crossing the whole picture
-  gain_height: 0.45            # the same, top to bottom
-  gain_forward: 0.70           # robot reach per fraction of your distance to the camera
-  workspace_min: [0.20, -0.42, 0.77]
-  workspace_max: [0.60, 0.42, 1.15]
-  smoothing: 0.35              # share of each new reading used; lower is steadier but slower
-  max_joint_speed: 3.0         # radians per second, so tracker jumps can't swing the arm
-  max_tilt: 1.2                # how far the wrist may turn from palm-down
-  finger_bend_open: 0.6        # total bend of a straight finger
+# How closed a tracked hand's fingers look (src/perception/finger_closure.py).
+finger_closure:                # for "fingers closed" on side-by-side videos
+  finger_bend_open: 0.6        # total bend of a straight finger, radians
   finger_bend_closed: 3.2      # total bend of a curled finger
   thumb_reach_open: 1.3        # thumb tip to middle knuckle, in palm widths, thumb out
   thumb_reach_closed: 0.6      # the same, thumb tucked in
-  open_width: 0.10             # robot thumb-to-fingers gap when your hand is open
-  closed_width: 0.02           # and when it is closed
-  calibration_frames: 15       # frames your hand must be held still before control starts
-  calibration_still: 0.04      # how far the wrist may drift then, as a share of the picture
-  reset_after_lost: 30         # frames without a hand before starting over from home
-
-teleop_view:
-  width: 640
-  height: 480
-  # Behind the robot and a little to its right, so it moves the way you do.
-  lookat: [0.38, -0.08, 0.84]
-  distance: 1.25
-  azimuth: 20.0
-  elevation: -32.0

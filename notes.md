@@ -31,7 +31,7 @@ Throughout, **[Built]** means the code exists and has been tested. **[Planned]**
 16. [Choosing arms for Task 2, and the logistic regression model](#16-choosing-arms-for-task-2-and-the-logistic-regression-model)
 17. [The vision language model (Claude) helper](#17-the-vision-language-model-claude-helper)
 18. [Copying your hand's carry](#18-copying-your-hands-carry---hand-path)
-19. [Live hand control, and matching a recorded video](#19-live-hand-control-and-matching-a-recorded-video)
+19. [Live hand control (tried, then removed)](#19-live-hand-control-tried-then-removed)
 20. [Step checks: finding where a run fails](#20-step-checks-finding-where-a-run-fails)
 21. [All results on your real videos, and how to read them](#21-all-results-on-your-real-videos-and-how-to-read-them)
 22. [How the project got here: one idea at a time](#22-how-the-project-got-here-one-idea-at-a-time)
@@ -488,7 +488,7 @@ It renders frames at 960x720 and 30 frames per second, writing directly to a vid
 | `check_video.py` | Checks a test video, and says what to fix |
 | `read_colors.py` | Suggests colour settings from points on a video frame |
 | `watch_live.py` | Runs the task live in the MuJoCo window |
-| `live_teleop.py` | Your webcam's view of your hand drives the robot live |
+| `live_teleop.py` | *(Removed 4 Nov.)* Your webcam's view of your hand drove the robot live; see chapter 19 |
 
 ### `tests/`
 `pytest` runs about 120 tests. Some test functions run several cases.
@@ -1007,12 +1007,6 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2
 
 # The same, with Claude finding the glasses and the model choosing arms (uses the API key)
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/task2_triangle_take3.mov --find-glasses --choose-arms
-
-# Live control with your webcam (c resets, q quits)
-PYTHONPATH=. .venv/bin/python scripts/live_teleop.py
-
-# Live control matched to a recorded video's glasses
-PYTHONPATH=. .venv/bin/python scripts/live_teleop.py --source data/raw/task2_triangle_right_take1.mov --match-video
 ```
 
 `--first-seed` chooses which random setups to use. The same seed always gives the same setup.
@@ -1328,9 +1322,19 @@ Takes 1, 2, 5 and 6 succeed with it. That's not a fair test, because these takes
 
 ---
 
-## 19. Live hand control, and matching a recorded video
+## 19. Live hand control (tried, then removed)
 
-### What it is
+> **Removed from the project on 4 Nov, before submitting, because it wasn't reliable with a live webcam.** This chapter keeps what it was and what was learned. The code is in the git history.
+>
+> | Live try | Hand seen | Robot following the hand |
+> |---|---|---|
+> | Second try (after the first fixes) | 71% of frames | 64% |
+> | Third try (final version) | 24% | 14% (you were out of view most of the time) |
+> | Fourth try | 65% | 22%: it was hard to start, as the hand had to be held very still |
+>
+> The finger-closure measurement it used lives on in `src/perception/finger_closure.py`, which prints "fingers closed" on the side-by-side videos.
+
+### What it was
 `scripts/live_teleop.py` lets a webcam (or a recorded video) drive the robot directly: you move, it moves. This is called **teleoperation**. Nothing is learned; the robot copies you frame by frame. It's a separate demo from the video-to-task pipeline, and it doesn't change those results.
 
 ### The 21 hand points
@@ -1634,7 +1638,7 @@ You asked about several well-known methods. Here is each one in plain words, wha
 |---|---|---|---|
 | **VLA** (vision-language-action model, such as OpenVLA or π0) | One big network that reads camera images and an instruction, and outputs robot motor commands directly | A GPU with lots of memory, and thousands of robot demonstrations to fine-tune on | **Not built.** This Mac has no suitable GPU, and there are no robot demonstrations to train on. Our split (Claude decides *what*, inverse kinematics decides *how*) gets the same "watch and do" result without training |
 | **RL** (reinforcement learning, such as PPO) | The robot learns by trial and error, rewarded when the triangle stands | Millions of simulated tries, normally run in parallel on a GPU for hours or days | **Not built.** On this CPU, even a simple grasp would take days to learn. The step checks (chapter 20) would make a good reward signal if a GPU were available |
-| **ACT** (Action Chunking Transformer) | Imitation learning: a network copies demonstrations and predicts short bursts of motion | 50 or more demonstrations of the robot itself doing the task, usually teleoperated, plus GPU training | **Not built.** The live hand control (chapter 19) could record such demonstrations; training would need a GPU. Copying our own scripted robot would only learn what is already programmed |
+| **ACT** (Action Chunking Transformer) | Imitation learning: a network copies demonstrations and predicts short bursts of motion | 50 or more demonstrations of the robot itself doing the task, usually teleoperated, plus GPU training | **Not built.** A teleoperation setup could record such demonstrations (ours, chapter 19, wasn't reliable enough); training would need a GPU. Copying our own scripted robot would only learn what is already programmed |
 | **A small RNN/GRU** trained on your demonstrations | A small network that learns timing from sequences | Many recorded demonstrations | **Not built,** for the same reason: too few demonstrations |
 | **SAM 2 / SAM 3** (Segment Anything) | Outlines any object in a picture from a click, and follows that outline through a video | Runs on CPU slowly; its smallest model is 156 MB | **Tried on 4 Nov:** given Claude's points as the clicks, it follows each glass by its *shape*, not its shine. See chapter 17 for how it compared with the bright-top reader |
 | **Dex-retargeting** | Maps a human hand's finger joints onto a robot hand with different fingers | A hand model and the robot's finger layout | **Not needed:** the live demo maps three fingers by bend angle (chapter 19), and the task grips are programmed |

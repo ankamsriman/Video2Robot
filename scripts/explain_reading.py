@@ -18,6 +18,7 @@ import yaml
 
 from scripts.glass_from_video import CONFIG_PATH, _background, rough_corners
 from scripts.side_by_side import _draw_hands, _hand_landmarker
+from src.perception.finger_closure import load_finger_settings
 from src.perception.glass_tracker import (
     GlassVideoConfig,
     find_tops,
@@ -26,7 +27,6 @@ from src.perception.glass_tracker import (
 )
 from src.perception.table_view import refine_corners, table_view
 from src.simulation.scene import ROOT
-from src.teleop.hand_retarget import load_teleop_config
 
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 TOP_COLOUR = (0, 220, 255)
@@ -65,7 +65,7 @@ def main() -> None:
     frames, fps = _read_frames(args.video)
     tops = [find_tops(frame, table, search, config) for frame in frames]
     spots = rest_spots(tops, fps, view, config)
-    teleop = load_teleop_config(ROOT / "configs/cups_real.yaml")
+    fingers = load_finger_settings(ROOT / "configs/cups_real.yaml")
     output = ROOT / "data/processed" / args.video.stem / "what_the_reader_saw.mp4"
     output.parent.mkdir(parents=True, exist_ok=True)
     scale = OUTPUT_WIDTH / size[0]
@@ -74,7 +74,7 @@ def main() -> None:
         imageio.get_writer(output, fps=fps, macro_block_size=1) as writer,
     ):
         for index, frame in enumerate(frames):
-            shown = _draw_hands(frame, landmarker, int(index * 1000 / fps), teleop)
+            shown = _draw_hands(frame, landmarker, int(index * 1000 / fps), fingers)
             cv2.polylines(shown, [corners.astype(np.int32)], True, TABLE_COLOUR, 2)
             for x, y in tops[index]:
                 cv2.circle(shown, (int(x), int(y)), 22, TOP_COLOUR, 3, cv2.LINE_AA)

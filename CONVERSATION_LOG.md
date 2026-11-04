@@ -151,5 +151,8 @@ SAM 2.1 tiny, in a separate environment, followed each glass by shape. In sunlig
 
 The session stopped from about 09:30 to 19:20, and jobs left running in the background were lost. Rerunning Task 3 then exposed two triangle-only rules misreading flips, which are now fixed: Task 3 is back to 2 of 9.
 
+### Live control removed (4 Nov, evening)
+I tested the final live webcam version three times. It followed my hand in only 14% and 22% of frames, and was hard to start, so I asked for it to be removed. The scripts and their tests are gone (the git history keeps them), the docs say it was tried and removed, and the finger-closure measurement stays for the side-by-side videos.
+
 ### Still open
 Raising the API limit, new videos to test the VLM fairly, making the repo public, and submitting. The data collection note needs your details. You decide when the repo goes public.
