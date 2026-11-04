@@ -148,7 +148,8 @@ Fresh videos with shiny clutter that moves: a plug, a charger, an earbud case, a
 | 10.3 | Does the agreement logic hold on videos it has never seen? | No change: fresh videos recorded after 10.2 | Task A clutter takes 4, 5, 6 | **3 of 3 read correctly** (plug, charger, earbud case, stand feet ignored); robot **2 of 3**. Take 4 failed: the triangle was built 13 cm from the robot's edge, too close to its chest, and the arm swap twisted the body into the glasses | Kept |
 | 10.4 | Hard to see what each reader recognised | Annotated video: CV tops, Claude's start and end glasses, and kept or ignored for each spot | Takes 4–6 | Shows the plug and stand feet ignored and a dull glass rescued by Claude | Yes |
 | 10.5 | Task B clutter take 3 refused: one resting spot missing | — | — | Not yet fixed | Open |
-| 10.6 | Two Task A videos failed only because of where I put the glasses: plain take 4 (a glass at the edge of reach) and clutter take 4 (the triangle against the robot's chest) | I deleted both as out of the robot's reach, like the excluded video before | — | Task A: **16 of 17** kept videos; **16 of 20** counting the 3 deleted | Recorded here so the count stays honest |
+| 10.6 | Two Task A videos failed only because of where I put the glasses: plain take 4 (a glass at the edge of reach) and clutter take 4 (the triangle against the robot's chest) | Deleted both as out of reach; clutter take 4 was later restored from its original upload, plain take 4 couldn't be | — | Plain take 4 stays deleted | Recorded so the count stays honest |
+| 10.7 | Does it still work on plain new videos? | No change: takes 9, 10, 11 recorded after every fix, camera moved slightly (new table corners) | 3 real videos | **3 of 3 built**, towers 0.2–0.4 cm off | Kept |
 
 ## Ideas discussed but not built
 - **A recurrent network (RNN/GRU) trained on demos.** Suggested in a plan, but not built: there was no time to collect training data. Nothing in this project is trained except the 16-weight logistic regression model.
@@ -163,5 +164,5 @@ Fresh videos with shiny clutter that moves: a plug, a charger, an earbud case, a
 | Block sorting, simulator | 0 of 10 → 20 of 20 |
 | Task B flip, simulator | 1 of 9 → 1 of 12 → 5 of 12 → 9 of 15 → 21 of 24 → 50 of 50 |
 | Real glasses, robot body | 0 of 6 → 28 of 30 |
-| Task A, real videos | 1 video → 4 of 9 → **8 of 9** with Claude → fresh cluttered takes 4–6: **2 of 3** built, 3 of 3 read → **16 of 17** kept videos (16 of 20 with the 3 deleted as out of reach) |
+| Task A, real videos | 1 video → 4 of 9 → **8 of 9** with Claude → fresh cluttered takes 4–6: **2 of 3** built, 3 of 3 read → fresh plain takes 9–11: **3 of 3** → **19 of 21** kept videos (19 of 23 with the 2 deleted) |
 | Task B, real videos | 1 video → 0 of 6 varied → **2 of 9**, and take 2 promising with the robot closer |

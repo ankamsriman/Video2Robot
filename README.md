@@ -267,7 +267,7 @@ sam_reader:
 |---|:---:|:---:|---|
 | **Task A**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
 | **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
-| **Task A**, all 17 videos I kept, final system | not run | **16 of 17** | The failure: sunlight (tower too close to the robot's chest). I deleted 3 other videos as beyond the robot's reach, all failures: a glass beyond reach, a glass at the edge of reach, and a triangle built against the robot's chest. Counting them, 16 of 20 |
+| **Task A**, all 21 videos I kept, final system | not run | **19 of 21** | Failures: sunlight and clutter take 4, both with the triangle built too close to the robot's chest. 3 of the 21 (takes 9–11, a plain table) were recorded after all the fixes and all built. 2 other videos were deleted as beyond the robot's reach, both failures; counting them, 19 of 23 |
 | **Task B**, all 12 of my videos | 2 of 9 | **2 of 12** | Most failures are glasses beyond a robot that can't walk. The 3 newest, on cluttered tables, are read correctly by Claude's rules, but the glasses are out of reach |
 
 **What the robot can do, with exact simulator positions:**
@@ -305,7 +305,7 @@ Each idea came from counting the failures of the one before. The full record, ab
 | Fresh hard videos | Clutter, dull tops, an unused glass, glints, a hidden glass | Claude reads the first **and last** frames; one rule per failure | 0 of 7 → **6 of 7** |
 | Arm swap | A swap twisted the body into the table; an idle hand rested on it | Hands rise and pass beside the body; the idle arm waits raised | 68 → **0** frames touching the table |
 | Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by shape | Correct timing (about 70 min a video on this Mac) |
-| Moving clutter | A charger set down where a glass later landed made a landing look 4 s early, and the video was refused | Only when the order is impossible, time each landing from when the picture at Claude's end point looked final | Refused → built; fresh videos after it: **3 of 3** read, **2 of 3** built (the failure, a triangle built against the robot's chest, was later deleted as out of reach) |
+| Moving clutter | A charger set down where a glass later landed made a landing look 4 s early, and the video was refused | Only when the order is impossible, time each landing from when the picture at Claude's end point looked final | Refused → built; fresh videos after it: **3 of 3** read, **2 of 3** built (the failure: a triangle built against the robot's chest) |
 
 ---
 

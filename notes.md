@@ -51,7 +51,7 @@ Imagine you sit at a table and film yourself putting an apple in a box. You hand
 
 Doing this on a real humanoid would be expensive and risky, so we use a **simulator**: a program that acts like a video game with accurate physics. If the robot's fingers don't squeeze hard enough in the simulator, the object really does slip.
 
-**Where we are (5 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task A, the triangle, it builds 16 of the 17 videos kept (16 of 20 counting 3 deleted as out of reach). For Task B, the flip, it builds 2 of 12; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
+**Where we are (5 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task A, the triangle, it builds 19 of the 21 videos kept (19 of 23 counting 2 deleted as out of reach). For Task B, the flip, it builds 2 of 12; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
 
 **To read the project as a story of ideas, from the first failure to today, start with chapter 21.** Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 20 has the numbers to quote.
 
@@ -1377,7 +1377,7 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 | Copying your hand's carry (`--hand-path`) | takes 1, 2, 5, 6 |
 
 ### Task A: every video I kept (17), final system
-**16 of 17 build.** The one failure is the sunlight video: the triangle was built too close to the robot's chest. Three more videos were deleted because their glasses were beyond the robot's reach, and all three had failed. Counting them, it's **16 of 20**. Always quote both numbers.
+**19 of 21 build.** Both failures are triangles built too close to the robot's chest: the sunlight video and clutter take 4. Takes 9, 10 and 11, recorded after every fix, all built. Two more videos were deleted as beyond the robot's reach, and both had failed. Counting them, it's **19 of 23**. Always quote both numbers.
 
 ### Task B: the 3 new cluttered videos
 Takes 1 and 2 are now **read correctly**, but the robot fails both, because the glasses sit up to 41 cm in, where the flip was only tested to 19 cm. Take 3 is refused (one resting spot missing). So Task B stands at **2 of 12** videos.
@@ -1447,7 +1447,7 @@ A glass can't land at 16.0 s if no glass has left since 3.4 s. The frames showed
 
 So glass 2 landed at 20 s. The order is now possible and the robot built the triangle. The rule knows nothing about chargers: it only runs when the order is impossible.
 
-**The fair test.** Three new cluttered videos recorded after this rule: **all 3 read correctly**, and the robot built 2. The third failed because I built the triangle against my own edge of the table, so the robot had to place glasses against its chest. I later deleted it as out of reach (see chapter 20).
+**The fair test.** Three new cluttered videos recorded after this rule: **all 3 read correctly**, and the robot built 2. The third failed because I built the triangle against my own edge of the table, so the robot had to place glasses against its chest. 
 
 **Lesson:** build the triangle near the middle of the table, about 20–27 cm from your edge.
 
