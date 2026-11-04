@@ -10,15 +10,16 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 
 | What | Result |
 |---|---|
-| **Task 2:** three glasses into a triangle | Built from 4 of my 9 videos ([video](docs/videos/task2_video_to_robot.mp4)). With a vision language model finding glasses my reader missed, and the small learned model choosing one arm or two, **8 of 9**, with no options set by hand |
+| **Task 2:** three glasses into a triangle | My first 9 videos: **4 of 9** without AI, **8 of 9** with Claude finding the glasses ([video](docs/videos/task2_video_to_robot.mp4)). Then 7 fresh videos on cluttered tables, one lit only by sunlight: **0 of 7 on their fair first run**. Each failure led to one rule (below), after which **13 of my 14 videos within reach build** ([cluttered](data/processed/showcase/task2_clutter_take2_robot.mp4), [hard](data/processed/showcase/task2_hard_take4_robot.mp4)). Not a fair test: the rules came from those videos |
 | **Task 3:** a fourth glass flipped and stood on top, opening up | Built from 2 of my 9 videos ([video](docs/videos/task3_new_video_to_robot.mp4)). One of the two, take 9, was new and untuned, in a layout I chose to suit the robot. 0 of 6 deliberately varied layouts worked |
 | **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](docs/videos/task2_two_arms_video_to_robot.mp4)) |
 | **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](docs/videos/task2_hand_path_video_to_robot.mp4)) |
-| **Vision language model (Claude),** optional | Turns a typed instruction such as "nearest at the bottom" into a checked plan, and finds glasses my reader missed. On cluttered simulated tables it found exactly the three glasses in 10 of 10 scenes, within 1.5 cm |
+| **Vision language model (Claude),** optional | Points at the glasses in the first and last frames, about 2 cents a video: it ignores clutter and finds dull glasses the shiny-top reader misses, while that reader times the moves. Also turns a typed instruction into a checked plan. On cluttered simulated tables it found exactly the three glasses in 10 of 10 scenes |
+| **SAM 2,** optional | Follows each glass by its outline, not its shine. In sunlight it timed my moves correctly (2.7, 8.9, 14.5 s) where the shiny-top reader didn't. About 70 minutes per video on this Mac ([video](data/processed/task2_triangle_sunlight_take1/sam_tracks.mp4)) |
 | **A small learned model,** optional | A logistic regression model (16 weights) learns from 180 saved runs whether one arm or two will work for a layout, and picks before the robot moves. On 60 new layouts its choices built 50, against 49 for a hand rule and 43–44 for always the same choice |
 | **What the robot can do** | 28 of 30 random layouts for each task, within tested areas, in simulation |
 
-**What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Only one small model is trained here,** the optional outcome model below. By default no AI model reads the video. Optional parts use a hand tracker (MediaPipe) and a vision language model (Claude). Everything runs in simulation, with the robot's pelvis pinned.
+**What my recording decides:** where each glass starts, the order, where the tower goes, whether a glass is flipped, which arm and where the robot stands, and optionally my hand's height and timing. **What's programmed:** the grip, the flip and the motion, by inverse kinematics. **Only one small model is trained here,** the optional logistic regression model. By default no AI model reads the video. Optional parts use models others trained: a hand tracker (MediaPipe), a vision language model (Claude) and SAM 2. No VLA, RL or ACT policy is used: they need a GPU and robot demonstrations this project doesn't have (see `notes.md` chapter 22). Everything runs in simulation, with the robot's pelvis pinned.
 
 A full walkthrough of one video through every step is in [`docs/PIPELINE_EXPLAINED.md`](docs/PIPELINE_EXPLAINED.md).
 
@@ -37,6 +38,9 @@ Each idea came from counting the failures of the one before. The full record is 
 | Reading | A missed starting glass refused 4 of 9 Task 2 videos | Claude points to every glass; measurements stay in charge | 4 → **8 of 9** (not a fair test) |
 | Copying motion | The robot copied *what*, not *how* | Copy the hand's carry height and timing; live control matched to the video | 4 of 4 carries; palm within about 1 cm of each glass |
 | Task 3 failures | Takes 2, 3, 7 failed: why? | Step checks: all three fail at **reach** | Stand 10 cm closer: take 2 builds (one run) |
+| Fresh cluttered and hard videos | Clutter taken for glasses, dull glasses missed, an unused glass, glints, a hand hiding a glass. 0 of 7 on fair first runs | Claude reads the first **and last** frames; one rule per failure (an unused glass, a glass that left, a top chosen by position) | 6 of 7 build after the fixes (not a fair test) |
+| Arm swap | Swapping arms twisted the body and knocked a glass off the table | My idea: hands rise and pass beside the body, off the table; waist held still | Hard takes 1 and 2 build; take 4 (a glass at the edge of reach) lost |
+| Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by its shape | Correct timing in sunlight (slow: about 70 min per video) |
 
 ## How my recording drives the robot
 
