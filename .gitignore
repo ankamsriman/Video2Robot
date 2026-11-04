@@ -32,3 +32,4 @@ data/processed/*
 .DS_Store
 data/excluded/
 .venv-sam/
+.tools/
