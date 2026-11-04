@@ -1,0 +1,31 @@
+[
+ {
+  "video": "task2_triangle_sunlight_take1",
+  "sam_seconds": 4172.4,
+  "glasses": [
+   {
+    "glass": 0,
+    "sam_left_at": 8.9,
+    "sam_end_pixels_from_nearest_claude_end": 31.0,
+    "outline_lost_frames": 0
+   },
+   {
+    "glass": 1,
+    "sam_left_at": 14.5,
+    "sam_end_pixels_from_nearest_claude_end": 22.9,
+    "outline_lost_frames": 0
+   },
+   {
+    "glass": 2,
+    "sam_left_at": 2.7,
+    "sam_end_pixels_from_nearest_claude_end": 24.6,
+    "outline_lost_frames": 0
+   }
+  ],
+  "reader_left_at": [
+   2.6,
+   3.4,
+   8.2
+  ]
+ }
+]
