@@ -298,6 +298,7 @@ Each idea came from counting the failures of the one before. The full record, ab
 | Fresh hard videos | Clutter, dull tops, an unused glass, glints, a hidden glass | Claude reads the first **and last** frames; one rule per failure | 0 of 7 → **6 of 7** |
 | Arm swap | A swap twisted the body into the table; an idle hand rested on it | Hands rise and pass beside the body; the idle arm waits raised | 68 → **0** frames touching the table |
 | Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by shape | Correct timing (about 70 min a video on this Mac) |
+| Moving clutter | A charger set down where a glass later landed made a landing look 4 s early, and the video was refused | Only when the order is impossible, time each landing from when the picture at Claude's end point looked final | Refused → built; fresh videos after it: **3 of 3** read, **2 of 3** built (the failure: a triangle too close to the robot's chest) |
 | Live webcam control | It followed the hand in only 14–22% of frames in later live tries | — | **Removed** before submitting |
 
 ---

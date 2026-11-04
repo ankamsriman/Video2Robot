@@ -141,6 +141,18 @@ Every fresh video below was first run with the system **exactly as it was** when
 
 ---
 
+## Stage 10: new cluttered videos, 4–5 Nov
+
+Fresh videos with shiny clutter that moves: a plug, a charger, an earbud case, a tennis ball.
+
+| # | Problem seen | Idea | Test | Before → after | Kept? |
+|---|---|---|---|---|---|
+| 10.1 | Two new cluttered Task 3 videos: the tower's top glass, hidden under the flipped glass in Claude's end view, was thrown away as a glint, and a starting glass the reader noticed late was taken for clutter | Keep a spot that sits where a tower top would be over two of Claude's end glasses; count late-noticed starts | Task 3 clutter takes 1, 2 | Misread → **both read correctly**; the robot still fails both at reach and grip (glasses up to 41 cm in, where the flip was tested to 19 cm) | Yes (reading) |
+| 10.2 | Task 2 clutter take 3 refused: "a glass seems to arrive before any glass left". A charger was set down at 16 s right where a glass landed at 20 s, so the CV reader timed the landing 4 s early. The CV–Claude agreement checks *where*, so it passed | Only when the order is impossible: time each landing from when the picture at Claude's end point began to look like the end | Take 3 | Refused → **built**, 0.3 cm off. Not a fair test of this rule: it was made on this video | Yes |
+| 10.3 | Does the agreement logic hold on videos it has never seen? | No change: fresh videos recorded after 10.2 | Task 2 clutter takes 4, 5, 6 | **3 of 3 read correctly** (plug, charger, earbud case, stand feet ignored); robot **2 of 3**. Take 4 failed: the triangle was built 13 cm from the robot's edge, too close to its chest, and the arm swap twisted the body into the glasses | Kept |
+| 10.4 | Hard to see what each reader recognised | Annotated video: CV tops, Claude's start and end glasses, and kept or ignored for each spot; a live webcam view of the CV reader | Takes 4–6 | Shows the plug and stand feet ignored and a dull glass rescued by Claude | Yes |
+| 10.5 | Task 3 clutter take 3 refused: one resting spot missing | — | — | Not yet fixed | Open |
+
 ## Ideas discussed but not built
 - **A recurrent network (RNN/GRU) trained on demos.** Suggested in a plan, but not built: there was no time to collect training data. Nothing in this project is trained except the 16-weight logistic regression model.
 - **SAM 2 and dex-retargeting.** Not needed. The glasses are identical, and rest spots keep their order.
@@ -154,5 +166,5 @@ Every fresh video below was first run with the system **exactly as it was** when
 | Block sorting, simulator | 0 of 10 → 20 of 20 |
 | Task 3 flip, simulator | 1 of 9 → 1 of 12 → 5 of 12 → 9 of 15 → 21 of 24 → 50 of 50 |
 | Real glasses, robot body | 0 of 6 → 28 of 30 |
-| Task 2, real videos | 1 video → 4 of 9 → **8 of 9** with Claude |
+| Task 2, real videos | 1 video → 4 of 9 → **8 of 9** with Claude → fresh cluttered takes 4–6: **2 of 3** built, 3 of 3 read |
 | Task 3, real videos | 1 video → 0 of 6 varied → **2 of 9**, and take 2 promising with the robot closer |
