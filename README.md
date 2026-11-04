@@ -4,7 +4,7 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 
 ![Task 3 from a new video: my video beside the robot as it flips the fourth glass](docs/videos/task3_flip.gif)
 
-**Watch first: [the three-minute demo reel](docs/videos/demo_reel.mp4).**
+**Watch first: [the real-world reel](docs/videos/reel_real_world.mp4)** (3.5 min: my tracked hand beside the robot on cluttered tables, a moving plug, SAM 2 in sunlight, live hand control), then [the original demo reel](docs/videos/demo_reel.mp4).
 
 ## At a glance
 
