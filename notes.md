@@ -1102,7 +1102,7 @@ So settings are written once, for the right arm, and the left arm gets their mir
 
 ### What later testing showed (4 Nov)
 The step checks (chapter 20) showed that on later takes, **Task 3 fails because a glass is out of reach**:
-- In takes 2, 3 and 7, you put the glasses 36–55 cm into the table. The flip was only tested on glasses 29–35 cm in.
+- In takes 2, 3 and 7, your glasses stood 20–39 cm from your edge of the table. The flip was only tested with starting glasses 13–19 cm from that edge.
 - The robot's hand stopped **11, 31 and 41 cm** short of a glass.
 
 **Experiment: stand closer.** The robot normally stands 16 cm back from the table's edge. Moving it closer, with the glasses unchanged:
@@ -1533,7 +1533,7 @@ You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in 
 
 **Idea 1: step checks** (chapter 20). After each step, measure whether it worked. Tested on 30 flip layouts: the same **28 of 30**, the same failures, and no false alarms. So the checks only measure, as intended.
 
-**What they found.** Your real Task 3 takes 2, 3 and 7 all fail at **reach**. The hand stopped 11, 31 and 41 cm short. You'd put the glasses 36–55 cm into the table, but the flip was only tested on 29–35 cm.
+**What they found.** Your real Task 3 takes 2, 3 and 7 all fail at **reach**. The hand stopped 11, 31 and 41 cm short. Your glasses stood 20–39 cm from your edge of the table, but the flip was only tested with starting glasses 13–19 cm from it.
 
 **Idea 2: stand closer to the table.**
 

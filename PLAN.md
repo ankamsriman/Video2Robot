@@ -40,7 +40,7 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | README, data sample, example videos | Done, data note needs the user's details |
 | Live hand control (separate demo) | Works with a live webcam after fixes (followed 941 of 1460 frames). `--match-video` places a video's glasses and the hand on the table: robot hand 2.6, 15.3 and 5.9 cm from each glass as it was taken (Task 2 take 1, one run) |
 | Step checks | Every pick and place reports its first failed step (reach, grip, lift, carry, twist, place, release, others still). They only measure: same 28 of 30 flips, same failures |
-| Task 3 reach | Real takes 2, 3 and 7 fail at reach: glasses 36-55 cm into the table, beyond the tested 29-35 cm. Standing 10 cm closer, take 2 succeeds (one run); take 7 still misses the fourth glass by 5 cm; take 3's glass is 47 cm to the side. Not yet a rule in the system |
+| Task 3 reach | Real takes 2, 3 and 7 fail at reach: glasses 20-39 cm from the person's edge of the table, beyond the tested 13-19 cm for starting glasses. Standing 10 cm closer, take 2 succeeds (one run); take 7 still misses the fourth glass by 5 cm; take 3's glass is 47 cm to the side. Not yet a rule in the system |
 | notes.md | Rebuilt Part Two (chapters 14-22) as a from-scratch book for the real videos, with worked examples |
 | Journey | `docs/JOURNEY.md`: about 40 ideas in seven stages, each with problem, test, before → after, kept or dropped; summarised in the README. Every new experiment is added there |
 | Repo public and submission | **The user decides** |

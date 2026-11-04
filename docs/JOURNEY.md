@@ -89,7 +89,7 @@ Ideas that didn't help are listed too, because they shaped the design as much as
 | # | Problem seen | Idea | Test | Before → after | Kept? |
 |---|---|---|---|---|---|
 | 7.1 | A failed run only said "tower wrong", not where | **Step checks** after reach, grip, lift, carry, twist, place, release, others still | 30 flip layouts | Same **28 of 30**, same failures, no false alarms (only measures) | Yes |
-| 7.2 | Why do real Task 3 takes fail? | Rerun takes 2, 3, 7 with step checks | 3 real videos | All three fail at **reach**: hand 11, 31, 41 cm short; glasses 36–55 cm into the table, tested area 29–35 cm | Diagnosis |
+| 7.2 | Why do real Task 3 takes fail? | Rerun takes 2, 3, 7 with step checks | 3 real videos | All three fail at **reach**: hand 11, 31, 41 cm short; glasses 20–39 cm from the person's edge of the table, where the flip was tested on starting glasses 13–19 cm cm | Diagnosis |
 | 7.3 | Glasses too deep for a robot that can't walk | **Stand closer** to the table | Takes 2, 3, 7 | 6 cm closer: 0 of 3 (misses 8, 45, 4 cm). **10 cm closer: take 2 builds**; take 7 misses its fourth glass by 5 cm | Promising, not yet a rule |
 | 7.4 | Next | A rule for how close to stand, then retest takes 1 and 9 (must still work) and the simulator areas | — | — | Planned |
 
