@@ -1511,6 +1511,7 @@ You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in 
 | 10 cluttered simulated tables | a brightness rule saw 20 bright patches | **10 of 10** found exactly the glasses |
 | Which Claude model? (10 cases) | — | All 9 of 10; Sonnet most accurate and far cheaper than Opus, so Sonnet is used |
 | Your 9 real Task 3 videos | 2 of 9 | 2 of 9: no change, so Task 3's problem isn't reading (stage 7) |
+| A fresh video on a cluttered table (fair test) | refused | **refused**: the reader took an earbud case and a laptop stand for glasses and missed the dim starting glasses. Claude can add missed glasses but not remove false ones |
 
 ---
 
@@ -1543,7 +1544,9 @@ You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in 
 | 7 | 41 cm short | 4 cm short | reached it, then missed the fourth glass by 5 cm |
 | 3 | 31 cm short | 45 cm short | its glass is 47 cm to the side, not too deep |
 
-**Where this stands.** One take is rescued, in one run. Next comes a rule for how close to stand, then retesting:
+**Idea 3: retry from the ready pose.** In take 2, the third glass stood untouched, and the solver says it's reachable, yet the hand stopped 11 cm short. The solver seemed stuck after the previous move. So when a move ended short, the arm went back to its ready pose and tried again. Take 2 then **reached** the glass, but the retry motion knocked it off the table, and takes 7 and 3 were unchanged. **0 of 3, so this idea was dropped.**
+
+**Where this stands.** One take is rescued (by standing closer), in one run. Next comes a rule for how close to stand, then retesting:
 - takes 1 and 9, which work now, must still work;
 - the simulator's working-area tests must not get worse.
 

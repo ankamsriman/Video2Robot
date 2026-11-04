@@ -25,6 +25,7 @@ BONES = (
 )  # fmt: skip
 BONE_COLOUR = (60, 200, 60)
 POINT_COLOUR = (40, 200, 230)
+WRIST_COLOUR = (230, 120, 40)
 
 
 def _hand_landmarker() -> vision.HandLandmarker:
@@ -55,6 +56,11 @@ def _draw_hands(
             cv2.line(shown, points[start], points[end], BONE_COLOUR, 2, cv2.LINE_AA)
         for point in points:
             cv2.circle(shown, point, 3, POINT_COLOUR, -1, cv2.LINE_AA)
+        wrist = points[0]
+        cv2.circle(shown, wrist, 9, WRIST_COLOUR, 2, cv2.LINE_AA)
+        cv2.putText(
+            shown, "wrist", (wrist[0] + 10, wrist[1] + 4), FONT, 0.45, WRIST_COLOUR, 1, cv2.LINE_AA
+        )
         size = float(np.ptp(np.array(points), axis=0).sum())
         if size > biggest:
             world = np.array([[p.x, p.y, p.z] for p in world_hand])

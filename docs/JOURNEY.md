@@ -72,6 +72,7 @@ Ideas that didn't help are listed too, because they shaped the design as much as
 | 5.2 | Would Claude be fooled by other bright things? | Cluttered simulated tables | 10 scenes | **10 of 10** found exactly the glasses, about 1 cm off | Yes |
 | 5.3 | Which Claude model? | Compare Haiku, Sonnet, Opus | 10 cases | All 9 of 10; Sonnet most accurate (0.33 cm) and far cheaper than Opus | Sonnet |
 | 5.4 | Task 3 still 2 of 9 with Claude | — | — | No change: Task 3's problem isn't reading | See stage 7 |
+| 5.5 | A fresh Task 2 video on a cluttered table (phone, earbud case, card, charger, laptop stand) | Fair test, nothing tuned on it | 1 new real video | **Refused**, with and without Claude. The reader took the earbud case and laptop stand for glasses, and missed all three starting glasses, whose tops looked dim from this camera angle. Claude added 2 missed glasses but can't remove false ones (`scripts/explain_reading.py` shows it frame by frame) | Next: drop spots far from every glass Claude finds |
 
 ## Stage 6: copying how I move, not just what I did
 
@@ -91,7 +92,8 @@ Ideas that didn't help are listed too, because they shaped the design as much as
 | 7.1 | A failed run only said "tower wrong", not where | **Step checks** after reach, grip, lift, carry, twist, place, release, others still | 30 flip layouts | Same **28 of 30**, same failures, no false alarms (only measures) | Yes |
 | 7.2 | Why do real Task 3 takes fail? | Rerun takes 2, 3, 7 with step checks | 3 real videos | All three fail at **reach**: hand 11, 31, 41 cm short; glasses 20–39 cm from the person's edge of the table, where the flip was tested on starting glasses 13–19 cm cm | Diagnosis |
 | 7.3 | Glasses too deep for a robot that can't walk | **Stand closer** to the table | Takes 2, 3, 7 | 6 cm closer: 0 of 3 (misses 8, 45, 4 cm). **10 cm closer: take 2 builds**; take 7 misses its fourth glass by 5 cm | Promising, not yet a rule |
-| 7.4 | Next | A rule for how close to stand, then retest takes 1 and 9 (must still work) and the simulator areas | — | — | Planned |
+| 7.4 | Take 2's third glass stood untouched and solver-reachable, yet the hand stopped 11 cm short: the solver seemed stuck after the previous move | When a move ends short, return to the ready pose and try once more | Takes 2, 7, 3 | Take 2 now **reached** the glass, but the retry motion knocked it off the table; 7 and 3 unchanged. 0 of 3 | Dropped |
+| 7.5 | Next | A rule for how close to stand, then retest takes 1 and 9 (must still work) and the simulator areas | — | — | Planned |
 
 ---
 
