@@ -30,3 +30,4 @@ data/processed/*
 
 # macOS
 .DS_Store
+data/excluded/

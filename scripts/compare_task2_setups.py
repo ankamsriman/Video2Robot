@@ -35,7 +35,6 @@ from src.simulation.scene import ROOT
 VIDEOS = (
     "task2_triangle_right_take1",
     *(f"task2_triangle_take{n}" for n in range(2, 9)),
-    "task2_triangle_check",
 )
 POINTS = ROOT / "data/processed/task2_setups/claude_points.json"
 OUTPUT = ROOT / "docs/results/task2_setups.json"
@@ -46,18 +45,24 @@ SETUPS = {
 }
 
 
-def _claude_points(video: Path, saved: dict) -> list:
-    if video.stem not in saved:
-        saved[video.stem] = glasses_from_model(video)
-        POINTS.parent.mkdir(parents=True, exist_ok=True)
-        POINTS.write_text(json.dumps(saved, indent=1))
-    return saved[video.stem]
+def _claude_points(video: Path, saved: dict) -> tuple[list, list]:
+    """Claude's glasses near the start and near the end, asked once and then saved."""
+    for key, at_end in ((video.stem, False), (f"{video.stem}@end", True)):
+        if key not in saved:
+            saved[key] = glasses_from_model(video, at_end=at_end)
+            POINTS.parent.mkdir(parents=True, exist_ok=True)
+            POINTS.write_text(json.dumps(saved, indent=1))
+    return saved[video.stem], saved[f"{video.stem}@end"]
 
 
 def _run(video: Path, setup: str, points, config: GlassVideoConfig) -> dict:
     options = SETUPS[setup]
     try:
-        demo, is_flip = read_video(video, config, points if options["claude"] else None)
+        start, end = points
+        claude = options["claude"]
+        demo, is_flip = read_video(
+            video, config, start if claude else None, end if claude else None
+        )
     except VideoReadError as error:
         return {"video": video.stem, "setup": setup, "success": False, "refused": str(error)}
     report = run_robot(

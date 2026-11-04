@@ -1508,6 +1508,7 @@ You also recorded 6 Task 3 takes in varied layouts: **0 of 6**. Then take 9, in 
 | Test | Before | After |
 |---|---|---|
 | Your 9 real Task 2 videos, same options for every video | 4 of 9 | **8 of 9**: Claude rescued takes 3, 4, 7 and 8, each refused for a missed glass (not a fair test) |
+| The one failure, `task2_triangle_check` | — | Read correctly, but its first glass was beyond the robot's reach (37 cm from your edge, 30 cm to the side). You judged it a poor example and removed it, so later tests use 8 videos. Counting it, 8 of 9 |
 | 10 cluttered simulated tables | a brightness rule saw 20 bright patches | **10 of 10** found exactly the glasses |
 | Which Claude model? (10 cases) | — | All 9 of 10; Sonnet most accurate and far cheaper than Opus, so Sonnet is used |
 | Your 9 real Task 3 videos | 2 of 9 | 2 of 9: no change, so Task 3's problem isn't reading (stage 7) |

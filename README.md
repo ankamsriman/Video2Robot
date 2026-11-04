@@ -79,7 +79,7 @@ Everything runs in MuJoCo with a **pinned pelvis**. The simulated glass matches 
 | The same video, robot kept mid-table with its right arm | As above | **Failed:** dropped the fourth glass in the twist |
 | `task2_triangle_take2`, glasses on both sides | 3 of 3 moves. **Top glass not seen, worked out from the others** | **Built the triangle** with the left arm, tower 0.4 cm off |
 | `task2_triangle_take5`, glasses on my left | As above | **Built the triangle** with the left arm, tower 0.5 cm off |
-| `task2_triangle_check`, glasses on my left | 3 of 3 moves | **Failed:** the hand knocked a glass while reaching for a far one, 37 cm from my edge |
+| `task2_triangle_check`, glasses on my left | 3 of 3 moves | **Failed, then excluded by me:** the hand knocked a glass while reaching for a far one, 37 cm from my edge and 30 cm to the side, beyond the robot's reach. I judged it a poor example and removed it from later tests. Counting it, Task 2 is 8 of 9 with Claude |
 | `task2_triangle_take6`, glasses on both sides | 3 of 3 moves | **Failed:** glasses knocked or tilted. The same layout also failed all 12 simulator runs, including a changed order and one glass moved closer. **With `--two-arms`, it built the triangle,** tower 0.2 cm off |
 | `task2_triangle_take3`, `take4`, `take7`, `take8` | **Refused:** a starting glass was missed | Not run |
 | `task2_triangle_left_take1`, my first video | **Refused:** 8 spots found, 6 expected | Not run. An earlier version read it, and the robot couldn't reach a glass on its far left |
