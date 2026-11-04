@@ -134,14 +134,21 @@ class RobotEnv:
     def use_arm(self, arm: str) -> None:
         """Hand the work to the other arm, with both hands going around the glasses.
 
-        Moving straight between poses sweeps a hand through anything in the way. So each
-        hand stays above the glasses and passes a point out beside the body and off the
-        table. Only the arm doing the work is controlled, so an idle arm must be out of the way.
+        Moving straight between poses sweeps a hand through anything in the way. So the old
+        hand rises straight up, both hands pass a point out beside the body and off the
+        table at that height, and the new hand comes down only once over the table's middle.
+        The waist stays still meanwhile. Only the arm doing the work is controlled, so an
+        idle arm must be out of the way.
         """
         if arm == self.motion.arm:
             return
         old_side = self.motion.arm
-        self.move_hand(self._beside_body(old_side))
+        # Rise straight up first, so the hand leaves without brushing anything, and keep
+        # the waist still: a sharp twist here once swung the body into the table.
+        raised = self.hand_position.copy()
+        raised[2] = max(raised[2], HANDOVER_POINT[2])
+        self.move_hand(raised, keep_waist=True)
+        self.move_hand(self._beside_body(old_side), keep_waist=True)
         hanging = dict(
             zip(
                 (f"{old_side}_{name}_joint" for name in ARM_JOINTS),
@@ -160,7 +167,10 @@ class RobotEnv:
             raise ValueError(f"{beside} is out of the {arm} arm's reach")
         self.move_joints(self._arm_targets(solved.qpos), HANDOVER_SECONDS)
         self._rotation = rotation
-        self.move_hand(np.array(self.motion.home_position))
+        # Come in high, above everything on the table, then down to the usual start.
+        home = np.array(self.motion.home_position)
+        self.move_hand(np.array([home[0], home[1], HANDOVER_POINT[2]]), keep_waist=True)
+        self.move_hand(home)
 
     @staticmethod
     def _beside_body(side: str) -> np.ndarray:

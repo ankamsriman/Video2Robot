@@ -1,0 +1,120 @@
+[
+ {
+  "video": "task2_triangle_right_take1",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "right",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.2,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take2",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.6,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take3",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "left",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.3,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take4",
+  "setup": "A",
+  "success": true,
+  "failed_at": "cup_c: reach",
+  "arm": [
+   "left",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.5,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take5",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "left",
+   "left"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.5,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take6",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "left",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.2,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take7",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.4,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_take8",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "left",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.2,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_check",
+  "setup": "A",
+  "success": false,
+  "refused": "Could not open video: /Users/ankamsriman/Desktop/study/Robotics/Hackthons/Video2Robot/data/raw/task2_triangle_check.mov"
+ }
+]

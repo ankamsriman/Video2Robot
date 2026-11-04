@@ -29,8 +29,10 @@ import yaml
 
 from src.keyframe_selector.hand_detector import track_both_hands
 from src.perception.glass_tracker import (
+    GLASSES_IN_TRIANGLE,
     SPOTS_IN_FLIP,
     GlassVideoConfig,
+    Spot,
     TriangleDemo,
     VideoReadError,
     find_tops,
@@ -49,11 +51,18 @@ from src.perception.hand_trajectory import (
 )
 from src.perception.table_view import TableView, refine_corners, table_view
 from src.perception.vlm_rescue import (
+    arrival_frame,
     departure_frame,
+    departure_from_order,
+    drop_clutter,
+    drop_misread_ends,
     missing_points,
     patch_change,
     rescued_spot,
     seen_from_start,
+    trust_model_departures,
+    unseen_ends,
+    unused_glasses,
 )
 from src.reasoning.fit_layout import (
     Area,
@@ -123,13 +132,21 @@ def rough_corners(video: Path, labels: Path = LABELS) -> np.ndarray:
     raise VideoReadError(f"No table corners for {video.name} in {labels}")
 
 
-def glasses_from_model(video: Path) -> list[tuple[float, float]]:
-    """Ask a vision language model where every glass top is, early in the video, in pixels."""
+def glasses_from_model(video: Path, at_end: bool = False) -> list[tuple[float, float]]:
+    """Ask a vision language model where every glass top is, in pixels.
+
+    It looks early in the video, or with `at_end` near its end, where the glasses finished.
+    """
     raw = yaml.safe_load(CONFIG_PATH.read_text())
     vlm = VlmConfig(**raw["vlm"])
     rescue = raw["vlm_rescue"]
     capture = cv2.VideoCapture(str(video))
-    capture.set(cv2.CAP_PROP_POS_MSEC, rescue["frame_seconds"] * 1000)
+    if at_end:
+        count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        before = round(rescue["end_seconds"] * capture.get(cv2.CAP_PROP_FPS))
+        capture.set(cv2.CAP_PROP_POS_FRAMES, max(count - 1 - before, 0))
+    else:
+        capture.set(cv2.CAP_PROP_POS_MSEC, rescue["frame_seconds"] * 1000)
     ok, frame = capture.read()
     capture.release()
     if not ok:
@@ -148,6 +165,7 @@ def read_video(
     video: Path,
     config: GlassVideoConfig,
     model_points: list[tuple[float, float]] | None = None,
+    end_points: list[tuple[float, float]] | None = None,
 ) -> tuple[TriangleDemo, bool]:
     """Return what the video shows, and whether it shows a flipped fourth glass.
 
@@ -170,7 +188,9 @@ def read_video(
     tops = []
     ending = []
     points = model_points or []
-    rescue = yaml.safe_load(CONFIG_PATH.read_text())["vlm_rescue"] if points else {}
+    finals = end_points or []
+    rescue = yaml.safe_load(CONFIG_PATH.read_text())["vlm_rescue"] if points or finals else {}
+    end_patches: list[list[np.ndarray]] = [[] for _ in finals]
     references: list = []
     changes: list[list[float]] = [[] for _ in points]
     while True:
@@ -178,6 +198,10 @@ def read_video(
         if not ok:
             break
         tops.append(find_tops(frame, table, search, config))
+        if finals:
+            gray_now = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            for index, point in enumerate(finals):
+                end_patches[index].append(_patch(gray_now, point, rescue["patch_half_pixels"]))
         if points:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             half = rescue["patch_half_pixels"]
@@ -193,11 +217,37 @@ def read_video(
             ending.append(frame)
     capture.release()
     spots = rest_spots(tops, fps, view, config)
+    unused: list = []
+    if points and finals:
+        spots, points, changes, finals, end_patches, unused = _set_aside_unused(
+            spots, points, changes, finals, end_patches, fps, rescue, config
+        )
+    unknown: list = []
     if points:
-        spots = _add_rescued(spots, points, changes, fps, rescue)
+        spots, unknown = _add_rescued(spots, points, changes, fps, rescue)
+    if points and finals:
+        departures = [
+            None if left is None else left + rescue["reference_frame"]
+            for left in (
+                departure_frame(
+                    np.array(series), rescue["change_threshold"], fps, rescue["settle_seconds"]
+                )
+                for series in changes
+            )
+        ]
+        spots, gone = trust_model_departures(
+            spots, points, finals, departures, len(tops) - 1, fps,
+            config.run_gap_seconds, rescue["near_pixels"],
+        )  # fmt: skip
+        unknown = [*unknown, *gone]
+    if finals:
+        spots = _match_ends(spots, finals, end_patches, fps, rescue, config, len(unknown))
+    spots = _add_unseen_departure(spots, unknown, fps, rescue) if unknown else spots
+    untouched = tuple(view.position(point, config.glass_height) for point in unused)
     if len(spots) != SPOTS_IN_FLIP:
-        return read_triangle(spots, view, fps, config), False
-    demo = read_flip(spots, view, fps, config)
+        demo = read_triangle(spots, view, fps, config)
+        return dataclasses.replace(demo, untouched=untouched), False
+    demo = dataclasses.replace(read_flip(spots, view, fps, config), untouched=untouched)
     last_frame = np.median(np.stack(ending), axis=0).astype(np.uint8)
     if not opening_faces_up(last_frame, demo, view, config):
         raise VideoReadError(
@@ -283,8 +333,76 @@ def follow_instruction(
     return chosen, flip, left_out, report
 
 
-def _add_rescued(spots, points, changes, fps, rescue) -> tuple:
-    """Add a starting spot for each glass the model found and the reader missed."""
+def _set_aside_unused(spots, points, changes, finals, end_patches, fps, rescue, config):
+    """Take glasses that never moved out of the task, as the model and the reader agree."""
+    departures = [
+        departure_frame(np.array(series), rescue["change_threshold"], fps, rescue["settle_seconds"])
+        for series in changes
+    ]
+    last = len(end_patches[0]) - 1
+    near = rescue["near_pixels"]
+    unused = unused_glasses(
+        points, finals, spots, departures, last, fps, config.run_gap_seconds, near
+    )
+    if not unused:
+        return spots, points, changes, finals, end_patches, unused
+
+    def is_unused(point) -> bool:
+        return any(np.hypot(point[0] - u[0], point[1] - u[1]) <= near for u in unused)
+
+    logger.warning("%d glass(es) never moved, so they take no part: %s", len(unused), unused)
+    keep_start = [i for i, point in enumerate(points) if not is_unused(point)]
+    keep_end = [i for i, point in enumerate(finals) if not is_unused(point)]
+    return (
+        tuple(spot for spot in spots if not is_unused((spot.x, spot.y))),
+        [points[i] for i in keep_start],
+        [changes[i] for i in keep_start],
+        [finals[i] for i in keep_end],
+        [end_patches[i] for i in keep_end],
+        unused,
+    )
+
+
+def _patch(gray: np.ndarray, point: tuple[float, float], half: int) -> np.ndarray:
+    x, y = int(point[0]), int(point[1])
+    return gray[max(y - half, 0) : y + half, max(x - half, 0) : x + half].astype(float)
+
+
+def _match_ends(spots, finals, patches, fps, rescue, config, unknown: int = 0) -> tuple:
+    """Check the glasses at the end against the model's view of the last frames.
+
+    A spot still there at the end that matches no glass the model saw is a misread, and is
+    dropped. For a triangle, a glass the model saw that the reader missed, such as a dim
+    top, is added; when it arrived is measured from a patch of the picture at its spot.
+    """
+    last = len(patches[0]) - 1
+    gap, near = config.run_gap_seconds, rescue["near_pixels"]
+    spots = drop_misread_ends(spots, finals, last, fps, gap, near)
+    starts = [spot for spot in spots if spot.first / fps <= rescue["early_seconds"]]
+    if len(starts) + unknown != GLASSES_IN_TRIANGLE:
+        return spots
+    reference = max(last - round(rescue["end_seconds"] * fps), 0)
+    added = []
+    for point in unseen_ends(spots, finals, last, fps, gap, near):
+        series = patches[finals.index(point)]
+        change = np.array(
+            [float(np.mean(np.abs(patch - series[reference]))) for patch in series[: reference + 1]]
+        )
+        arrived = arrival_frame(change, rescue["change_threshold"], fps, rescue["settle_seconds"])
+        if arrived is None:
+            logger.warning("A glass the model saw at the end at %s never seemed to arrive", point)
+            continue
+        added.append(Spot(float(point[0]), float(point[1]), arrived, last, last - arrived + 1))
+    if added:
+        logger.warning("Added %d end glass(es) the reader missed", len(added))
+    return tuple(sorted((*spots, *added), key=lambda spot: spot.first))
+
+
+def _add_rescued(spots, points, changes, fps, rescue) -> tuple[tuple, list]:
+    """Drop bright clutter, and add a starting spot for each glass the reader missed."""
+    spots = drop_clutter(
+        spots, points, fps, rescue["early_seconds"], rescue["near_pixels"]
+    )
     spots = seen_from_start(
         points, spots, fps, rescue["early_seconds"], rescue["near_pixels"]
     )
@@ -292,6 +410,7 @@ def _add_rescued(spots, points, changes, fps, rescue) -> tuple:
         points, spots, fps, rescue["early_seconds"], rescue["near_pixels"]
     )
     added = []
+    unknown = []
     for point in missing:
         index = points.index(point)
         series = np.array(changes[index])
@@ -300,10 +419,25 @@ def _add_rescued(spots, points, changes, fps, rescue) -> tuple:
         )
         if left is None:
             logger.warning("A glass the model found at %s never seemed to leave", point)
+            unknown.append(point)
             continue
         added.append(rescued_spot(point, left + rescue["reference_frame"]))
     logger.warning("Added %d starting glass(es) the reader missed", len(added))
-    return tuple(sorted((*spots, *added), key=lambda spot: spot.first))
+    return tuple(sorted((*spots, *added), key=lambda spot: spot.first)), unknown
+
+
+def _add_unseen_departure(spots, unknown, fps, rescue) -> tuple:
+    """Give the one starting glass whose leaving wasn't seen a departure, from the order."""
+    if len(unknown) != 1:
+        return spots
+    early = rescue["early_seconds"] * fps
+    starts = [spot.last for spot in spots if spot.first <= early]
+    landings = [spot.first for spot in spots if spot.first > early]
+    left = departure_from_order(starts, landings)
+    if left is None:
+        return spots
+    logger.warning("Worked out when the glass at %s left, from the order of moves", unknown[0])
+    return tuple(sorted((*spots, rescued_spot(unknown[0], left)), key=lambda spot: spot.first))
 
 
 def _model_prefers_two_arms(starts, tower, scene: SceneConfig, report: dict) -> bool:
@@ -372,6 +506,9 @@ def run_robot(
     `left_out` is a glass that stays on the table untouched, as when an instruction asks
     for a triangle from a video with four glasses.
     """
+    if left_out is None and demo.untouched and not is_flip:
+        left_out = demo.untouched[0]
+        notes = {**(notes or {}), "untouched_glass_from_video": _rounded(left_out)}
     path = FLIP_CONFIG_PATH if is_flip or left_out is not None else CONFIG_PATH
     scene = load_scene_config(path)
     motion = load_motion_config(path)
@@ -521,11 +658,12 @@ def main() -> None:
     config = GlassVideoConfig(**raw)
     try:
         points = glasses_from_model(args.video) if args.find_glasses else None
+        finals = glasses_from_model(args.video, at_end=True) if args.find_glasses else None
     except InstructionError as error:
         logger.error("Couldn't ask the vision model for glasses: %s", error)
         raise SystemExit(1) from error
     try:
-        demo, is_flip = read_video(args.video, config, points)
+        demo, is_flip = read_video(args.video, config, points, finals)
     except VideoReadError as error:
         logger.error("Couldn't read %s: %s", args.video.name, error)
         raise SystemExit(1) from error

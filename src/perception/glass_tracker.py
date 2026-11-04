@@ -66,6 +66,8 @@ class TriangleDemo:
     ends: tuple[np.ndarray, np.ndarray, np.ndarray]
     moved_at: tuple[float, ...]
     top_offset: float | None
+    # Glasses on the table that took no part, at their table positions.
+    untouched: tuple[np.ndarray, ...] = ()
 
     @property
     def top_seen(self) -> bool:

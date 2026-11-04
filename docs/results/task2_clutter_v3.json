@@ -1,0 +1,58 @@
+[
+ {
+  "video": "task2_triangle_clutter_take1",
+  "setup": "B",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "right",
+   "right",
+   "right"
+  ],
+  "model_chose": null,
+  "tower_error_cm": 0.2,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_clutter_take1",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "right",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.2,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_clutter_take2",
+  "setup": "B",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "right",
+   "right",
+   "right"
+  ],
+  "model_chose": null,
+  "tower_error_cm": 0.4,
+  "refused": null
+ },
+ {
+  "video": "task2_triangle_clutter_take2",
+  "setup": "A",
+  "success": true,
+  "failed_at": null,
+  "arm": [
+   "right",
+   "right",
+   "right"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 0.4,
+  "refused": null
+ }
+]

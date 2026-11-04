@@ -76,6 +76,7 @@ vlm_rescue:
   patch_half_pixels: 12
   change_threshold: 45
   settle_seconds: 1.0
+  end_seconds: 0.5            # the model also looks this long before the video ends
 
 # The outcome model, a small learned predictor, trained on saved runs in docs/results.
 outcome_model:

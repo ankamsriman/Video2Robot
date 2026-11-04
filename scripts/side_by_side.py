@@ -116,6 +116,7 @@ def main() -> None:
         action="store_true",
         help="use the robot run that copied the hand's path",
     )
+    parser.add_argument("--robot", type=Path, help="a specific robot video to put beside it")
     parser.add_argument(
         "--show-hand",
         action="store_true",
@@ -127,7 +128,9 @@ def main() -> None:
     suffix = f"{suffix}_hand_path" if args.hand_path else suffix
     source = "order from this video, positions moved to fit" if args.fitted else "from this video"
     person, fps = _read_all(args.video)
-    robot, robot_fps = _read_all(output / f"robot{suffix}.mp4")
+    robot_path = args.robot or output / f"robot{suffix}.mp4"
+    suffix = f"_{robot_path.stem.removeprefix('robot_')}" if args.robot else suffix
+    robot, robot_fps = _read_all(robot_path)
     speed = (len(robot) / robot_fps) / (len(person) / fps)
     robot_label = f"G1 in simulation, {source} ({speed:.1f}x speed)"
     person_label = "Recorded person"
