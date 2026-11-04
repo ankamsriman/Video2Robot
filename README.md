@@ -267,7 +267,7 @@ sam_reader:
 |---|:---:|:---:|---|
 | **Task A**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
 | **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
-| **Task A**, all 21 videos I kept, final system | not run | **19 of 21** | Failures: sunlight and clutter take 4, both with the triangle built too close to the robot's chest. 3 of the 21 (takes 9–11, a plain table) were recorded after all the fixes and all built. 2 other videos were deleted as beyond the robot's reach, both failures; counting them, 19 of 23 |
+| **Task A**, all 24 videos I kept, final system | not run | **20 of 24** | Failures: two triangles built too close to the robot's chest (sunlight, clutter take 4), glasses starting at the table's far corners (out of reach), and a 4× fast move with a high lift (refused: two rests too short to read). Recorded after every fix and all fair tests: plain takes 9–11 and a 4× fast move with a low lift built. 2 other videos were deleted as beyond reach; counting them, 20 of 26 |
 | **Task B**, all 12 of my videos | 2 of 9 | **2 of 12** | Most failures are glasses beyond a robot that can't walk. The 3 newest, on cluttered tables, are read correctly by Claude's rules, but the glasses are out of reach |
 
 **What the robot can do, with exact simulator positions:**
@@ -318,6 +318,7 @@ Each idea came from counting the failures of the one before. The full record, ab
 - **Optional services:** Claude needs an API key and sends two frames per video to Anthropic. SAM 2 is slow on a CPU.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not its own camera.
 - **No clutter in the simulation:** clutter is recognised and ignored in the video, but not placed on the simulated table, and the robot doesn't plan its arm around obstacles.
+- **Very fast moves with a high lift:** at 4× speed with the glasses lifted high, the reader missed two of the moments a glass sits still and refused the video (the same speed with a low lift worked).
 - **Where the glasses go matters:** a triangle built near the person's edge of the table sits against the robot's chest, and the arm swap can then twist the body into the glasses. Build near the middle, about 20–27 cm from your edge.
 
 **Next steps:**

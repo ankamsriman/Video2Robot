@@ -1,0 +1,8 @@
+[
+ {
+  "video": "task2_triangle_fast_high",
+  "setup": "A",
+  "success": false,
+  "refused": "Expected 6 resting spots for a triangle, found 4"
+ }
+]
