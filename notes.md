@@ -1274,6 +1274,21 @@ Claude now costs about 1–2 cents a video (2 pictures).
 
 **What these don't show:** each rule came from the video that failed, so those videos are "not a fair test" once fixed. A fresh video is the honest check.
 
+### Version 4: SAM 2 follows each glass by its shape (optional)
+**SAM 2** (Segment Anything 2, from Meta) outlines any object you click on, and keeps outlining it through a video. We use its smallest model, "tiny", 156 MB.
+
+**How it's used:**
+1. Claude points at each glass in the first frame. Those points are SAM 2's clicks.
+2. SAM 2 outlines each glass in every third frame, all the way to the end, even while it's in your hand.
+3. Each outline's track gives that glass's own start, **when it left** (the outline moved away and stayed away), and **where it ended**.
+4. These become ordinary resting spots, so all the usual checks still run: the order of moves, which glass is on top, the triangle's shape.
+
+**Worked example: your sunlight video.** The shiny-top reader, confused by the new light, timed the moves at 2.6, 3.4 and 8.2 s. Watching the video, the glasses really left at about 2.7, 9 and 15 s. SAM 2 said **2.7, 8.9 and 14.5 s**. It never took the laptop stand, tube or plug for a glass.
+
+**Its catch: speed.** On this Mac it took about 70 minutes for a 21-second video, though other jobs were running. On a proper GPU it would take about a minute. So it's an option: run `scripts/sam_track_glasses.py` once (it saves the tracks), then add `--sam-tracks`.
+
+**Why it's better than shiny tops:** each track keeps its glass's identity, so it knows directly which start became which end. The reader had to guess that from the order of events.
+
 ### The API key, and an expensive lesson
 The key lives only in `.env`, a file git ignores, under the name **`VIDEO2ROBOT_CLAUDE_KEY`**.
 
