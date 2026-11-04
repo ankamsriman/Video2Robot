@@ -142,5 +142,14 @@ I pointed out that testing live control on a recorded video means little if the 
 
 My API balance was draining: VS Code loads `.env` into terminals, and Claude Code used the key under its standard name. The project's key is now `VIDEO2ROBOT_CLAUDE_KEY`.
 
+### Fresh hard videos, Claude reading both ends, and SAM 2 (4 Nov, day)
+I recorded fresh videos meant to confuse the system: cluttered tables, a 4th glass never moved, a glass the right way up, a steel laptop stand, a plug moved mid-video, and sunlight only. Each was first run with nothing changed: **0 of 7 built on their fair first run.** Each failure led to one rule. My main idea was that Claude should read the **last** frame as well as the first, because shiny tops depend on lighting. After the rules, 6 of the 7 build, and 13 of 14 Task 2 videos within reach do (not a fair test).
+
+I asked why we didn't just use Claude for everything. It costs about a cent per picture, so it reads the first and last frames, and the free frame-by-frame reader times the moves. I also suggested keeping the arms off the table during a swap, which rescued hard takes 1 and 2. I later saw the idle left hand touching the table; a contact log confirmed it, and leaving the idle arm raised fixed it. Copying my side order was tried and made optional, because it broke two videos.
+
+SAM 2.1 tiny, in a separate environment, followed each glass by shape. In sunlight it timed the moves correctly where shiny tops didn't, but it takes about 70 minutes a video on this Mac. VLA, RL and ACT were written up rather than built: they need a GPU and robot demonstrations.
+
+The session stopped from about 09:30 to 19:20, and jobs left running in the background were lost. Rerunning Task 3 then exposed two triangle-only rules misreading flips, which are now fixed: Task 3 is back to 2 of 9.
+
 ### Still open
 Raising the API limit, new videos to test the VLM fairly, making the repo public, and submitting. The data collection note needs your details. You decide when the repo goes public.
