@@ -1,0 +1,16 @@
+[
+ {
+  "video": "task2_triangle_take14",
+  "setup": "A",
+  "success": false,
+  "failed_at": "cup_b: place",
+  "arm": [
+   "right",
+   "left",
+   "left"
+  ],
+  "model_chose": "two",
+  "tower_error_cm": 2.0,
+  "refused": null
+ }
+]

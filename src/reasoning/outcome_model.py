@@ -72,3 +72,13 @@ def train(
         gradient = x.T @ (predicted - y) / len(y) + shrink * weights
         weights = weights - step * gradient
     return OutcomeModel(weights)
+
+
+def prefer_two_arms(chances: dict[str, float], margin: float) -> bool:
+    """Use two arms unless one arm's predicted chance is clearly higher, by more than `margin`.
+
+    Two arms let each glass be taken by the arm on its side, so a near tie goes to them.
+    """
+    return chances["nearest"] - chances["two"] <= margin and (
+        margin > 0 or chances["two"] > chances["nearest"]
+    )

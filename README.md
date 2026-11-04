@@ -267,7 +267,7 @@ sam_reader:
 |---|:---:|:---:|---|
 | **Task A**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
 | **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
-| **Task A**, all 24 videos I kept, final system | not run | **20 of 24** | Failures: two triangles built too close to the robot's chest (sunlight, clutter take 4), glasses starting at the table's far corners (out of reach), and a 4× fast move with a high lift (refused: two rests too short to read). Recorded after every fix and all fair tests: plain takes 9–11 and a 4× fast move with a low lift built. 2 other videos were deleted as beyond reach; counting them, 20 of 26 |
+| **Task A**, all 27 videos I kept, final system | not run | **20 of 27** | Developed on many of them. **On fair tests only, 6 of 12.** Failures: triangles built too close to the robot's chest (3), glasses at the far corners, and very quick moves (3, two refused). 2 more videos deleted as beyond reach; counting them, 20 of 29 |
 | **Task B**, all 12 of my videos | 2 of 9 | **2 of 12** | Most failures are glasses beyond a robot that can't walk. The 3 newest, on cluttered tables, are read correctly by Claude's rules, but the glasses are out of reach |
 
 **What the robot can do, with exact simulator positions:**
@@ -286,6 +286,10 @@ sam_reader:
 - [SAM 2 in sunlight](docs/videos/sam2_sunlight_tracks.mp4)
 - [Task A](docs/videos/task2_video_to_robot.mp4)
 - [Task B](docs/videos/task3_new_video_to_robot.mp4)
+
+**📊 Analysis with charts: [`docs/ANALYSIS.md`](docs/ANALYSIS.md).** Where on the table the robot succeeds and fails (shaded maps, one arm against two), every real video grouped by result, what Claude and the logistic regression model each add, and what the failures have in common.
+
+[![Where on the table Task A works: one arm against two](docs/analysis/task_a_where_it_passes.png)](docs/ANALYSIS.md)
 
 **Every result in detail**, with each video, each check and each comparison: [`docs/RESULTS_IN_DETAIL.md`](docs/RESULTS_IN_DETAIL.md).
 

@@ -77,7 +77,7 @@ from src.reasoning.fit_layout import (
     plan_stand,
 )
 from src.reasoning.instruction import InstructionError, choose_glasses
-from src.reasoning.outcome_model import MODES, features, table_cm, train
+from src.reasoning.outcome_model import MODES, features, prefer_two_arms, table_cm, train
 from src.reasoning.vlm_client import (
     AnthropicVision,
     VlmConfig,
@@ -523,7 +523,8 @@ def _add_unseen_departure(spots, unknown, fps, rescue) -> tuple:
 
 def _model_prefers_two_arms(starts, tower, scene: SceneConfig, report: dict) -> bool:
     """Train the outcome model on saved runs, and ask which way it expects to work."""
-    seeds = yaml.safe_load(CONFIG_PATH.read_text())["outcome_model"]["training_seeds"]
+    settings = yaml.safe_load(CONFIG_PATH.read_text())["outcome_model"]
+    seeds = settings["training_seeds"]
     rows = []
     for seed in seeds:
         for mode in MODES:
@@ -534,8 +535,9 @@ def _model_prefers_two_arms(starts, tower, scene: SceneConfig, report: dict) -> 
     cm_starts = [table_cm(start, edge) for start in starts]
     cm_tower = table_cm(tower, edge)
     chances = {mode: round(model.chance(cm_starts, cm_tower, mode), 2) for mode in MODES}
-    report["outcome_model"] = {"predicted_chance": chances, "chose": max(chances, key=chances.get)}
-    return chances["two"] > chances["nearest"]
+    two = prefer_two_arms(chances, settings.get("two_arms_margin", 0.0))
+    report["outcome_model"] = {"predicted_chance": chances, "chose": "two" if two else "nearest"}
+    return two
 
 
 def _to_robot(place: np.ndarray, scene: SceneConfig, table_width: float) -> np.ndarray:

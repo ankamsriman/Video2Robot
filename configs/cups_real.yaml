@@ -86,6 +86,7 @@ sam_reader:
 # The outcome model, a small learned predictor, trained on saved runs in docs/results.
 outcome_model:
   training_seeds: [8500, 8800, 8900]
+  two_arms_margin: 0.10         # use two arms unless one arm's predicted chance is higher by more than this
 
 # Copying the person's hand path from a video, within what's safe for the robot.
 hand_path:

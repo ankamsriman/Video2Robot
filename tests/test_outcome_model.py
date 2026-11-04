@@ -39,3 +39,22 @@ def test_chances_are_between_zero_and_one() -> None:
     chance = model.chance(STARTS, (30.0, 10.0), "two")
 
     assert 0.0 <= chance <= 1.0
+
+
+def test_two_arms_win_a_near_tie() -> None:
+    from src.reasoning.outcome_model import prefer_two_arms
+
+    assert prefer_two_arms({"nearest": 0.48, "two": 0.46}, margin=0.10)
+
+
+def test_one_arm_wins_only_when_clearly_better() -> None:
+    from src.reasoning.outcome_model import prefer_two_arms
+
+    assert not prefer_two_arms({"nearest": 0.80, "two": 0.60}, margin=0.10)
+    assert prefer_two_arms({"nearest": 0.80, "two": 0.60}, margin=0.25)
+
+
+def test_no_margin_keeps_the_plain_comparison() -> None:
+    from src.reasoning.outcome_model import prefer_two_arms
+
+    assert not prefer_two_arms({"nearest": 0.48, "two": 0.46}, margin=0.0)
