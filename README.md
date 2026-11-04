@@ -238,8 +238,8 @@ sam_reader:
 | Task | Without AI | With Claude | Notes |
 |---|:---:|:---:|---|
 | **Task 2**, my first 9 videos | 4 of 9 | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
-| **Task 2**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | — | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes |
-| **Task 2**, all 14 videos within reach, final system | — | **13 of 14** | Take 4's third glass sits at the edge of reach |
+| **Task 2**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
+| **Task 2**, all 16 of my videos, final system | not run | **13 of 16** (13 of 15 without the one I excluded) | Failures: take 4 (a glass at the edge of reach), sunlight (tower too close), and the excluded video (a glass beyond reach) |
 | **Task 3** | 2 of 9 | 2 of 9 | Most failures are glasses beyond a robot that can't walk |
 
 **What the robot can do, with exact simulator positions:**
