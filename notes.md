@@ -51,7 +51,7 @@ Imagine you sit at a table and film yourself putting an apple in a box. You hand
 
 Doing this on a real humanoid would be expensive and risky, so we use a **simulator**: a program that acts like a video game with accurate physics. If the robot's fingers don't squeeze hard enough in the simulator, the object really does slip.
 
-**Where we are (5 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task A, the triangle, it builds 20 of the 28 videos kept (20 of 30 counting 2 deleted as out of reach). For Task B, the flip, it builds 2 of 12; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
+**Where we are (5 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task A, the triangle, it builds 20 of the 26 videos kept (20 of 30 counting 4 deleted as out of reach). For Task B, the flip, it builds 2 of 12; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
 
 **To read the project as a story of ideas, from the first failure to today, start with chapter 21.** Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 20 has the numbers to quote.
 

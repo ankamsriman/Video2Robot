@@ -267,7 +267,7 @@ sam_reader:
 |---|:---:|:---:|---|
 | **Task A**, my first 9 videos | 3 of 9 (4 with two arms) | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. One video, a glass beyond the robot's reach, was later excluded by me |
 | **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
-| **Task A**, all 28 videos I kept, final system | not run | **20 of 28** | Developed on many of them. **On fair tests only, 6 of 13.** Failures: triangles built too close to the robot's chest (3), glasses at the far corners, very quick moves (3, all refused), and a glass carried across the robot's body to a triangle far to one side (take 15). 2 more videos deleted as beyond reach; counting them, 20 of 30 |
+| **Task A**, all 26 videos I kept, final system | not run | **20 of 26** | Developed on many of them. **On fair tests only, 6 of 11.** Failures: triangles built too close to the robot's chest (2), glasses at the far corners, and very quick moves (3, all refused). 4 more videos deleted as beyond the robot's reach, all failures; counting them, 20 of 30 |
 | **Task B**, all 12 of my videos | 2 of 9 (first 9) | **2 of 12** | Most failures are glasses beyond a robot that can't walk. The 3 newest, on cluttered tables, are read correctly by Claude's rules, but the glasses are out of reach |
 
 **What the robot can do, with exact simulator positions:**
