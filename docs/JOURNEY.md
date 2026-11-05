@@ -153,6 +153,7 @@ Fresh videos with shiny clutter that moves: a plug, a charger, an earbud case, a
 | 10.8 | Harder fresh videos | No change: glasses at the corners; moves 4× faster with a low lift; 4× faster with a high lift | 3 real videos | Fast, low lift: **built**, 0.2 cm off. Corners: read correctly, robot **failed at reach** (far corner). Fast, high lift: **refused**, 4 of 6 rests found | Kept; limits recorded |
 | 10.9 | Take 14 (slow moves) read correctly, but the robot used one arm and reached across its body for a glass on its right | Bias the logistic regression model toward two arms: one arm only if its predicted chance is more than 10 points higher | Take 14 | Still failed, but tower 30 → **2 cm** off. My observation: it fails when a glass is carried from one far side to the other, close to the robot | Kept (`two_arms_margin: 0.10`); other videos not yet rechecked |
 | 10.10 | Quick takes 12, 13 | No change | 2 real videos | Both refused: the reader's timing of quick moves was impossible | Open |
+| 10.11 | Take 15: triangle far to the robot's right; the left arm carried two glasses across the body | Tried: build a far-to-one-side triangle with that side's arm only | Not run to the end | Reverted at my request before testing | Dropped |
 
 ## Ideas discussed but not built
 - **A recurrent network (RNN/GRU) trained on demos.** Suggested in a plan, but not built: there was no time to collect training data. Nothing in this project is trained except the 16-weight logistic regression model.

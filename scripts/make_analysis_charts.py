@@ -31,6 +31,7 @@ REAL_GROUPS = [
     ("Task A: plain takes 9-11\n(fair test, after all fixes)", 3, 0, 0),
     ("Task A: fast, fast + high lift,\ncorners (fair test)", 1, 1, 1),
     ("Task A: quick takes 12-14\n(fair test)", 0, 1, 2),
+    ("Task A: take 15, triangle far\nto one side (fair test)", 0, 1, 0),
     ("Task B: all 12 videos", 2, 6, 4),
 ]
 

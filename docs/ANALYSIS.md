@@ -25,9 +25,10 @@ Every chart here comes from saved runs in [`results/`](results/). The robot is a
 | Task A, plain takes 9–11 | **3 of 3** | **Fair test:** recorded after every fix, camera moved, nothing changed |
 | Task A, fast / fast + high lift / corners | **1 of 3** | **Fair test.** Fast with a low lift built; a high lift at 4× speed was refused (two rests too short to see); corners were out of reach |
 | Task A, quick takes 12–14 | **0 of 3** | **Fair test.** Quick moves confused the timing (12, 13 refused); take 14 was read correctly but built against the robot's chest |
+| Task A, take 15 | **0 of 1** | **Fair test.** Read correctly; the triangle was far to the robot's right and the left arm carried glasses across the body to it |
 | Task B, all 12 videos | 2 of 12 | Most glasses are beyond a robot that can't walk; the 3 cluttered takes were read correctly |
 
-**Task A in total: 20 of 27 videos kept** (20 of 29 counting 2 deleted as out of reach). **On fair tests only** (cluttered takes 4–6 and everything recorded after the last fix): **6 of 12**. Both numbers matter: the system works on videos like the ones it was built on, and new kinds of video (very fast moves, glasses at the corners, triangles near the robot's chest) still find its limits.
+**Task A in total: 20 of 28 videos kept** (20 of 30 counting 2 deleted as out of reach). **On fair tests only** (cluttered takes 4–6 and everything recorded after the last fix): **6 of 13**. Both numbers matter: the system works on videos like the ones it was built on, and new kinds of video (very fast moves, glasses at the corners, triangles near the robot's chest) still find its limits.
 
 ---
 
@@ -83,7 +84,7 @@ Simulator layouts drawn on my camera's view, where one choice built the triangle
 | Cause | Videos | Fix it would need |
 |---|---|---|
 | Triangle built against the robot's chest | Sunlight, clutter take 4, take 14 | Let the robot step back, or test and tune that strip of the table |
-| A glass carried from one far side to the other, close to the robot's body | Take 14: a glass starting at one far side is carried across to the triangle near the robot's chest, so the arm crosses the body at close range | Two arms helped (tower 30 → 2 cm off) but not enough; build the triangle further in |
+| A glass carried from one far side to the other, close to the robot's body | Takes 14 and 15: a glass starting at one far side is carried across to the triangle near the robot's chest, so the arm crosses the body at close range | Two arms helped (tower 30 → 2 cm off) but not enough; build the triangle further in |
 | Glasses beyond reach | Task B takes 2, 3, 7, clutter 1, 2; Task A corners | Let the robot walk or step to the side |
 | Moves too quick to time | Fast + high lift, takes 12, 13 | Accept short pauses, or use Claude's start and end positions when the timing is impossible |
 | A starting glass missed | Task B takes 4, 5, 8, clutter 3 | Better reading for the flip |
