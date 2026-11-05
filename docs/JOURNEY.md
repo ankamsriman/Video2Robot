@@ -170,4 +170,4 @@ Fresh videos with shiny clutter that moves: a plug, a charger, an earbud case, a
 | Task B flip, simulator | 1 of 9 → 1 of 12 → 5 of 12 → 9 of 15 → 21 of 24 → 50 of 50 |
 | Real glasses, robot body | 0 of 6 → 28 of 30 |
 | Task A, real videos | 1 video → 4 of 9 → **8 of 9** with Claude → fresh cluttered takes 4–6: **2 of 3** built, 3 of 3 read → fresh plain takes 9–11: **3 of 3** → **19 of 21** kept → corners and fast tests: **1 of 3** → **20 of 24** kept videos (20 of 26 with the 2 deleted) |
-| Task B, real videos | 1 video → 0 of 6 varied → **2 of 9**, and take 2 promising with the robot closer |
+| Task B, real videos | 1 video → 0 of 6 varied → **2 of 9**, and take 2 promising with the robot closer → **2 of 8** today |

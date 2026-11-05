@@ -1379,15 +1379,13 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 ### Task A: every video I kept (17), final system
 **20 of 26 build.** Two failures are triangles built too close to the robot's chest (the sunlight video and clutter take 4). One started the glasses at the table's far corners, out of the robot's reach. Three moved the glasses very quickly (4× fast with a high lift, and quick takes 12 and 13): the reader couldn't time the moves, so it refused them. Four more videos were deleted as beyond the robot's reach, and all four had failed. Counting them, it's **20 of 30**. Always quote both numbers.
 
-### Task B: the new cluttered video
-It was refused (one resting spot missing). So Task B stands at **2 of 8** videos.
 
-### Task B: the flip (9 real videos)
+### Task B: the flip (8 real videos)
 | | Result |
 |---|---|
-| Built and flipped | **2 of 9** (takes 1 and 9) |
-| Refused while reading the video | 4 (takes 4, 5, 6, 8). With Claude, take 6 is read but then fails |
-| Failed at reach (a glass too far for a robot that can't walk) | takes 2, 3, 7. Standing 10 cm closer, take 2 succeeded (one run, not yet part of the system) |
+| Built and flipped | **2 of 8** (takes 1 and 9) |
+| Refused while reading the video | 4 (takes 4, 5, 8 and the cluttered take 3) |
+| Failed at reach (a glass too far for a robot that can't walk) | takes 2 and 3. Standing 10 cm closer, take 2 succeeded (one run, not yet part of the system) |
 
 ### What the robot can do, with exact simulator positions
 | Test | Result |
@@ -1632,7 +1630,7 @@ You asked about several well-known methods. Here is each one in plain words, wha
 | Task B flip, simulator | 1 of 9 | 50 of 50 |
 | Real glasses, robot body | 0 of 6 | 28 of 30 |
 | Task A, your real videos | 1 video | 4 of 9, and **8 of 9** with Claude |
-| Task B, your real videos | 1 video, then 0 of 6 varied | 2 of 9, and take 2 promising with the robot closer |
+| Task B, your real videos | 1 video, then 0 of 6 varied | 2 of 9, and take 2 promising with the robot closer; now **2 of 8** |
 
 ---
 
