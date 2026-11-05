@@ -7,13 +7,13 @@
 
 > I film myself stacking steel glasses at a table. A simulated Unitree G1 humanoid watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo. It uses no printed marker and no hand-written labels.
 
-[![My annotated demonstration beside the G1 in MuJoCo](docs/images/annotated_demo_vs_robot.gif)](docs/videos/annotated_demo_vs_robot.mp4)
-
-*Task A on a cluttered table. Left: my video, marked with what each reader recognises. **Yellow** discs are shiny tops the CV reader finds, **red** boxes are kept because the CV reader and Claude agree, **teal** boxes are ignored because Claude sees no glass there (a charger, an earbud case, a plug), and **blue / purple** crosses are Claude's glasses at the start / end. Right: the G1 builds the same triangle in MuJoCo. [Full-quality video](docs/videos/annotated_demo_vs_robot.mp4).*
-
 [![Task A, take 11: my video beside the G1 in MuJoCo](docs/images/task2_take11_vs_robot.gif)](docs/videos/task2_take11_vs_robot.mp4)
 
 *Task A, take 11, the whole video: my demonstration on the left, the G1 in MuJoCo on the right. Recorded after every fix and not tuned on; the robot used two arms and built the triangle 0.2 cm from where I did. [Full-quality video](docs/videos/task2_take11_vs_robot.mp4).*
+
+[![My annotated demonstration beside the G1 in MuJoCo](docs/images/annotated_demo_vs_robot.gif)](docs/videos/annotated_demo_vs_robot.mp4)
+
+*Task A on a cluttered table. Left: my video, marked with what each reader recognises. **Yellow** discs are shiny tops the CV reader finds, **red** boxes are kept because the CV reader and Claude agree, **teal** boxes are ignored because Claude sees no glass there (a charger, an earbud case, a plug), and **blue / purple** crosses are Claude's glasses at the start / end. Right: the G1 builds the same triangle in MuJoCo. [Full-quality video](docs/videos/annotated_demo_vs_robot.mp4).*
 
 **▶️ More: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min: cluttered tables, an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight) and [the original demo reel](docs/videos/demo_reel.mp4).
 
