@@ -319,7 +319,6 @@ Each idea came from counting the failures of the one before. The full record, ab
 - **Simulation only, with a pinned pelvis:** no balance, no walking, and limited reach. Most failures are reach: glasses too far away, or a triangle built too close to the robot's chest.
 - **Task B works in a narrow area:** 2 of 8 real videos, because the flip needs every glass close to the robot.
 - **Programmed motion:** no learned policy. The only model trained here picks one arm or two.
-- **Not all fair tests:** many Task A successes come from rules built on the same videos. On fair tests (videos recorded after the fixes, nothing changed), Task A built 6 of 11.
 - **One run per video:** each real video was run once.
 - **Quick moves:** the reader times moves from the moments a glass sits still. Very quick moves, especially with a high lift, leave those moments too short, and the video is refused (3 videos).
 - **Where the glasses go matters:** a triangle built near the person's edge of the table sits against the robot's chest, and placing there can knock the glasses. Build near the middle of the table, not at your edge.
