@@ -1377,7 +1377,7 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 | Copying your hand's carry (`--hand-path`) | takes 1, 2, 5, 6 |
 
 ### Task A: every video I kept (17), final system
-**20 of 24 build.** Two failures are triangles built too close to the robot's chest (the sunlight video and clutter take 4). One started the glasses at the table's far corners, out of the robot's reach. One moved the glasses 4× faster with a high lift: the reader found only 4 of the 6 moments a glass sits still, so it refused the video. The same 4× speed with a low lift built fine. Two more videos were deleted as beyond reach; counting them, it's **20 of 26**. Always quote both numbers.
+**20 of 26 build.** Two failures are triangles built too close to the robot's chest (the sunlight video and clutter take 4). One started the glasses at the table's far corners, out of the robot's reach. Three moved the glasses very quickly (4× fast with a high lift, and quick takes 12 and 13): the reader couldn't time the moves, so it refused them. Four more videos were deleted as beyond the robot's reach, and all four had failed. Counting them, it's **20 of 30**. Always quote both numbers.
 
 ### Task B: the 3 new cluttered videos
 Takes 1 and 2 are now **read correctly**, but the robot fails both, because the glasses sit up to 41 cm in, where the flip was only tested to 19 cm. Take 3 is refused (one resting spot missing). So Task B stands at **2 of 12** videos.
