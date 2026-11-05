@@ -269,26 +269,26 @@ scripts/setup.sh
 .venv/bin/pytest
 
 # A sample video, through to the robot. Output goes to data/processed/
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_right_take1.mp4
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take5.mp4
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task3_flip_right_take1.mp4
 
 # Put the person and robot side by side, after running the matching line above
-PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/task2_triangle_right_take1.mp4
+PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/task2_triangle_clutter_take5.mp4
 
 # Optional for a triangle: each arm serves its own side
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --two-arms
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take6.mp4 --two-arms
 
 # Optional, needs VIDEO2ROBOT_CLAUDE_KEY in .env: a typed instruction, or finding missed glasses
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --instruction "nearest glasses at the bottom, farthest on top"
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --find-glasses
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take5.mp4 --instruction "nearest glasses at the bottom, farthest on top"
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take5.mp4 --find-glasses
 PYTHONPATH=. .venv/bin/python scripts/clutter_test.py --trials 5 --seed 4100 --two-arms
 
 # Optional: let the logistic regression model choose one arm or two, and test it on unseen layouts
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --choose-arms
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take6.mp4 --choose-arms
 PYTHONPATH=. .venv/bin/python scripts/outcome_test.py
 
 # Optional for a triangle: carry each glass along the hand's path in the video
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take5.mp4 --hand-path
 
 # Test what the robot can do, with random setups
 PYTHONPATH=. .venv/bin/python scripts/area_test.py triangle --trials 30 --seed 8123

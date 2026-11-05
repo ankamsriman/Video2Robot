@@ -122,7 +122,7 @@ The CV reader still decides **when** each glass moved, because that needs every 
 ```text
 ├── configs/              # YAML settings: scene, motion, reader, Claude (all tunable numbers)
 ├── data/
-│   ├── raw/sample/       # five sample videos (compressed copies of my recordings)
+│   ├── raw/sample/       # four sample videos (compressed copies of my recordings)
 │   └── labels/           # four rough table corners per camera position
 ├── docs/                 # journey, results in detail, data collection, videos, result files
 ├── scripts/              # entry points: glass_from_video.py, comparisons, videos, area tests
@@ -167,7 +167,7 @@ My videos were recorded with **one fixed webcam** (a Logitech Brio 100, 1620 × 
 - looking down about 43°;
 - from the side of the table opposite the person.
 
-The code works this position out from the table's corners. **Five samples are in `data/raw/sample/`**, and the full note is in [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md).
+The code works this position out from the table's corners. **Four samples are in `data/raw/sample/`** (two cluttered Task A videos and two Task B videos), and the full note is in [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md).
 
 To record your own:
 1. Keep all four table corners in view, and the camera still.
@@ -185,27 +185,25 @@ To record your own:
 
 ### 1. Video to robot
 ```bash
-# Task A: a triangle. The report and robot video go to data/processed/<video>/
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_right_take1.mp4
+# Task A: a triangle on a cluttered table. Claude tells the glasses from the clutter (needs the API key).
+# The report and robot video go to data/processed/<video>/
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take5.mp4 --find-glasses --choose-arms
 
 # Task B: the flipped tower
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task3_flip_right_take1.mp4
 
 # Your video beside the robot's, with the tracked hand drawn on
-PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/task2_triangle_right_take1.mp4 --show-hand
+PYTHONPATH=. .venv/bin/python scripts/side_by_side.py --video data/raw/sample/task2_triangle_clutter_take5.mp4 --show-hand
 ```
 
 ### 2. Optional helpers
 ```bash
-# Claude finds the glasses at the start and end; the model chooses one arm or two
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --find-glasses --choose-arms
-
 # A typed instruction, turned into a checked plan
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --instruction "nearest glasses at the bottom, farthest on top"
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take5.mp4 --instruction "nearest glasses at the bottom, farthest on top"
 
 # Each arm serves its own side; or copy the hand's carry height and timing
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --two-arms
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take6.mp4 --find-glasses --two-arms
+PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_clutter_take5.mp4 --find-glasses --hand-path
 
 # See live, on the webcam, what the CV reader takes for glass tops (Q quits)
 PYTHONPATH=. .venv/bin/python scripts/live_cv_reader.py

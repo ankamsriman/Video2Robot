@@ -552,7 +552,7 @@ Before I added the rule for an unseen top glass, 0 of these 8 succeeded. After i
 - **The robot has no camera,** and it reads exact positions from the simulator.
 - **Glasses are simplified:** solid, rigid and a guessed weight.
 - **The table's corners fit less well on the newer takes,** as explained in [Step 3](#step-3-where-the-camera-is).
-- **Compression changes the reading.** The compressed sample copy of this video, `data/raw/sample/task2_triangle_take5.mp4`, did see the top glass, 1.1 cm off, and read the second move at 7.2 s instead of 7.7 s. The robot's result was the same. This shows the reader is sensitive to small changes in the picture.
+- **Compression changes the reading.** The compressed sample copy of this video, `data/raw/sample/task2_triangle_clutter_take5.mp4`, did see the top glass, 1.1 cm off, and read the second move at 7.2 s instead of 7.7 s. The robot's result was the same. This shows the reader is sensitive to small changes in the picture.
 - **A risk in the new rule.** A Task B video that loses two spots could look like 5 spots, and be read as Task A. Check the `task` line in the report.
 
 ---
