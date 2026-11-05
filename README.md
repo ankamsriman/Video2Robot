@@ -307,7 +307,7 @@ Each idea came from counting the failures of the one before. The full record, ab
 - **Task B works in a narrow area:** 2 of 8 real videos, because the flip needs every glass close to the robot.
 - **Programmed motion:** no learned policy. The only model trained here picks one arm or two.
 - **One run per video:** each real video was run once.
-- **Quick moves:** the reader times moves from the moments a glass sits still. Very quick moves, especially with a high lift, leave those moments too short, and the video is refused (3 videos).
+- **Quick moves and reflections:** to keep costs low, Claude looks only at the first and last frames; the free CV reader times the moves on every frame in between. It finds a glass by its shiny steel top, and the steel reflects its surroundings, so when a top happens to look like the background, or a glass sits still only for a moment in a quick move, the reader can lose it. The order and timing of the moves then don't add up, and the video is refused (3 videos). Sending more frames to Claude would solve it, at many times the cost (about $5 a video for every frame, against about 2 cents now).
 - **Where the glasses go matters:** a triangle built near the person's edge of the table sits against the robot's chest, and placing there can knock the glasses. Build near the middle of the table, not at your edge.
 - **Narrow setup:** one fixed camera, a dark table, steel glasses, and four rough corners picked once per camera position.
 - **Optional services:** Claude needs an API key and sends 2 to 5 frames per video to Anthropic.
