@@ -315,15 +315,17 @@ Each idea came from counting the failures of the one before. The full record, ab
 
 ## ⚠️ Limitations
 
-- **Simulation only, with a pinned pelvis:** no balance, no walking, and limited reach. Most remaining failures are glasses beyond reach.
-- **Programmed motion:** no learned policy. The only trained model picks the arms.
-- **Not fair tests:** many Task A successes come from rules built on the same videos. Fresh videos were 0 of 7 on their first run.
+- **Simulation only, with a pinned pelvis:** no balance, no walking, and limited reach. Most failures are reach: glasses too far away, or a triangle built too close to the robot's chest.
+- **Task B works in a narrow area:** 2 of 12 real videos, because the flip needs every glass close to the robot.
+- **Programmed motion:** no learned policy. The only model trained here picks one arm or two.
+- **Not all fair tests:** many Task A successes come from rules built on the same videos. On fair tests (videos recorded after the fixes, nothing changed), Task A built 6 of 11.
+- **One run per video:** each real video was run once.
+- **Quick moves:** the reader times moves from the moments a glass sits still. Very quick moves, especially with a high lift, leave those moments too short, and the video is refused (3 videos).
+- **Where the glasses go matters:** a triangle built near the person's edge of the table sits against the robot's chest, and placing there can knock the glasses. Build near the middle of the table, not at your edge.
 - **Narrow setup:** one fixed camera, a dark table, steel glasses, and four rough corners picked once per camera position.
-- **Optional services:** Claude needs an API key and sends two frames per video to Anthropic. SAM 2 is slow on a CPU.
+- **Optional services:** Claude needs an API key and sends 2 to 5 frames per video to Anthropic. SAM 2 is slow on a CPU (about 70 minutes a video here).
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not its own camera.
 - **No clutter in the simulation:** clutter is recognised and ignored in the video, but not placed on the simulated table, and the robot doesn't plan its arm around obstacles.
-- **Very fast moves with a high lift:** at 4× speed with the glasses lifted high, the reader missed two of the moments a glass sits still and refused the video (the same speed with a low lift worked).
-- **Where the glasses go matters:** a triangle built near the person's edge of the table sits against the robot's chest, and the arm swap can then twist the body into the glasses. Build near the middle, about 20–27 cm from your edge.
 
 **Next steps:**
 - teach the robot to step closer for far glasses;
