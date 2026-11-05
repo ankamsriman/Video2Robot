@@ -25,7 +25,7 @@ Every chart here comes from saved runs in [`results/`](results/). The robot is a
 | Task A, plain takes 9–11 | **3 of 3** | **Fair test:** recorded after every fix, camera moved, nothing changed |
 | Task A, fast / fast + high lift / corners | **1 of 3** | **Fair test.** Fast with a low lift built; a high lift at 4× speed was refused (two rests too short to see); corners were out of reach |
 | Task A, quick takes 12–13 | **0 of 2** | **Fair test.** Quick moves confused the timing: both refused |
-| Task B, all 12 videos | 2 of 12 | Most glasses are beyond a robot that can't walk; the 3 cluttered takes were read correctly |
+| Task B, all 10 videos | 2 of 10 | Most glasses are beyond a robot that can't walk |
 
 **Task A in total: 20 of 26 videos kept** (20 of 30 counting 4 deleted as out of the robot's reach). **On fair tests only** (cluttered takes 4–6 and everything recorded after the last fix): **6 of 11**. Both numbers matter: the system works on videos like the ones it was built on, and new kinds of video (very fast moves, glasses at the corners, triangles near the robot's chest) still find its limits.
 
@@ -84,7 +84,7 @@ Simulator layouts drawn on my camera's view, where one choice built the triangle
 |---|---|---|
 | Triangle built against the robot's chest | Sunlight, clutter take 4 (and take 14, later deleted) | Let the robot step back, or test and tune that strip of the table |
 | A glass carried from one far side to the other, close to the robot's body | Takes 14 and 15 (later deleted as out of reach): a glass starting at one far side is carried across to the triangle near the robot's chest, so the arm crosses the body at close range | Two arms helped (tower 30 → 2 cm off) but not enough; build the triangle further in |
-| Glasses beyond reach | Task B takes 2, 3, 7, clutter 1, 2; Task A corners | Let the robot walk or step to the side |
+| Glasses beyond reach | Task B takes 2, 3, 7; Task A corners | Let the robot walk or step to the side |
 | Moves too quick to time | Fast + high lift, takes 12, 13 | Accept short pauses, or use Claude's start and end positions when the timing is impossible |
 | A starting glass missed | Task B takes 4, 5, 8, clutter 3 | Better reading for the flip |
 
