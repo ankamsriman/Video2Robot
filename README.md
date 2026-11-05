@@ -313,17 +313,6 @@ Each idea came from counting the failures of the one before. The full record, ab
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not its own camera.
 - **No clutter in the simulation:** clutter is recognised and ignored in the video, but not placed on the simulated table, and the robot doesn't plan its arm around obstacles.
 
-**Next steps**, in the order I'd try them. Each targets a failure measured above, and each needs a GPU except the last:
-
-| Idea | What it would fix | Why it fits |
-|---|---|---|
-| **RL for walking:** unpin the pelvis and use a reinforcement-learning walking policy, such as the ones trained for the G1, so the robot steps toward far glasses | Glasses beyond reach, the most common failure | The task plan stays the same; the robot only needs to stand in the right spot |
-| **RL to fine-tune placing:** start from the scripted motion and train in MuJoCo with a reward for a glass placed upright without knocking the others | Triangles near the robot's chest, and glasses carried across the body | MuJoCo runs thousands of simulated tries cheaply; the reward is the check this project already has |
-| **ACT (imitation learning):** generate thousands of successful scripted runs on random layouts in the simulator, then train ACT with the robot's camera as input | A policy that reacts to what it sees, not just a fixed script | Copying the script alone would add nothing; the gain is closing the loop through the camera |
-| **A learned model to choose the arm for each glass**, extending the logistic regression model, which today only chooses one arm or two | A glass taken by the arm on the wrong side (no GPU needed) | It's the same kind of model, trained on more simulator runs |
-
-A full world model, learning to predict what the scene will look like after each move, is possible but needs far more data and compute than this project has, so it isn't on the list.
-
 ---
 
 ## 🤝 Contributing
