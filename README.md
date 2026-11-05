@@ -313,6 +313,11 @@ Each idea came from counting the failures of the one before. The full record, ab
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not its own camera.
 - **No clutter in the simulation:** clutter is recognised and ignored in the video, but not placed on the simulated table, and the robot doesn't plan its arm around obstacles.
 
+**Next steps:**
+- teach the robot to step closer for far glasses;
+- follow each glass by its shape, not its shine, so lighting matters less;
+- record robot demonstrations to try a learned policy (ACT or RL) with a GPU.
+
 ---
 
 ## 🤝 Contributing
