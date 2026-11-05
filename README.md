@@ -71,6 +71,7 @@ File and video names still use the earlier numbering: `task2_…` files are Task
 * **The table is the ruler.** Its four corners and measured size (80 × 50 cm) turn pixels into real centimetres and give the camera's position, with no printed marker.
 * **Identical glasses, told apart by where they rest.** Bright closed tops are followed frame by frame, which keeps the order of moves with no labels.
 * **Claude reads the first and last frames** (optional, about 2 cents a video). It names which bright things are glasses, ignores clutter, and finds dull glasses the shiny-top reader misses. The free frame-by-frame reader still times the moves.
+* **Extra glasses don't confuse it.** In a three-glass video with a fourth glass on the table that I never touched, the unused glass is recognised and left where it is, and the triangle is built from the other three. A glass standing the right way up (opening up), next to the three upside-down ones, is told apart the same way. Both were fresh videos that were first refused, then fixed with one rule each.
 * **SAM 2 follows each glass by its shape** (optional). In sunlight it timed the moves correctly where shiny tops didn't.
 * **The robot chooses its arm and standing spot** from the layout. A logistic regression model picks one arm or two before the robot moves.
 * **Step checks** after every reach, grip, lift, carry, place and release, so a failed run says *where* it failed.
