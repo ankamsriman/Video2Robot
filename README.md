@@ -126,7 +126,7 @@ The CV reader still decides **when** each glass moved, because that needs every 
 ```text
 ├── configs/              # YAML settings: scene, motion, reader, Claude (all tunable numbers)
 ├── data/
-│   ├── raw/sample/       # four sample videos (compressed copies of my recordings)
+│   ├── raw/sample/       # six sample videos (compressed copies of my recordings)
 │   └── labels/           # four rough table corners per camera position
 ├── docs/                 # journey, results in detail, data collection, videos, result files
 ├── scripts/              # entry points: glass_from_video.py, comparisons, videos, area tests
@@ -171,7 +171,7 @@ My videos were recorded with **one fixed webcam** (a Logitech Brio 100, 1620 × 
 - looking down about 43°;
 - from the side of the table opposite the person.
 
-The code works this position out from the table's corners. **Four samples are in `data/raw/sample/`** (two cluttered Task A videos and two Task B videos), and the full note is in [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md).
+The code works this position out from the table's corners. **Six samples are in `data/raw/sample/`** (two plain and two cluttered Task A videos, and two Task B videos), and the full note is in [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md).
 
 To record your own:
 1. Keep all four table corners in view, and the camera still.
