@@ -15,6 +15,10 @@
 
 *Task A on a cluttered table. Left: my video, marked with what each reader recognises. **Yellow** discs are shiny tops the CV reader finds, **red** boxes are kept because the CV reader and Claude agree, **teal** boxes are ignored because Claude sees no glass there (a charger, an earbud case, a plug), and **blue / purple** crosses are Claude's glasses at the start / end. Right: the G1 builds the same triangle in MuJoCo. [Full-quality video](docs/videos/annotated_demo_vs_robot.mp4).*
 
+[![Task B, take 1: my video beside the G1 in MuJoCo](docs/images/task3_flip_take1_vs_robot.gif)](docs/videos/task3_flip_take1_vs_robot.mp4)
+
+*Task B, take 1, the whole video: I build the triangle, then turn a fourth glass over and stand it on top. The G1 repeats it in MuJoCo, including the flip. [Full-quality video](docs/videos/task3_flip_take1_vs_robot.mp4).*
+
 **▶️ More: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min: cluttered tables, an unused glass, a glass the right way up, and a moving plug) and [the original demo reel](docs/videos/demo_reel.mp4).
 
 ---
