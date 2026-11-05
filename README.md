@@ -269,7 +269,7 @@ sam_reader:
 | **Task A**, my first 9 videos | 3 of 9 (4 with two arms) | **8 of 9** | Claude rescued 4 videos where the reader missed a glass. |
 | **Task A**, 7 fresh hard videos (clutter, an unused glass, glints, a moving plug, sunlight) | not run | **0 of 7** on their fair first run → **6 of 7** after one rule per failure | Not a fair test after the fixes. Sunlight still fails: the tower was too close to the robot's chest |
 | **Task A**, 26 videos within the robot's reach, final system | not run | **20 of 26** | Developed on many of them. **On fair tests only, 6 of 11.** Failures: triangles built too close to the robot's chest (2), glasses at the far corners, and very quick moves (3, all refused) |
-| **Task B**, all 10 of my videos | 2 of 9 (first 9) | **2 of 10** | Most failures are glasses beyond a robot that can't walk |
+| **Task B**, all 8 of my videos | 2 of 7 (first 7) | **2 of 8** | Most failures are glasses beyond a robot that can't walk |
 
 **What the robot can do, with exact simulator positions:**
 
@@ -317,7 +317,7 @@ Each idea came from counting the failures of the one before. The full record, ab
 ## ⚠️ Limitations
 
 - **Simulation only, with a pinned pelvis:** no balance, no walking, and limited reach. Most failures are reach: glasses too far away, or a triangle built too close to the robot's chest.
-- **Task B works in a narrow area:** 2 of 10 real videos, because the flip needs every glass close to the robot.
+- **Task B works in a narrow area:** 2 of 8 real videos, because the flip needs every glass close to the robot.
 - **Programmed motion:** no learned policy. The only model trained here picks one arm or two.
 - **Not all fair tests:** many Task A successes come from rules built on the same videos. On fair tests (videos recorded after the fixes, nothing changed), Task A built 6 of 11.
 - **One run per video:** each real video was run once.

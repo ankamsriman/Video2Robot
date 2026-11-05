@@ -51,7 +51,7 @@ Imagine you sit at a table and film yourself putting an apple in a box. You hand
 
 Doing this on a real humanoid would be expensive and risky, so we use a **simulator**: a program that acts like a video game with accurate physics. If the robot's fingers don't squeeze hard enough in the simulator, the object really does slip.
 
-**Where we are (5 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task A, the triangle, it builds 20 of the 26 videos kept (20 of 30 counting 4 deleted as out of reach). For Task B, the flip, it builds 2 of 10; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
+**Where we are (5 Nov):** the robot now learns from **your real webcam videos** of steel glasses. For Task A, the triangle, it builds 20 of the 26 videos kept (20 of 30 counting 4 deleted as out of reach). For Task B, the flip, it builds 2 of 8; most failures are glasses too far for a robot that can't walk. The challenge's hard rule is met: the plan and every glass position come from your video.
 
 **To read the project as a story of ideas, from the first failure to today, start with chapter 21.** Chapters 1 to 13 explain the ideas using the first version, which sorted coloured blocks. **Part Two (chapters 14 to 22) covers your real videos**, and chapter 20 has the numbers to quote.
 
@@ -1380,7 +1380,7 @@ These are the numbers to quote. "Real video" means the robot's plan and glass po
 **20 of 26 build.** Two failures are triangles built too close to the robot's chest (the sunlight video and clutter take 4). One started the glasses at the table's far corners, out of the robot's reach. Three moved the glasses very quickly (4× fast with a high lift, and quick takes 12 and 13): the reader couldn't time the moves, so it refused them. Four more videos were deleted as beyond the robot's reach, and all four had failed. Counting them, it's **20 of 30**. Always quote both numbers.
 
 ### Task B: the new cluttered video
-It was refused (one resting spot missing). So Task B stands at **2 of 10** videos.
+It was refused (one resting spot missing). So Task B stands at **2 of 8** videos.
 
 ### Task B: the flip (9 real videos)
 | | Result |
