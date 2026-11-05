@@ -45,7 +45,7 @@ video -> keyframes -> tracked objects + table positions (cm) -> plan.json -> G1 
 | Journey | `docs/JOURNEY.md`: about 40 ideas in seven stages, each with problem, test, before → after, kept or dropped; summarised in the README. Every new experiment is added there |
 | Claude reads both ends (version 3) | Claude points at glasses in the first and last frames; the frame-by-frame reader times the moves. Rules for clutter, unused glasses, glints and hidden glasses, each from a fresh video that first failed. Task A: 20 of the 26 videos kept build, 20 of 30 counting 4 deleted as out of reach; Task B 2 of 8 (not a fair test); 7 fresh videos were 0 of 7 on their fair first run |
 | Arm swap | Hands rise, pass beside the body off the table, waist held still (the user's idea): hard takes 1 and 2 build, take 4 (a glass at the edge of reach) lost |
-| SAM 2 (version 4, optional) | SAM 2.1 tiny in a separate environment follows each glass by shape; in sunlight it timed the moves correctly where shiny tops didn't. About 70 minutes per video on this Mac |
+| SAM 2 (version 4) | Tried: it timed one sunlight video correctly, but raised no success rate and took about 70 minutes a video. **Removed 5 Nov.** |
 | Real-world reel | `docs/videos/reel_real_world.mp4`, 3.5 minutes |
 | Repo public and submission | **The user decides** |
 
@@ -76,9 +76,7 @@ Options B and C (retargeting the hand, training a policy) were not started. A wo
 
 ## Phase 3: Perception and real positions (colour tracking and marker built, tested on a synthetic video only)
 - [ ] Object detection in the first frame, falling back to clicking objects by hand
-- [ ] SAM 2 tracking on the GPU, with outlines and IDs drawn on saved keyframes
 - [ ] Pixels to table centimetres from the marker, using each object's base contact point
-- [ ] Fallback if SAM 2 is unavailable: colour tracking, reported as such
 - [ ] **Gate:** median position error of 3 cm or less, with IDs stable across keyframes
 
 ## Phase 4: Planner

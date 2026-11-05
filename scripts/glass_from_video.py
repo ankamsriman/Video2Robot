@@ -50,7 +50,6 @@ from src.perception.hand_trajectory import (
     is_believable,
     profile_from_pixels,
 )
-from src.perception.sam_reader import spots_from_tracks
 from src.perception.table_view import TableView, refine_corners, table_view
 from src.perception.vlm_rescue import (
     arrival_frame,
@@ -188,7 +187,6 @@ def read_video(
     config: GlassVideoConfig,
     model_points: list[tuple[float, float]] | None = None,
     end_points: list[tuple[float, float]] | None = None,
-    sam_tracks: dict | None = None,
 ) -> tuple[TriangleDemo, bool]:
     """Return what the video shows, and whether it shows a flipped fourth glass.
 
@@ -241,16 +239,6 @@ def read_video(
     capture.release()
     spots = rest_spots(tops, fps, view, config)
     unused: list = []
-    if sam_tracks is not None:
-        # SAM 2 followed each glass by its outline, so its tracks replace the bright-top
-        # spots and the rules that patch them; every later check still applies.
-        settings = yaml.safe_load(CONFIG_PATH.read_text())["sam_reader"]
-        near = (rescue or yaml.safe_load(CONFIG_PATH.read_text())["vlm_rescue"])["near_pixels"]
-        spots, unused = spots_from_tracks(
-            sam_tracks["tracks"], points, finals, fps,
-            settings["moved_pixels"], settings["stay_seconds"], near,
-        )  # fmt: skip
-        points, finals = [], []
     if points and finals:
         spots, points, changes, finals, end_patches, unused = _set_aside_unused(
             spots, points, changes, finals, end_patches, fps, rescue, config
@@ -740,11 +728,6 @@ def main() -> None:
         help="ask a vision language model for glasses the reader may have missed",
     )
     parser.add_argument(
-        "--sam-tracks",
-        action="store_true",
-        help="read the glasses from SAM 2's saved tracks (run scripts/sam_track_glasses.py first)",
-    )
-    parser.add_argument(
         "--copy-side-order",
         action="store_true",
         help="for a triangle, put the first lower glass on the side the person did",
@@ -764,9 +747,7 @@ def main() -> None:
         logger.error("Couldn't ask the vision model for glasses: %s", error)
         raise SystemExit(1) from error
     try:
-        tracks_path = ROOT / "data/processed" / args.video.stem / "sam_tracks.json"
-        sam = json.loads(tracks_path.read_text()) if args.sam_tracks else None
-        demo, is_flip = read_video(args.video, config, points, finals, sam)
+        demo, is_flip = read_video(args.video, config, points, finals)
     except VideoReadError as error:
         logger.error("Couldn't read %s: %s", args.video.name, error)
         raise SystemExit(1) from error

@@ -3,7 +3,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Simulator: MuJoCo](https://img.shields.io/badge/Simulator-MuJoCo-orange.svg)](https://mujoco.org/)
 [![Robot: Unitree G1](https://img.shields.io/badge/Robot-Unitree%20G1%20(simulated)-lightgrey.svg)](https://github.com/google-deepmind/mujoco_menagerie/tree/main/unitree_g1)
-[![Tests: 312 passing](https://img.shields.io/badge/tests-312%20passing-brightgreen.svg)](tests/)
+[![Tests: 308 passing](https://img.shields.io/badge/tests-308%20passing-brightgreen.svg)](tests/)
 
 > I film myself stacking steel glasses at a table. A simulated Unitree G1 humanoid watches the footage, works out which glass moved where and in what order, and repeats the task in MuJoCo. It uses no printed marker and no hand-written labels.
 
@@ -15,7 +15,7 @@
 
 *Task A on a cluttered table. Left: my video, marked with what each reader recognises. **Yellow** discs are shiny tops the CV reader finds, **red** boxes are kept because the CV reader and Claude agree, **teal** boxes are ignored because Claude sees no glass there (a charger, an earbud case, a plug), and **blue / purple** crosses are Claude's glasses at the start / end. Right: the G1 builds the same triangle in MuJoCo. [Full-quality video](docs/videos/annotated_demo_vs_robot.mp4).*
 
-**▶️ More: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min: cluttered tables, an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight) and [the original demo reel](docs/videos/demo_reel.mp4).
+**▶️ More: [the real-world reel](docs/videos/reel_real_world.mp4)** (about 3.5 min: cluttered tables, an unused glass, a glass the right way up, and a moving plug) and [the original demo reel](docs/videos/demo_reel.mp4).
 
 ---
 
@@ -60,7 +60,7 @@ File and video names still use the earlier numbering: `task2_…` files are Task
 
 **What's programmed:** the grip, the flip and the arm motion, by inverse kinematics.
 
-**Only one small model is trained here:** a 16-weight logistic regression model that picks one arm or two. **No VLA, RL or ACT policy is used:** they need a GPU and robot demonstrations this project doesn't have ([`notes.md`](notes.md), chapter 21). Optional parts use models others trained: MediaPipe (hands), Claude (finding glasses) and SAM 2 (following glasses by shape).
+**Only one small model is trained here:** a 16-weight logistic regression model that picks one arm or two. **No VLA, RL or ACT policy is used:** they need a GPU and robot demonstrations this project doesn't have ([`notes.md`](notes.md), chapter 21). Optional parts use models others trained: MediaPipe (hands) and Claude (finding glasses).
 
 **The robot is simulated, with its pelvis pinned** (it can't fall, and it can't walk). Every result below says which numbers come from real videos and which from simulator layouts, and which are "not a fair test" (tuned on the same videos).
 
@@ -72,7 +72,6 @@ File and video names still use the earlier numbering: `task2_…` files are Task
 * **Identical glasses, told apart by where they rest.** Bright closed tops are followed frame by frame, which keeps the order of moves with no labels.
 * **Claude reads the first and last frames** (optional, about 2 cents a video). It names which bright things are glasses, ignores clutter, and finds dull glasses the shiny-top reader misses. The free frame-by-frame reader still times the moves.
 * **Extra glasses don't confuse it.** In a three-glass video with a fourth glass on the table that I never touched, the unused glass is recognised and left where it is, and the triangle is built from the other three. A glass standing the right way up (opening up), next to the three upside-down ones, is told apart the same way. Both were fresh videos that were first refused, then fixed with one rule each.
-* **SAM 2 follows each glass by its shape** (optional). In sunlight it timed the moves correctly where shiny tops didn't.
 * **The robot chooses its arm and standing spot** from the layout. A logistic regression model picks one arm or two before the robot moves.
 * **Step checks** after every reach, grip, lift, carry, place and release, so a failed run says *where* it failed.
 * **Honest reporting:** every idea is logged with its test and its before-and-after numbers in [`docs/JOURNEY.md`](docs/JOURNEY.md), including the ones that were dropped.
@@ -95,7 +94,7 @@ webcam video of steel glasses, no marker
 | Job | Tool | Why |
 |---|---|---|
 | Which things are glasses (start and end) | Claude, one picture each | Recognises glasses, ignores clutter |
-| *When* each glass moved | Frame-by-frame bright-top reader (or SAM 2) | Needs every frame; free |
+| *When* each glass moved | Frame-by-frame bright-top reader | Needs every frame; free |
 | Pixels to centimetres | The table's corners | Exact geometry, no marker |
 | Moving the robot | Inverse kinematics (mink) | Programmed, measured, repeatable |
 
@@ -121,18 +120,18 @@ The CV reader still decides **when** each glass moved, because that needs every 
 ## 📁 Repository Structure
 
 ```text
-├── configs/              # YAML settings: scene, motion, reader, Claude, SAM 2 (all tunable numbers)
+├── configs/              # YAML settings: scene, motion, reader, Claude (all tunable numbers)
 ├── data/
 │   ├── raw/sample/       # five sample videos (compressed copies of my recordings)
 │   └── labels/           # four rough table corners per camera position
 ├── docs/                 # journey, results in detail, data collection, videos, result files
 ├── scripts/              # entry points: glass_from_video.py, comparisons, videos, area tests
 ├── src/
-│   ├── perception/       # table view, glass reader, Claude rescue rules, SAM 2 reader, hands
+│   ├── perception/       # table view, glass reader, Claude rescue rules, hands
 │   ├── reasoning/        # arm choice, standing spot, logistic regression model, Claude client
 │   ├── simulation/       # G1 scene, inverse kinematics, pick, place, flip, arm swap
 │   └── verification/     # triangle and flip checks, step checks
-├── tests/                # 312 tests
+├── tests/                # 308 tests
 ├── notes.md              # the whole project explained from zero, as a book
 ├── PLAN.md               # phases and status
 └── README.md             # this file
@@ -153,16 +152,11 @@ cd Video2Robot
 **2. Create the environment and download the G1 model and hand tracker:**
 ```bash
 scripts/setup.sh          # .venv with the exact tested versions, MuJoCo Menagerie's G1, MediaPipe hands
-.venv/bin/pytest          # 312 tests
+.venv/bin/pytest          # 308 tests
 ```
 
 **3. (Optional) Claude helper:** put your Anthropic API key in a `.env` file as `VIDEO2ROBOT_CLAUDE_KEY=...`. It has its own name so tools that load `.env` can't hand it to anything else. Git ignores `.env`.
 
-**4. (Optional) SAM 2:** it runs in a separate environment, so the main one never needs PyTorch.
-```bash
-python3 -m venv .venv-sam && .venv-sam/bin/pip install torch torchvision sam2 opencv-python-headless
-curl -L -o checkpoints/sam2.1_hiera_tiny.pt https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
-```
 
 ---
 
@@ -213,10 +207,6 @@ PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sampl
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take6.mp4 --two-arms
 PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/sample/task2_triangle_take5.mp4 --hand-path
 
-# SAM 2: track the glasses once (slow on a CPU), then read the video from its tracks
-.venv-sam/bin/python scripts/sam_track_glasses.py --video data/raw/<video>.mov
-PYTHONPATH=. .venv/bin/python scripts/glass_from_video.py --video data/raw/<video>.mov --find-glasses --sam-tracks
-
 # See live, on the webcam, what the CV reader takes for glass tops (Q quits)
 PYTHONPATH=. .venv/bin/python scripts/live_cv_reader.py
 
@@ -253,9 +243,6 @@ vlm:
 vlm_rescue:
   near_pixels: 30              # a Claude point and a reader spot this close are the same glass
   end_seconds: 0.5             # Claude also looks this long before the video ends
-sam_reader:
-  moved_pixels: 40             # an outline this far from its start has left
-  stay_seconds: 1.0            # and must stay away this long
 ```
 
 ---
@@ -284,7 +271,6 @@ sam_reader:
 - [cluttered table](docs/videos/task2_clutter_video_to_robot.mp4)
 - [moving plug](docs/videos/task2_hard_video_to_robot.mp4)
 - [arm swap with an unused glass](docs/videos/task2_arm_swap_video_to_robot.mp4)
-- [SAM 2 in sunlight](docs/videos/sam2_sunlight_tracks.mp4)
 - [Task A](docs/videos/task2_video_to_robot.mp4)
 - [Task B](docs/videos/task3_new_video_to_robot.mp4)
 
@@ -309,7 +295,6 @@ Each idea came from counting the failures of the one before. The full record, ab
 | Reading | Missed glasses refused videos | Claude names the glasses; measurements stay in charge | 4 → **8 of 9** |
 | Fresh hard videos | Clutter, dull tops, an unused glass, glints, a hidden glass | Claude reads the first **and last** frames; one rule per failure | 0 of 7 → **6 of 7** |
 | Arm swap | A swap twisted the body into the table; an idle hand rested on it | Hands rise and pass beside the body; the idle arm waits raised | 68 → **0** frames touching the table |
-| Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by shape | Correct timing (about 70 min a video on this Mac) |
 | Moving clutter | A charger set down where a glass later landed made a landing look 4 s early, and the video was refused | Only when the order is impossible, time each landing from when the picture at Claude's end point looked final | Refused → built; fresh videos after it: **3 of 3** read, **2 of 3** built (the failure: a triangle built against the robot's chest) |
 
 ---
@@ -323,13 +308,13 @@ Each idea came from counting the failures of the one before. The full record, ab
 - **Quick moves:** the reader times moves from the moments a glass sits still. Very quick moves, especially with a high lift, leave those moments too short, and the video is refused (3 videos).
 - **Where the glasses go matters:** a triangle built near the person's edge of the table sits against the robot's chest, and placing there can knock the glasses. Build near the middle of the table, not at your edge.
 - **Narrow setup:** one fixed camera, a dark table, steel glasses, and four rough corners picked once per camera position.
-- **Optional services:** Claude needs an API key and sends 2 to 5 frames per video to Anthropic. SAM 2 is slow on a CPU (about 70 minutes a video here).
+- **Optional services:** Claude needs an API key and sends 2 to 5 frames per video to Anthropic.
 - **Simulator knowledge:** once a run starts, the robot uses exact glass positions from the simulator, not its own camera.
 - **No clutter in the simulation:** clutter is recognised and ignored in the video, but not placed on the simulated table, and the robot doesn't plan its arm around obstacles.
 
 **Next steps:**
 - teach the robot to step closer for far glasses;
-- run SAM 2 on a GPU for every video;
+- follow each glass by its shape, not its shine, so lighting matters less;
 - record robot demonstrations to try a learned policy (ACT or RL) with a GPU.
 
 ---
@@ -355,6 +340,5 @@ No license file has been added yet, so all rights are reserved by the author for
 * [MuJoCo](https://mujoco.org/) for the physics simulation, and [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie) for the Unitree G1 model.
 * [mink](https://github.com/kevinzakka/mink) for inverse kinematics.
 * [MediaPipe](https://ai.google.dev/edge/mediapipe) for hand tracking, and [OpenCV](https://opencv.org/) for image processing.
-* [SAM 2](https://github.com/facebookresearch/sam2) (Meta) for following glasses by shape.
 * [Claude](https://www.anthropic.com/) (Anthropic) for finding glasses in pictures, and Claude Code for help building the project.
 * Ideas from SeeDo (VLM See, Robot Do) and Robot See Robot Do.

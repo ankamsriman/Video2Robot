@@ -6,7 +6,7 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 
 ![Task B from a new video: my video beside the robot as it flips the fourth glass](videos/task3_flip.gif)
 
-**Watch first: [the real-world reel](videos/reel_real_world.mp4)** (about 3.5 min: my tracked hand beside the robot on cluttered tables, an unused glass, a glass the right way up, a moving plug, and SAM 2 in sunlight), then [the original demo reel](videos/demo_reel.mp4).
+**Watch first: [the real-world reel](videos/reel_real_world.mp4)** (about 3.5 min: my tracked hand beside the robot on cluttered tables, an unused glass, a glass the right way up, a moving plug,), then [the original demo reel](videos/demo_reel.mp4).
 
 ## At a glance
 
@@ -17,7 +17,6 @@ I film myself stacking steel glasses at a table. A simulated Unitree G1 watches 
 | **Two arms,** optional | Each glass uses the arm on its own side. Tied with one arm on random layouts, and rescued a real video one arm fails ([video](videos/task2_two_arms_video_to_robot.mp4)) |
 | **Copying my hand,** optional | A hand tracker follows my hand, and the robot copies its height and timing. 4 of 4 videos built ([video](videos/task2_hand_path_video_to_robot.mp4)) |
 | **Vision language model (Claude),** optional | Points at the glasses in the first and last frames, about 2 cents a video: it ignores clutter and finds dull glasses the shiny-top reader misses, while that reader times the moves. Also turns a typed instruction into a checked plan. On cluttered simulated tables it found exactly the three glasses in 10 of 10 scenes |
-| **SAM 2,** optional | Follows each glass by its outline, not its shine. In sunlight it timed my moves correctly (2.7, 8.9, 14.5 s) where the shiny-top reader didn't. About 70 minutes per video on this Mac ([video](videos/sam2_sunlight_tracks.mp4)) |
 | **A small learned model,** optional | A logistic regression model (16 weights) learns from 180 saved runs whether one arm or two will work for a layout, and picks before the robot moves. On 60 new layouts its choices built 50, against 49 for a hand rule and 43–44 for always the same choice |
 | **What the robot can do** | 28 of 30 random layouts for each task, within tested areas, in simulation |
 
@@ -42,7 +41,6 @@ Each idea came from counting the failures of the one before. The full record is 
 | Task B failures | Takes 2, 3, 7 failed: why? | Step checks: all three fail at **reach** | Stand 10 cm closer: take 2 builds (one run) |
 | Fresh cluttered and hard videos | Clutter taken for glasses, dull glasses missed, an unused glass, glints, a hand hiding a glass. 0 of 7 on fair first runs | Claude reads the first **and last** frames; one rule per failure (an unused glass, a glass that left, a top chosen by position) | 6 of 7 build after the fixes (not a fair test) |
 | Arm swap | Swapping arms twisted the body and knocked a glass off the table | My idea: hands rise and pass beside the body, off the table; waist held still | Hard takes 1 and 2 build; take 4 (a glass at the edge of reach) lost |
-| Lighting | In sunlight, shiny tops timed the moves wrongly | SAM 2 follows each glass by its shape | Correct timing in sunlight (slow: about 70 min per video) |
 
 ## How my recording drives the robot
 

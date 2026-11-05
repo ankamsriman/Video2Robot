@@ -78,11 +78,6 @@ vlm_rescue:
   settle_seconds: 1.0
   end_seconds: 0.5            # the model also looks this long before the video ends
 
-# Reading from SAM 2's glass tracks (--sam-tracks), made by scripts/sam_track_glasses.py.
-sam_reader:
-  moved_pixels: 40             # an outline this far from its start has left
-  stay_seconds: 1.0            # and must stay away this long
-
 # The outcome model, a small learned predictor, trained on saved runs in docs/results.
 outcome_model:
   training_seeds: [8500, 8800, 8900]

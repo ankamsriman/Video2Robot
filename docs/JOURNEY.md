@@ -116,6 +116,7 @@ Every fresh video below was first run with the system **exactly as it was** when
 |---|---|---|---|---|---|
 | 9.1 | Shiny tops depend on light. In sunlight the reader timed the moves at 2.6, 3.4 and 8.2 s; the video shows about 2.7, 9 and 15 s | **SAM 2.1 tiny** follows each glass by its outline, prompted by Claude's start points (`scripts/sam_track_glasses.py`, separate environment) | Sunlight take | SAM 2: **2.7, 8.9, 14.5 s**, correct. It kept the glass outlined while in my hand, and never took the stand, tube or plug for a glass | Yes |
 | 9.2 | Use SAM 2's tracks in the pipeline | **Version 4** (`--sam-tracks`): each track gives its own start, departure and end, turned into ordinary resting spots, so every later check still applies | Sunlight take | Reading correct; the robot still fails for reach (8.4) | Optional: about 70 minutes per video on this Mac |
+| 9.3 | SAM 2 raised no success rate: its one video still failed for another reason, and it took about 70 minutes a video | Remove it | — | — | **Removed** 5 Nov |
 
 ## Stage 6: copying how I move, not just what I did
 

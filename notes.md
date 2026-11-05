@@ -1273,7 +1273,10 @@ Claude now costs about 1–2 cents a video (2 pictures).
 - If Claude gives no answer about the last picture (it happened on a Task B video, where you fill the frame as you step away), it tries pictures 1.5 s and 3 s earlier. Without an answer it skips the end check, rather than stopping.
 - All these rules were built and tested on **triangles**. On the **flip** task, with 4 glasses and a top glass showing a dark opening, two of them misread and refused Task B take 1, a video that builds. So with 4 starting glasses, the reader keeps its earlier start-only behaviour.
 
-### Version 4: SAM 2 follows each glass by its shape (optional)
+### Version 4: SAM 2 follows each glass by its shape (tried, then removed)
+
+> **Removed on 5 Nov.** It fixed the timing of one sunlight video, but that video still failed for another reason (the triangle was too close to the robot's chest), so it raised no success rate, and it took about 70 minutes a video on this Mac. It's in the git history. This section keeps what it was and what it showed.
+
 **SAM 2** (Segment Anything 2, from Meta) outlines any object you click on, and keeps outlining it through a video. We use its smallest model, "tiny", 156 MB.
 
 **How it's used:**
@@ -1284,7 +1287,7 @@ Claude now costs about 1–2 cents a video (2 pictures).
 
 **Worked example: your sunlight video.** The shiny-top reader, confused by the new light, timed the moves at 2.6, 3.4 and 8.2 s. Watching the video, the glasses really left at about 2.7, 9 and 15 s. SAM 2 said **2.7, 8.9 and 14.5 s**. It never took the laptop stand, tube or plug for a glass.
 
-**Its catch: speed.** On this Mac it took about 70 minutes for a 21-second video, though other jobs were running. On a proper GPU it would take about a minute. So it's an option: run `scripts/sam_track_glasses.py` once (it saves the tracks), then add `--sam-tracks`.
+**Its catch: speed.** On this Mac it took about 70 minutes for a 21-second video, though other jobs were running. On a proper GPU it would take about a minute. It was an option: run `scripts/sam_track_glasses.py` once (it saves the tracks), then add `--sam-tracks`.
 
 **Why it's better than shiny tops:** each track keeps its glass's identity, so it knows directly which start became which end. The reader had to guess that from the order of events.
 
@@ -1617,7 +1620,7 @@ You asked about several well-known methods. Here is each one in plain words, wha
 | **RL** (reinforcement learning, such as PPO) | The robot learns by trial and error, rewarded when the triangle stands | Millions of simulated tries, normally run in parallel on a GPU for hours or days | **Not built.** On this CPU, even a simple grasp would take days to learn. The step checks (chapter 19) would make a good reward signal if a GPU were available |
 | **ACT** (Action Chunking Transformer) | Imitation learning: a network copies demonstrations and predicts short bursts of motion | 50 or more demonstrations of the robot itself doing the task, usually teleoperated, plus GPU training | **Not built.** A teleoperation setup could record such demonstrations; training would need a GPU. Copying our own scripted robot would only learn what is already programmed |
 | **A small RNN/GRU** trained on your demonstrations | A small network that learns timing from sequences | Many recorded demonstrations | **Not built,** for the same reason: too few demonstrations |
-| **SAM 2 / SAM 3** (Segment Anything) | Outlines any object in a picture from a click, and follows that outline through a video | Runs on CPU slowly; its smallest model is 156 MB | **Tried on 4 Nov:** given Claude's points as the clicks, it follows each glass by its *shape*, not its shine. See chapter 17 for how it compared with the bright-top reader |
+| **SAM 2 / SAM 3** (Segment Anything) | Outlines any object in a picture from a click, and follows that outline through a video | Runs on CPU slowly; its smallest model is 156 MB | **Tried on 4 Nov:** Removed on 5 Nov, as it raised no success rate. given Claude's points as the clicks, it follows each glass by its *shape*, not its shine. See chapter 17 for how it compared with the bright-top reader |
 | **Dex-retargeting** | Maps a human hand's finger joints onto a robot hand with different fingers | A hand model and the robot's finger layout | **Not needed:** the task grips are programmed |
 
 **The only model trained in this project** is the 16-weight logistic regression model (chapter 16). Everything else either is programmed, or uses a model someone else trained: MediaPipe for hands, Claude for finding glasses, and SAM 2 for outlines.

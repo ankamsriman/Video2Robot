@@ -1,4 +1,4 @@
-"""Follow objects by colour. A simple fallback for when SAM 2 and a GPU aren't available.
+"""Follow objects by colour.
 
 For each item, it reports the middle of the bottom edge of its coloured area, because
 that's the part touching the table, which is what the marker mapping needs.

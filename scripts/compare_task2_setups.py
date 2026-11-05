@@ -4,7 +4,6 @@
      (each glass with the arm on its side, or one arm for all).
   B: Claude finds the glasses; each glass always uses the arm on its own side (no model).
   C: no Claude; each glass always uses the arm on its own side.
-  S: Claude names the glasses, SAM 2's saved tracks time them, and the model picks arms.
 
 Claude is asked once per video, and its points are saved, so rerunning makes no API calls.
 On the first 9 videos the model chose an arm per glass every time, so B would repeat A
@@ -43,7 +42,6 @@ OUTPUT = ROOT / "docs/results/task2_setups.json"
 SETUPS = {
     "A": {"claude": True, "two_arms": False, "choose_arms": True},
     "B": {"claude": True, "two_arms": True, "choose_arms": False},
-    "S": {"claude": True, "two_arms": False, "choose_arms": True, "sam": True},
     "C": {"claude": False, "two_arms": True, "choose_arms": False},
 }
 
@@ -63,10 +61,8 @@ def _run(video: Path, setup: str, points, config: GlassVideoConfig) -> dict:
     try:
         start, end = points
         claude = options["claude"]
-        tracks = ROOT / "data/processed" / video.stem / "sam_tracks.json"
-        sam = json.loads(tracks.read_text()) if options.get("sam") else None
         demo, is_flip = read_video(
-            video, config, start if claude else None, end if claude else None, sam
+            video, config, start if claude else None, end if claude else None
         )
     except VideoReadError as error:
         return {"video": video.stem, "setup": setup, "success": False, "refused": str(error)}
